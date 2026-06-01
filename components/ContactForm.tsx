@@ -197,8 +197,8 @@ export function ContactSidebar() {
         <InfoItem
           icon="📧"
           title="Email"
-          text="hello@saurahanepal.com"
-          href="mailto:hello@saurahanepal.com"
+          text="hello@mail.saurahanepal.com"
+          href="mailto:hello@mail.saurahanepal.com"
         />
         <InfoItem icon="💬" title="WhatsApp" text="+977 98XXXXXXXX" href="#" />
         <InfoItem icon="🕐" title="Response Time" text="Within 24 hours (NPT timezone)" />
