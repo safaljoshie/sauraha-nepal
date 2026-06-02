@@ -1,7 +1,5 @@
 import type { Metadata } from "next"
 import { Nunito, Playfair_Display } from "next/font/google"
-import Footer from "@/components/Footer"
-import Navbar from "@/components/Navbar"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -32,11 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${playfair.variable} ${nunito.variable}`}>
-      <body className="antialiased">
-        <Navbar />
-        {children}
-        <Footer />
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   )
 }
