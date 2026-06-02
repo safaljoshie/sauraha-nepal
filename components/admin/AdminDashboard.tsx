@@ -7,6 +7,9 @@ import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate, planLabel } from "@/lib/business-listing"
 import { businessCategories } from "@/lib/data"
 import { mergePhotoLinks } from "@/lib/list-business-photos"
+import AdminBlogSection from "@/components/admin/AdminBlogSection"
+import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
+import AdminTabNav, { type AdminTab } from "@/components/admin/AdminTabNav"
 
 type FilterTab =
   | "all"
@@ -136,6 +139,7 @@ export default function AdminDashboard() {
   const [toasts, setToasts] = useState<Toast[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [uploadingPhotos, setUploadingPhotos] = useState(false)
+  const [adminTab, setAdminTab] = useState<AdminTab>("listings")
 
   const loadListings = useCallback(async () => {
     setLoading(true)
@@ -491,7 +495,9 @@ export default function AdminDashboard() {
           <h1 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand md:text-3xl">
             Sauraha Nepal — Admin Dashboard
           </h1>
-          <p className="mt-1 text-sm text-text-light">Manage business listing submissions</p>
+          <p className="mt-1 text-sm text-text-light">
+            Manage listings, blog posts, and site settings
+          </p>
         </div>
         <div className="flex gap-2">
           <Link
@@ -522,6 +528,14 @@ export default function AdminDashboard() {
         </div>
       </header>
 
+      <AdminTabNav active={adminTab} onChange={setAdminTab} />
+
+      {adminTab === "blog" && <AdminBlogSection />}
+
+      {adminTab === "settings" && <AdminSiteSettingsSection />}
+
+      {adminTab === "listings" && (
+        <>
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
           { label: "Total listings", value: stats.total },
@@ -1058,6 +1072,8 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+        </>
+      )}
     </div>
   )
 }

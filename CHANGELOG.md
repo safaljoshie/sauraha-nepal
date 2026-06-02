@@ -1,5 +1,30 @@
 # Changelog
 
+## Admin blog editor & site settings
+
+### Blog (CMS)
+
+- Supabase `blog_posts` table with RLS for published posts
+- Admin dashboard tab: list, publish/unpublish, delete, **New Post**
+- Editor at `/admin/blog/new` and `/admin/blog/[id]` with `@uiw/react-md-editor` (live preview)
+- API: `GET/POST /api/admin/blog`, `GET/PUT/PATCH/DELETE /api/admin/blog/[id]`
+- Public `/blog` and `/blog/[slug]` from Supabase; `react-markdown` for content
+- Removed static blog article pages; sitemap and homepage use DB posts
+
+### Site settings
+
+- Supabase `site_settings` for social URLs, WhatsApp number, contact email
+- Admin **Site Settings** tab with save toast
+- Footer shows Facebook, Instagram, Twitter/X, TikTok, YouTube only when URLs are set
+- Contact page email prefers `site_settings.email`
+
+### SQL to run
+
+- `supabase/blog_posts.sql`
+- `supabase/site_settings.sql`
+
+---
+
 ## Critical site fixes (stats, nav, listings UX, map)
 
 ### Homepage stats (FIX 1)

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next"
-import { BLOG_POSTS } from "@/lib/blog-posts"
+import { fetchPublishedBlogPosts } from "@/lib/blog-db"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 
 export const revalidate = 3600
@@ -20,12 +20,6 @@ function staticPages(now: Date): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     { url: `${BASE_URL}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    ...BLOG_POSTS.map((post) => ({
-      url: `${BASE_URL}${post.href}`,
-      lastModified: new Date(post.date),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    })),
   ]
 }
 
@@ -40,14 +34,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages = staticPages(now)
 
   try {
-    const listings = await fetchApprovedListings()
+    const [listings, blogPosts] = await Promise.all([
+      fetchApprovedListings(),
+      fetchPublishedBlogPosts(),
+    ])
     const listingPages: MetadataRoute.Sitemap = listings.map((listing) => ({
       url: `${BASE_URL}/listings/${listing.id}`,
       lastModified: safeLastModified(listing.created_at, now),
       changeFrequency: "weekly",
       priority: 0.7,
     }))
-    return [...pages, ...listingPages]
+    const blogPages: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+      url: `${BASE_URL}/blog/${post.slug}`,
+      lastModified: safeLastModified(post.published_at ?? post.updated_at, now),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }))
+    return [...pages, ...blogPages, ...listingPages]
   } catch (error) {
     console.error("Sitemap: failed to fetch listings, returning static URLs only:", error)
     return pages

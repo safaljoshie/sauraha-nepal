@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import ContactForm, { ContactSidebarContent } from "@/components/ContactForm"
 import PageHeader from "@/components/PageHeader"
 import { fetchContactPageContent } from "@/lib/site-content"
+import { fetchSiteSettings } from "@/lib/site-settings"
 import { pageMetadata } from "@/lib/seo"
 
 export const revalidate = 60
@@ -18,7 +19,14 @@ export default function ContactPage() {
 }
 
 async function ContactPageContent() {
-  const content = await fetchContactPageContent()
+  const [content, settings] = await Promise.all([
+    fetchContactPageContent(),
+    fetchSiteSettings(),
+  ])
+  const email =
+    settings.email.trim() ||
+    content?.email?.trim() ||
+    "hello@mail.saurahanepal.com"
 
   const heading = content?.heading ?? "Let's connect"
   const subheading =
@@ -40,7 +48,7 @@ async function ContactPageContent() {
           address={content?.address ?? "Sauraha, Chitwan, Nepal"}
           phone={content?.phone ?? ""}
           whatsapp={content?.whatsapp ?? "+977 98XXXXXXXX"}
-          email={content?.email ?? "hello@mail.saurahanepal.com"}
+          email={email}
           responseTime={content?.response_time ?? "Within 24 hours (NPT timezone)"}
         />
         <ContactForm />

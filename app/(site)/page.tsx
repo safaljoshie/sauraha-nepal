@@ -6,7 +6,7 @@ import HomeActivityCard from "@/components/home/HomeActivityCard"
 import HomeFeaturedCard from "@/components/home/HomeFeaturedCard"
 import HeroSearch from "@/components/home/HeroSearch"
 import HeroStats from "@/components/home/HeroStats"
-import { BLOG_POSTS } from "@/lib/blog-posts"
+import { fetchPublishedBlogPosts } from "@/lib/blog-db"
 import { buildHomepageData } from "@/lib/homepage-data"
 import { fetchHomepageStats } from "@/lib/homepage-stats"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
@@ -37,6 +37,8 @@ export default async function HomePage() {
   const data = buildHomepageData(listings)
   const heroMedia = await fetchActiveHeroMedia()
   const primaryHeroMedia = heroMedia[0] ?? null
+  const blogPosts = await fetchPublishedBlogPosts()
+  const featuredBlog = blogPosts.slice(0, 3)
 
   if (stats.businessCount > 0 && listings.length === 0) {
     console.warn(
@@ -184,40 +186,52 @@ export default async function HomePage() {
               <p className="section-label">Travel Tips</p>
               <h2 className="section-title mb-0">Plan your perfect trip</h2>
             </div>
-            <Link href="/listings" className="view-all-link">
-              Browse listings →
+            <Link href="/blog" className="view-all-link">
+              View all guides →
             </Link>
           </div>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
-            {BLOG_POSTS.map((post) => (
-              <Link
-                key={post.href}
-                href={post.href}
-                className="card-hover group overflow-hidden rounded-2xl border border-border-brand"
-              >
-                <article>
-                  <div className="relative h-[180px] overflow-hidden">
-                    <Image
-                      src={post.image}
-                      alt=""
-                      fill
-                      className="object-cover transition-transform duration-400 group-hover:scale-105"
-                      sizes="400px"
-                    />
-                  </div>
-                  <div className="p-5">
-                    <p className="mb-2 text-xs font-bold tracking-widest text-orange-brand uppercase">
-                      {post.tag}
-                    </p>
-                    <h3 className="font-[family-name:var(--font-playfair)] text-lg leading-snug text-text-brand">
-                      {post.title}
-                    </h3>
-                    <p className="mt-2 text-sm text-text-light">{post.readTime}</p>
-                  </div>
-                </article>
-              </Link>
-            ))}
-          </div>
+          {featuredBlog.length === 0 ? (
+            <p className="text-text-mid">Travel guides coming soon.</p>
+          ) : (
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
+              {featuredBlog.map((post) => {
+                const image = post.cover_image ?? "/images/placeholder-listing.jpg"
+                return (
+                  <Link
+                    key={post.id}
+                    href={`/blog/${post.slug}`}
+                    className="card-hover group overflow-hidden rounded-2xl border border-border-brand"
+                  >
+                    <article>
+                      <div className="relative h-[180px] overflow-hidden">
+                        <Image
+                          src={image}
+                          alt={post.title}
+                          fill
+                          className="object-cover transition-transform duration-400 group-hover:scale-105"
+                          sizes="400px"
+                          unoptimized={image.startsWith("http")}
+                        />
+                      </div>
+                      <div className="p-5">
+                        {post.tag && (
+                          <p className="mb-2 text-xs font-bold tracking-widest text-orange-brand uppercase">
+                            {post.tag}
+                          </p>
+                        )}
+                        <h3 className="font-[family-name:var(--font-playfair)] text-lg leading-snug text-text-brand">
+                          {post.title}
+                        </h3>
+                        <p className="mt-2 text-sm text-text-light">
+                          {post.read_time ?? "Article"}
+                        </p>
+                      </div>
+                    </article>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
         </div>
       </section>
 
