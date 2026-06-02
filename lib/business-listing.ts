@@ -1,3 +1,5 @@
+const LISTING_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export type ListingStatus = "pending" | "approved" | "rejected"
 export type ListingPlan = "basic" | "featured" | "premium"
 
@@ -46,4 +48,9 @@ export function planLabel(plan: string) {
 
 export function isPaidPlan(plan: string) {
   return plan === "featured" || plan === "premium"
+}
+
+export function hasListingContactEmail(email: string | null | undefined) {
+  const value = email?.trim() ?? ""
+  return value.length > 0 && LISTING_EMAIL_RE.test(value)
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { requireAdminApi } from "@/lib/admin-auth"
-import type { BusinessListing } from "@/lib/business-listing"
+import { hasListingContactEmail, type BusinessListing } from "@/lib/business-listing"
 import { buildRejectionEmail } from "@/lib/emails/listing-status"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
@@ -15,13 +15,6 @@ export async function POST(_request: Request, context: RouteContext) {
   if (unauthorized) return unauthorized
 
   const { id } = await context.params
-  const resendKey = process.env.RESEND_API_KEY
-  if (!resendKey) {
-    return NextResponse.json(
-      { error: "Email service is not configured." },
-      { status: 500 },
-    )
-  }
 
   try {
     const supabase = getSupabaseAdmin()
@@ -51,11 +44,24 @@ export async function POST(_request: Request, context: RouteContext) {
     }
 
     const record = updated as BusinessListing
+
+    if (!hasListingContactEmail(record.email)) {
+      return NextResponse.json({ success: true, listing: record, emailSkipped: true })
+    }
+
+    const resendKey = process.env.RESEND_API_KEY
+    if (!resendKey) {
+      return NextResponse.json(
+        { error: "Email service is not configured." },
+        { status: 500 },
+      )
+    }
+
     const email = buildRejectionEmail(record)
     const resend = new Resend(resendKey)
     const { error: emailError } = await resend.emails.send({
       from: FROM,
-      to: record.email,
+      to: record.email.trim(),
       subject: email.subject,
       html: email.html,
       text: email.text,
