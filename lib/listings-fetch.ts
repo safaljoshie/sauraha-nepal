@@ -1,9 +1,10 @@
 import type { BusinessListing } from "@/lib/business-listing"
 import { sortListingsForDisplay } from "@/lib/listings-catalog"
 import { getSupabaseAdmin } from "@/lib/supabase"
-import { supabase } from "@/lib/supabase"
+import { getSupabasePublic } from "@/lib/supabase"
 
 async function queryApprovedListings() {
+  const supabase = getSupabasePublic()
   return supabase
     .from("business_listings")
     .select("*")
@@ -41,12 +42,22 @@ export async function fetchApprovedListings(): Promise<BusinessListing[]> {
 export async function fetchApprovedListingById(
   id: string,
 ): Promise<BusinessListing | null> {
-  let { data, error } = await supabase
-    .from("business_listings")
-    .select("*")
-    .eq("id", id)
-    .eq("status", "approved")
-    .maybeSingle()
+  let data: unknown = null
+  let error: unknown = null
+
+  try {
+    const supabase = getSupabasePublic()
+    const result = await supabase
+      .from("business_listings")
+      .select("*")
+      .eq("id", id)
+      .eq("status", "approved")
+      .maybeSingle()
+    data = result.data
+    error = result.error
+  } catch {
+    error = new Error("Supabase public client is not configured.")
+  }
 
   if (error || !data) {
     try {
