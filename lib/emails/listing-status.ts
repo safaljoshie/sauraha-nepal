@@ -99,3 +99,30 @@ export function buildRejectionEmail(listing: BusinessListing) {
     text,
   }
 }
+
+export function buildDeletionEmail(listing: BusinessListing) {
+  const body = `
+    <p style="margin:0 0 16px;font-size:16px;color:#1a5c2a;font-weight:700;">Hi ${escapeHtml(listing.owner_name)},</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.6;">Your listing for <strong>${escapeHtml(listing.business_name)}</strong> has been removed from Sauraha Nepal.</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.6;">This can happen if listing details are incomplete, outdated, or no longer meet our directory guidelines.</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#444;line-height:1.6;">You are welcome to submit an updated listing anytime at <a href="https://www.saurahanepal.com/list-your-business" style="color:#1a5c2a;">saurahanepal.com/list-your-business</a>.</p>
+    <p style="margin:24px 0 0;font-size:14px;color:#666;">Need help? Contact hello@mail.saurahanepal.com.</p>
+  `
+
+  const text = [
+    `Hi ${listing.owner_name},`,
+    "",
+    `Your listing for ${listing.business_name} has been removed from Sauraha Nepal.`,
+    "This can happen if details are incomplete, outdated, or no longer meet our guidelines.",
+    "",
+    "You can resubmit at saurahanepal.com/list-your-business.",
+    "",
+    "Need help? hello@mail.saurahanepal.com",
+  ].join("\n")
+
+  return {
+    subject: "Your listing has been removed — Sauraha Nepal",
+    html: emailShell("Listing removed", body),
+    text,
+  }
+}
