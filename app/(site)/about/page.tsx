@@ -1,12 +1,17 @@
 import Image from "next/image"
 import Link from "next/link"
+import type { Metadata } from "next"
 import PageHeader from "@/components/PageHeader"
 import { missionCards } from "@/lib/data"
 import { fetchActiveTeamMembers } from "@/lib/team-members"
+import { pageMetadata } from "@/lib/seo"
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "About Us",
-}
+  description:
+    "Learn about Sauraha Nepal — your local directory for Chitwan National Park travellers and businesses.",
+  path: "/about",
+})
 
 export const revalidate = 60
 

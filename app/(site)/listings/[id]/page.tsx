@@ -1,17 +1,23 @@
-import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import ListingImage from "@/components/listings/ListingImage"
+import ListingMapSection from "@/components/listings/ListingMapSection"
+import ListingShareButtons from "@/components/listings/ListingShareButtons"
+import OpeningHoursDisplay from "@/components/listings/OpeningHoursDisplay"
 import {
   formatListingDate,
+  formatWhatsAppDisplay,
   getCategoryDisplay,
   getListingImage,
   getPhotoUrls,
   whatsappUrl,
 } from "@/lib/listings-catalog"
 import { fetchApprovedListingById } from "@/lib/listings-fetch"
+import { SITE_URL } from "@/lib/blog-posts"
+import { listingJsonLd, pageMetadata } from "@/lib/seo"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 3600
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -26,15 +32,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description =
     listing.description?.slice(0, 160) ??
     `${listing.business_name} in Sauraha, Nepal — ${listing.category}`
+  const image = getListingImage(listing)
 
-  return {
+  return pageMetadata({
     title: listing.business_name,
     description,
-    openGraph: {
-      title: `${listing.business_name} – Sauraha Nepal`,
-      description,
-    },
-  }
+    path: `/listings/${id}`,
+    image,
+    type: "website",
+  })
 }
 
 export default async function ListingDetailPage({ params }: PageProps) {
@@ -45,11 +51,17 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const photos = getPhotoUrls(listing)
   const heroImage = getListingImage(listing)
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""
+  const listingUrl = `${SITE_URL}/listings/${id}`
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
+  const jsonLd = listingJsonLd(listing)
 
   return (
     <main className="pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="relative mt-[68px] overflow-hidden bg-gradient-to-br from-green-brand to-[#0d3a18] px-4 py-14 text-white md:px-8">
         <div className="relative z-10 mx-auto max-w-4xl">
           <Link
@@ -88,14 +100,13 @@ export default async function ListingDetailPage({ params }: PageProps) {
       <div className="mx-auto grid max-w-4xl gap-10 px-4 py-10 md:px-8 lg:grid-cols-[1fr_320px]">
         <div className="space-y-8">
           <div className="relative h-64 overflow-hidden rounded-2xl md:h-80">
-            <Image
+            <ListingImage
               src={heroImage}
               alt={listing.business_name}
               fill
               className="object-cover"
-              priority
               sizes="(max-width: 1024px) 100vw, 800px"
-              unoptimized={!heroImage.includes("unsplash")}
+              priority
             />
           </div>
 
@@ -110,14 +121,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             </section>
           )}
 
-          {listing.opening_hours && (
-            <section className="rounded-2xl border border-border-brand bg-white p-6">
-              <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
-                Opening Hours
-              </h2>
-              <p className="mt-3 text-text-mid">{listing.opening_hours}</p>
-            </section>
-          )}
+          {listing.opening_hours && <OpeningHoursDisplay hours={listing.opening_hours} />}
 
           {photos.length > 0 && (
             <section className="rounded-2xl border border-border-brand bg-white p-6">
@@ -133,14 +137,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     rel="noopener noreferrer"
                     className="relative block h-48 overflow-hidden rounded-xl"
                   >
-                    <Image
-                      src={url}
-                      alt=""
-                      fill
-                      className="object-cover transition-transform hover:scale-105"
-                      sizes="400px"
-                      unoptimized
-                    />
+                    <ListingImage src={url} alt="" fill className="object-cover transition-transform hover:scale-105" sizes="400px" />
                   </a>
                 ))}
               </div>
@@ -159,7 +156,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   <span className="font-semibold text-text-light">Phone</span>
                   <br />
                   <a
-                    href={`tel:${listing.phone.replace(/\s/g, "")}`}
+                    href={`tel:${listing.phone.replace(/\D/g, "")}`}
                     className="text-green-mid hover:underline"
                   >
                     {listing.phone}
@@ -176,17 +173,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     rel="noopener noreferrer"
                     className="text-green-mid hover:underline"
                   >
-                    Message on WhatsApp
+                    {formatWhatsAppDisplay(listing.whatsapp!)}
                   </a>
                 </li>
               )}
               <li>
                 <span className="font-semibold text-text-light">Email</span>
                 <br />
-                <a
-                  href={`mailto:${listing.email}`}
-                  className="text-green-mid hover:underline"
-                >
+                <a href={`mailto:${listing.email}`} className="text-green-mid hover:underline">
                   {listing.email}
                 </a>
               </li>
@@ -232,7 +226,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {listing.phone && (
                 <a
-                  href={`tel:${listing.phone.replace(/\s/g, "")}`}
+                  href={`tel:${listing.phone.replace(/\D/g, "")}`}
                   className="btn-primary block py-3 text-center"
                 >
                   Call Now
@@ -241,22 +235,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
             </div>
           </section>
 
-          {listing.google_maps_link && (
-            <section className="rounded-2xl border border-border-brand bg-white p-6">
-              <h2 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-green-brand">
-                Location
-              </h2>
-              <p className="mt-2 text-sm text-text-mid">{listing.address}</p>
-              <a
-                href={listing.google_maps_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 inline-block text-sm font-semibold text-green-mid hover:underline"
-              >
-                Open in Google Maps →
-              </a>
-            </section>
-          )}
+          <ListingShareButtons businessName={listing.business_name} url={listingUrl} />
+
+          <ListingMapSection
+            address={listing.address}
+            googleMapsLink={listing.google_maps_link}
+          />
 
           <p className="text-center text-xs text-text-light">
             Listed {formatListingDate(listing.created_at)}

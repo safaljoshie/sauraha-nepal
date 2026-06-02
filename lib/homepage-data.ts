@@ -58,8 +58,19 @@ export function isActivityListing(listing: BusinessListing) {
     c.includes("safari") ||
     c.includes("canoe") ||
     c.includes("bird") ||
-    c.includes("cultural")
+    c.includes("cultural") ||
+    c.includes("culture") ||
+    c.includes("walk")
   )
+}
+
+function countUniqueCategories(listings: BusinessListing[]) {
+  const seen = new Set<string>()
+  for (const listing of listings) {
+    const category = listing.category?.trim()
+    if (category) seen.add(category.toLowerCase())
+  }
+  return seen.size
 }
 
 export function buildHomepageData(listings: BusinessListing[]): HomepageData {
@@ -78,9 +89,7 @@ export function buildHomepageData(listings: BusinessListing[]): HomepageData {
     }
   })
 
-  const categoryCount = CATEGORY_GROUPS.filter(
-    (g) => g.id !== "all" && countByCategoryGroup(listings, g.id) > 0,
-  ).length
+  const categoryCount = countUniqueCategories(listings)
 
   const featured = sorted.slice(0, 6)
 

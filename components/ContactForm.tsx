@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
+import { formatWhatsAppDisplay, whatsappUrl } from "@/lib/whatsapp"
 
 const listingPlans = [
   {
@@ -411,26 +412,57 @@ function ListingForm() {
 }
 
 export function ContactSidebar() {
+  return <ContactSidebarContent />
+}
+
+export type ContactSidebarContentProps = {
+  heading?: string
+  subheading?: string
+  address?: string
+  phone?: string
+  whatsapp?: string
+  email?: string
+  responseTime?: string
+}
+
+export function ContactSidebarContent({
+  heading = "Let's connect",
+  subheading = "Have a question about Sauraha? Want to list your business or partner with us? Fill in the form and we'll get back to you within 24 hours.",
+  address = "Sauraha, Chitwan, Nepal",
+  phone = "",
+  whatsapp = "+977 98XXXXXXXX",
+  email = "hello@mail.saurahanepal.com",
+  responseTime = "Within 24 hours (NPT timezone)",
+}: ContactSidebarContentProps = {}) {
   return (
     <div>
       <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-green-brand">
-        Let&apos;s connect
+        {heading}
       </h2>
       <p className="mt-4 mb-8 leading-relaxed text-text-mid">
-        Have a question about Sauraha? Want to list your business or partner with us?
-        Fill in the form and we&apos;ll get back to you within 24 hours.
+        {subheading}
       </p>
 
       <div className="space-y-6">
-        <InfoItem icon="📍" title="Location" text="Sauraha, Chitwan, Nepal" />
-        <InfoItem
-          icon="📧"
-          title="Email"
-          text="hello@mail.saurahanepal.com"
-          href="mailto:hello@mail.saurahanepal.com"
-        />
-        <InfoItem icon="💬" title="WhatsApp" text="+977 98XXXXXXXX" href="#" />
-        <InfoItem icon="🕐" title="Response Time" text="Within 24 hours (NPT timezone)" />
+        <InfoItem icon="📍" title="Location" text={address} />
+        {email && (
+          <InfoItem
+            icon="📧"
+            title="Email"
+            text={email}
+            href={`mailto:${email}`}
+          />
+        )}
+        {phone && <InfoItem icon="📞" title="Phone" text={phone} href={`tel:${phone}`} />}
+        {whatsapp && (
+          <InfoItem
+            icon="💬"
+            title="WhatsApp"
+            text={formatWhatsAppDisplay(whatsapp)}
+            href={whatsappUrl(whatsapp)}
+          />
+        )}
+        <InfoItem icon="🕐" title="Response Time" text={responseTime} />
       </div>
 
       <div className="mt-10">

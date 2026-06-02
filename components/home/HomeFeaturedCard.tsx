@@ -1,5 +1,5 @@
-import Image from "next/image"
 import Link from "next/link"
+import ListingImage from "@/components/listings/ListingImage"
 import type { BusinessListing } from "@/lib/business-listing"
 import {
   getCategoryDisplay,
@@ -25,13 +25,12 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
       }`}
     >
       <div className="relative h-[200px] overflow-hidden">
-        <Image
+        <ListingImage
           src={image}
           alt={listing.business_name}
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 33vw"
-          unoptimized={!image.includes("unsplash")}
         />
         {isPremium && (
           <span className="absolute top-3 left-3 rounded-full bg-orange-brand px-2.5 py-1 text-[0.72rem] font-bold text-white">

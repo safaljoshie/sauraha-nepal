@@ -37,6 +37,8 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only; DB + storage uploads |
 | `SUPABASE_LISTING_PHOTOS_BUCKET` | Storage bucket for list-your-business photo uploads (default: `Sauraha Nepal Listing uploads`) |
+| `NEXT_PUBLIC_SITE_URL` | Canonical site URL (default: `https://www.saurahanepal.com`) |
+| `NEXT_PUBLIC_GA_ID` | Google Analytics measurement ID (e.g. `G-XXXXXXXXXX`); loaded in production only |
 | `RESEND_API_KEY` | Contact / listing notification emails |
 | `ADMIN_PASSWORD` | Admin panel login |
 

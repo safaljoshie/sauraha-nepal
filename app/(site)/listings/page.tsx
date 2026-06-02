@@ -1,15 +1,18 @@
+import type { Metadata } from "next"
 import ListingsExplorer from "@/components/listings/ListingsExplorer"
 import PageHeader from "@/components/PageHeader"
 import { parseCategoryParam } from "@/lib/listings-catalog"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
+import { pageMetadata } from "@/lib/seo"
 
 export const dynamic = "force-dynamic"
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "All Listings",
   description:
     "Browse approved hotels, restaurants, activities, and services in Sauraha, Nepal.",
-}
+  path: "/listings",
+})
 
 type ListingsPageProps = {
   searchParams: Promise<{ search?: string; category?: string; q?: string }>

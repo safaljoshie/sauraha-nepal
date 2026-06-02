@@ -500,6 +500,18 @@ export default function AdminDashboard() {
           >
             Manage Team
           </Link>
+          <Link
+            href="/admin/content/contact"
+            className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
+          >
+            Edit Contact
+          </Link>
+          <Link
+            href="/admin/content/hero"
+            className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
+          >
+            Edit Hero
+          </Link>
           <button
             type="button"
             onClick={handleLogout}

@@ -1,4 +1,6 @@
 import type { Metadata } from "next"
+import { GoogleAnalytics } from "@next/third-parties/google"
+import { Analytics } from "@vercel/analytics/next"
 import { Nunito, Playfair_Display } from "next/font/google"
 import "./globals.css"
 
@@ -24,6 +26,8 @@ export const metadata: Metadata = {
     "Your complete guide to Sauraha — hotels, restaurants, activities, and everything at the gateway to Chitwan National Park.",
 }
 
+const gaId = process.env.NEXT_PUBLIC_GA_ID
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -31,7 +35,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${playfair.variable} ${nunito.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <Analytics />
+        {process.env.NODE_ENV === "production" && gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+      </body>
     </html>
   )
 }

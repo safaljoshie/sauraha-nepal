@@ -60,10 +60,16 @@ async function submitListing(payload: Record<string, unknown>) {
   return data
 }
 
-async function uploadPhotos(files: File[], plan: ListingPlan, existingCount: number) {
+async function uploadPhotos(
+  files: File[],
+  plan: ListingPlan,
+  existingCount: number,
+  submissionId: string,
+) {
   const formData = new FormData()
   formData.set("plan", plan)
   formData.set("existingCount", String(existingCount))
+  formData.set("submissionId", submissionId)
   for (const file of files) {
     formData.append("files", file)
   }
@@ -92,9 +98,11 @@ type PhotoFileEntry = {
 }
 
 export default function ListBusinessForm() {
+  const [submissionId] = useState(() => crypto.randomUUID())
   const [plan, setPlan] = useState<(typeof pricingPlans)[number]["name"]>("Basic")
   const [form, setForm] = useState(initialForm)
   const [photoFiles, setPhotoFiles] = useState<PhotoFileEntry[]>([])
+  const [uploadingPhotos, setUploadingPhotos] = useState(false)
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [submittedPlan, setSubmittedPlan] = useState<ListingPlan>("basic")
@@ -140,7 +148,7 @@ export default function ListBusinessForm() {
     const invalid = selected.find((f) => !isAllowedPhotoFile(f))
     if (invalid) {
       setStatus("error")
-      setErrorMessage("Only JPEG and PNG images are allowed.")
+      setErrorMessage("Only JPEG, PNG, and WEBP images are allowed.")
       return
     }
 
@@ -222,11 +230,17 @@ export default function ListBusinessForm() {
     try {
       let uploadedUrls: string[] = []
       if (photoFiles.length > 0) {
-        uploadedUrls = await uploadPhotos(
-          photoFiles.map((p) => p.file),
-          planValue,
-          pastedLinkCount,
-        )
+        setUploadingPhotos(true)
+        try {
+          uploadedUrls = await uploadPhotos(
+            photoFiles.map((p) => p.file),
+            planValue,
+            pastedLinkCount,
+            submissionId,
+          )
+        } finally {
+          setUploadingPhotos(false)
+        }
       }
 
       const photo_links = mergePhotoLinks(uploadedUrls, form.photoLinks)
@@ -476,22 +490,30 @@ export default function ListBusinessForm() {
 
       <FormSection title="4. Photos">
         <p className="text-sm text-text-light">
-          Upload JPEG or PNG files and/or paste image links (one per line).{" "}
+          Upload JPEG, PNG, or WEBP files and/or paste image links (one per line).{" "}
           <span className="font-semibold text-text-mid">
             {totalPhotoCount} / {photoLimit} used
           </span>{" "}
           on your {plan} plan.
         </p>
-        <Field label="Upload photos (JPEG or PNG)">
+        <Field label="Upload photos (JPEG, PNG, or WEBP)">
           <input
             type="file"
-            accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
             multiple
             className={`${inputClass} cursor-pointer file:mr-4 file:rounded-full file:border-0 file:bg-green-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white`}
             onChange={handlePhotoFileChange}
-            disabled={isLoading || totalPhotoCount >= photoLimit}
+            disabled={isLoading || uploadingPhotos || totalPhotoCount >= photoLimit}
           />
         </Field>
+        {uploadingPhotos && (
+          <div className="mt-2">
+            <div className="h-2 overflow-hidden rounded-full bg-cream">
+              <div className="h-full w-2/3 animate-pulse rounded-full bg-green-brand" />
+            </div>
+            <p className="mt-1 text-xs text-text-light">Uploading photos…</p>
+          </div>
+        )}
         {photoFiles.length > 0 && (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {photoFiles.map((entry) => (

@@ -220,10 +220,7 @@ export function getPhotoUrls(listing: BusinessListing) {
     .filter(Boolean)
 }
 
-export function whatsappUrl(phone: string) {
-  const digits = phone.replace(/\D/g, "")
-  return digits ? `https://wa.me/${digits}` : ""
-}
+export { formatWhatsAppDisplay, whatsappShareUrl, whatsappUrl } from "@/lib/whatsapp"
 
 export function formatListingDate(iso: string) {
   return formatSubmittedDate(iso)

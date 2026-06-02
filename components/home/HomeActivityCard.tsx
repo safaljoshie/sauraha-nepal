@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import ListingImage from "@/components/listings/ListingImage"
 import type { ActivityCardItem } from "@/lib/homepage-data"
 import { getCategoryDisplay, getListingImage } from "@/lib/listings-catalog"
 
@@ -27,13 +28,12 @@ export default function HomeActivityCard({ item }: { item: ActivityCardItem }) {
       href={`/listings/${listing.id}`}
       className="group relative block h-60 overflow-hidden rounded-2xl transition-transform hover:scale-[1.03]"
     >
-      <Image
+      <ListingImage
         src={image}
         alt={listing.business_name}
         fill
         className="object-cover"
         sizes="240px"
-        unoptimized={!image.includes("unsplash")}
       />
       <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-[rgba(10,35,12,0.85)] to-transparent p-5">
         <p className="text-xs font-semibold text-orange-light">

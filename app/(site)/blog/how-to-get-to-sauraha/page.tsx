@@ -1,6 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
+import BlogPostFooter from "@/components/blog/BlogPostFooter"
+import { getBlogPost } from "@/lib/blog-posts"
 
 export const metadata: Metadata = {
   title: {
@@ -33,16 +35,18 @@ const IMAGES = {
   pokhara: "/images/pokhara-to-sauraha.jpg",
 } as const
 
+const post = getBlogPost("how-to-get-to-sauraha")!
+
 export default function TravelToSaurahaPage() {
   return (
     <main className="mt-[68px] bg-cream">
       <article className="mx-auto max-w-4xl px-6 py-12">
         <header className="mb-12">
           <Link
-            href="/"
+            href="/blog"
             className="text-sm font-semibold text-green-mid transition-colors hover:text-green-brand"
           >
-            ← Back to home
+            ← Back to blog
           </Link>
           <span className="section-label mt-6 block">Travel Guide</span>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl leading-tight font-bold text-green-brand md:text-5xl">
@@ -269,6 +273,8 @@ export default function TravelToSaurahaPage() {
             </Link>
           </div>
         </section>
+
+        <BlogPostFooter post={post} />
       </article>
     </main>
   )

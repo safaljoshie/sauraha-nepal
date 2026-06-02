@@ -52,11 +52,18 @@ export default function HeroStats({ stats }: { stats: StatConfig[] }) {
     const node = ref.current
     if (!node) return
 
+    const checkInView = () => {
+      const rect = node.getBoundingClientRect()
+      return rect.top < window.innerHeight && rect.bottom > 0
+    }
+
+    if (checkInView()) setInView(true)
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) setInView(true)
       },
-      { threshold: 0.3 },
+      { threshold: 0.1 },
     )
 
     observer.observe(node)

@@ -65,13 +65,17 @@ export async function POST(request: Request) {
   }
 
   const bucket = getListingPhotosBucket()
-  const submissionId = randomUUID()
+  const submissionIdRaw = formData.get("submissionId")
+  const submissionId =
+    typeof submissionIdRaw === "string" && submissionIdRaw.trim()
+      ? submissionIdRaw.trim().replace(/[^a-zA-Z0-9-]/g, "")
+      : randomUUID()
   const urls: string[] = []
 
   for (const file of files) {
     if (!isAllowedPhotoFile(file)) {
       return NextResponse.json(
-        { error: "Only JPEG and PNG images are allowed." },
+        { error: "Only JPEG, PNG, and WEBP images are allowed." },
         { status: 400 },
       )
     }

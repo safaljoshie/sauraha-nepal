@@ -2,9 +2,9 @@ import type { ListingPlan } from "@/lib/list-business"
 
 export const MAX_PHOTO_BYTES = 5 * 1024 * 1024
 
-export const ALLOWED_PHOTO_MIME = new Set(["image/jpeg", "image/png"])
+export const ALLOWED_PHOTO_MIME = new Set(["image/jpeg", "image/png", "image/webp"])
 
-export const ALLOWED_PHOTO_EXTENSIONS = new Set([".jpg", ".jpeg", ".png"])
+export const ALLOWED_PHOTO_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"])
 
 export function getListingPhotosBucket() {
   return (

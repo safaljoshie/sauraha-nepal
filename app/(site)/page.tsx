@@ -6,9 +6,10 @@ import HomeActivityCard from "@/components/home/HomeActivityCard"
 import HomeFeaturedCard from "@/components/home/HomeFeaturedCard"
 import HeroSearch from "@/components/home/HeroSearch"
 import HeroStats from "@/components/home/HeroStats"
-import { blogPosts } from "@/lib/data"
+import { BLOG_POSTS } from "@/lib/blog-posts"
 import { buildHomepageData } from "@/lib/homepage-data"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
+import { fetchActiveHeroMedia } from "@/lib/site-content"
 
 export const revalidate = 60
 
@@ -30,6 +31,8 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const listings = await fetchApprovedListings()
   const data = buildHomepageData(listings)
+  const heroMedia = await fetchActiveHeroMedia()
+  const primaryHeroMedia = heroMedia[0] ?? null
 
   const heroStats = [
     {
@@ -49,14 +52,31 @@ export default async function HomePage() {
   return (
     <main>
       <section className="relative mt-[68px] flex min-h-[88vh] items-center justify-center overflow-hidden bg-[#0a2310] px-6 py-16 text-center">
-        <Image
-          src="/images/home-hero.png"
-          alt="One-horned rhinoceros in Chitwan National Park near Sauraha"
-          fill
-          priority
-          className="pointer-events-none object-cover object-center"
-          sizes="100vw"
-        />
+        {/* Replace hero video with a compressed MP4/WebM under ~5MB for faster loads */}
+        {primaryHeroMedia?.type === "video" ? (
+          <video
+            className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={primaryHeroMedia.poster_url ?? "/images/home-hero.png"}
+          >
+            <source src={primaryHeroMedia.url} type="video/mp4" />
+          </video>
+        ) : (
+          <Image
+            src={primaryHeroMedia?.url ?? "/images/home-hero.png"}
+            alt={
+              primaryHeroMedia?.alt_text ||
+              "One-horned rhinoceros in Chitwan National Park near Sauraha"
+            }
+            fill
+            priority
+            className="pointer-events-none object-cover object-center"
+            sizes="100vw"
+          />
+        )}
         <div
           className="absolute inset-0 z-10 bg-gradient-to-b from-[rgba(26,92,42,0.12)] via-[rgba(26,92,42,0.22)] to-[rgba(10,35,12,0.52)]"
           aria-hidden
@@ -159,7 +179,7 @@ export default async function HomePage() {
             </Link>
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
-            {blogPosts.map((post) => (
+            {BLOG_POSTS.map((post) => (
               <Link
                 key={post.href}
                 href={post.href}
@@ -182,7 +202,7 @@ export default async function HomePage() {
                     <h3 className="font-[family-name:var(--font-playfair)] text-lg leading-snug text-text-brand">
                       {post.title}
                     </h3>
-                    <p className="mt-2 text-sm text-text-light">{post.meta}</p>
+                    <p className="mt-2 text-sm text-text-light">{post.readTime}</p>
                   </div>
                 </article>
               </Link>

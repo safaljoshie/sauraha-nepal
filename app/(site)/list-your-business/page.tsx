@@ -1,10 +1,15 @@
 import Image from "next/image"
+import type { Metadata } from "next"
 import ListBusinessForm from "@/components/ListBusinessForm"
 import { listingSteps, pricingPlans } from "@/lib/data"
+import { pageMetadata } from "@/lib/seo"
 
-export const metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "List Your Business",
-}
+  description:
+    "List your hotel, restaurant, or activity on Sauraha Nepal — reach travellers visiting Chitwan National Park.",
+  path: "/list-your-business",
+})
 
 const heroStats = [
   { value: "50,000+", label: "Annual visitors" },
