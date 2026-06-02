@@ -7,6 +7,7 @@ import HomeFeaturedCard from "@/components/home/HomeFeaturedCard"
 import HeroSearch from "@/components/home/HeroSearch"
 import HeroStats from "@/components/home/HeroStats"
 import { fetchPublishedBlogPosts } from "@/lib/blog-db"
+import { HOMEPAGE_BLOG_FALLBACK } from "@/lib/homepage-blog-fallback"
 import { buildHomepageData } from "@/lib/homepage-data"
 import { fetchHomepageStats } from "@/lib/homepage-stats"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
@@ -39,8 +40,28 @@ export default async function HomePage() {
   const primaryHeroMedia = heroMedia[0] ?? null
   const blogPosts = await fetchPublishedBlogPosts()
   const featuredBlog = blogPosts.slice(0, 3)
+  const useBlogFallback = featuredBlog.length === 0
 
-  if (stats.businessCount > 0 && listings.length === 0) {
+  let businessCount = stats.businessCount
+  let categoryCount = stats.categoryCount
+
+  if (businessCount === 0 && listings.length > 0) {
+    businessCount = listings.length
+    const categories = new Set(
+      listings.map((l) => l.category?.trim().toLowerCase()).filter(Boolean),
+    )
+    categoryCount = categories.size
+    console.log("[Homepage] stats from listings fallback", { businessCount, categoryCount })
+  }
+
+  console.log("[Homepage] hero stats", {
+    businessCount,
+    categoryCount,
+    fromFallback: stats.fromFallback,
+    listingsLoaded: listings.length,
+  })
+
+  if (businessCount > 0 && listings.length === 0) {
     console.warn(
       "Homepage: stats show approved listings but public fetch returned none — check RLS (supabase/rls-business-listings.sql).",
     )
@@ -50,12 +71,12 @@ export default async function HomePage() {
     {
       label: "Businesses Listed",
       type: "animated" as const,
-      value: stats.businessCount,
+      value: businessCount,
     },
     {
       label: "Categories",
       type: "animated" as const,
-      value: stats.categoryCount,
+      value: categoryCount,
     },
     { label: "National Park", type: "static" as const, display: "932 km²" },
     { label: "To Explore", type: "static" as const, display: "Free" },
@@ -190,48 +211,74 @@ export default async function HomePage() {
               View all guides →
             </Link>
           </div>
-          {featuredBlog.length === 0 ? (
-            <p className="text-text-mid">Travel guides coming soon.</p>
-          ) : (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
-              {featuredBlog.map((post) => {
-                const image = post.cover_image ?? "/images/placeholder-listing.jpg"
-                return (
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
+            {useBlogFallback
+              ? HOMEPAGE_BLOG_FALLBACK.map((post) => (
                   <Link
-                    key={post.id}
-                    href={`/blog/${post.slug}`}
+                    key={post.href}
+                    href={post.href}
                     className="card-hover group overflow-hidden rounded-2xl border border-border-brand"
                   >
                     <article>
                       <div className="relative h-[180px] overflow-hidden">
                         <Image
-                          src={image}
+                          src={post.image}
                           alt={post.title}
                           fill
                           className="object-cover transition-transform duration-400 group-hover:scale-105"
                           sizes="400px"
-                          unoptimized={image.startsWith("http")}
+                          unoptimized={post.image.startsWith("http")}
                         />
                       </div>
                       <div className="p-5">
-                        {post.tag && (
-                          <p className="mb-2 text-xs font-bold tracking-widest text-orange-brand uppercase">
-                            {post.tag}
-                          </p>
-                        )}
+                        <p className="mb-2 text-xs font-bold tracking-widest text-orange-brand uppercase">
+                          {post.tag}
+                        </p>
                         <h3 className="font-[family-name:var(--font-playfair)] text-lg leading-snug text-text-brand">
                           {post.title}
                         </h3>
-                        <p className="mt-2 text-sm text-text-light">
-                          {post.read_time ?? "Article"}
-                        </p>
+                        <p className="mt-2 text-sm text-text-light">{post.readTime}</p>
                       </div>
                     </article>
                   </Link>
-                )
-              })}
-            </div>
-          )}
+                ))
+              : featuredBlog.map((post) => {
+                  const image = post.cover_image ?? "/images/placeholder-listing.jpg"
+                  return (
+                    <Link
+                      key={post.id}
+                      href={`/blog/${post.slug}`}
+                      className="card-hover group overflow-hidden rounded-2xl border border-border-brand"
+                    >
+                      <article>
+                        <div className="relative h-[180px] overflow-hidden">
+                          <Image
+                            src={image}
+                            alt={post.title}
+                            fill
+                            className="object-cover transition-transform duration-400 group-hover:scale-105"
+                            sizes="400px"
+                            unoptimized={image.startsWith("http")}
+                          />
+                        </div>
+                        <div className="p-5">
+                          {post.tag && (
+                            <p className="mb-2 text-xs font-bold tracking-widest text-orange-brand uppercase">
+                              {post.tag}
+                            </p>
+                          )}
+                          <h3 className="font-[family-name:var(--font-playfair)] text-lg leading-snug text-text-brand">
+                            {post.title}
+                          </h3>
+                          <p className="mt-2 text-sm text-text-light">
+                            {post.read_time ?? "Article"}
+                          </p>
+                        </div>
+                      </article>
+                    </Link>
+                  )
+                })}
+          </div>
         </div>
       </section>
 

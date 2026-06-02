@@ -19,13 +19,18 @@ function AnimatedValue({
   suffix?: string
   active: boolean
 }) {
-  const [display, setDisplay] = useState(0)
+  const [display, setDisplay] = useState(value)
 
   useEffect(() => {
-    if (!active) return
+    setDisplay(value)
+  }, [value])
+
+  useEffect(() => {
+    if (!active || value <= 0) return
 
     const duration = 1500
     const start = performance.now()
+    setDisplay(0)
 
     function tick(now: number) {
       const progress = Math.min((now - start) / duration, 1)
