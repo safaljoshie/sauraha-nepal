@@ -2,18 +2,23 @@ import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { SITE_SETTING_KEYS, type SiteSettingsMap } from "@/lib/site-settings-keys"
-import { fetchSiteSettings, upsertSiteSettings } from "@/lib/site-settings"
+import { fetchSiteSettingsAdmin, upsertSiteSettings } from "@/lib/site-settings"
 
 export async function GET() {
   const unauthorized = await requireAdminApi()
   if (unauthorized) return unauthorized
 
   try {
-    const settings = await fetchSiteSettings()
+    const settings = await fetchSiteSettingsAdmin()
     return NextResponse.json({ settings })
   } catch (error) {
     console.error("Settings fetch error:", error)
-    return NextResponse.json({ error: "Failed to load settings." }, { status: 500 })
+    const message =
+      error instanceof Error ? error.message : "Failed to load settings."
+    return NextResponse.json(
+      { error: message.includes("site_settings") ? "Run supabase/site_settings.sql in Supabase first." : "Failed to load settings." },
+      { status: 500 },
+    )
   }
 }
 
@@ -42,6 +47,10 @@ export async function PUT(request: Request) {
     return NextResponse.json({ success: true, settings })
   } catch (error) {
     console.error("Settings save error:", error)
-    return NextResponse.json({ error: "Failed to save settings." }, { status: 500 })
+    const detail = error instanceof Error ? error.message : ""
+    const hint = detail.includes("site_settings")
+      ? "Run supabase/site_settings.sql in the Supabase SQL Editor."
+      : "Failed to save settings."
+    return NextResponse.json({ error: hint, detail: detail || undefined }, { status: 500 })
   }
 }

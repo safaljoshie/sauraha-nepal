@@ -49,7 +49,7 @@ export default function AdminSiteSettingsSection() {
     setLoading(true)
     setError("")
     try {
-      const res = await fetch("/api/admin/settings")
+      const res = await fetch("/api/admin/settings", { credentials: "same-origin" })
       if (res.status === 401) {
         router.push("/admin")
         return
@@ -59,7 +59,7 @@ export default function AdminSiteSettingsSection() {
         setError(data.error ?? "Failed to load settings.")
         return
       }
-      setForm({ ...EMPTY_SETTINGS, ...data.settings })
+      setForm(data.settings ?? EMPTY_SETTINGS)
     } catch {
       setError("Failed to load settings.")
     } finally {
@@ -79,6 +79,7 @@ export default function AdminSiteSettingsSection() {
       const res = await fetch("/api/admin/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify(form),
       })
       if (res.status === 401) {
@@ -87,11 +88,14 @@ export default function AdminSiteSettingsSection() {
       }
       const data = (await res.json()) as { settings?: SiteSettingsMap; error?: string }
       if (!res.ok) {
-        showToast("error", data.error ?? "Failed to save settings.")
+        const msg = data.error ?? "Failed to save settings."
+        setError(msg)
+        showToast("error", msg)
         return
       }
       if (data.settings) setForm(data.settings)
       showToast("success", "Settings saved!")
+      await loadSettings()
     } catch {
       showToast("error", "Failed to save settings.")
     } finally {
@@ -122,6 +126,7 @@ export default function AdminSiteSettingsSection() {
 
       <form
         onSubmit={handleSave}
+        noValidate
         className="max-w-xl space-y-4 rounded-2xl border border-border-brand bg-white p-6 shadow-sm"
       >
         {SITE_SETTING_KEYS.map((key) => (
@@ -130,7 +135,7 @@ export default function AdminSiteSettingsSection() {
               {LABELS[key]}
             </label>
             <input
-              type={key === "email" ? "email" : "text"}
+              type="text"
               value={form[key]}
               onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))}
               className={fieldClass}
@@ -149,7 +154,7 @@ export default function AdminSiteSettingsSection() {
         </button>
       </form>
 
-      <div className="pointer-events-none fixed right-4 bottom-4 z-[60] flex w-full max-w-sm flex-col gap-2">
+      <div className="pointer-events-none fixed right-4 bottom-4 z-[200] flex w-full max-w-sm flex-col gap-2">
         {toasts.map((toast) => (
           <div
             key={toast.id}

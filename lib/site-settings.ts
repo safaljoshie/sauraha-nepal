@@ -18,8 +18,32 @@ const DEFAULT_SETTINGS: SiteSettingsMap = {
   email: "hello@mail.saurahanepal.com",
 }
 
-function rowsToMap(rows: { key: string; value: string | null }[]): SiteSettingsMap {
+function emptySettingsMap(): SiteSettingsMap {
+  return {
+    facebook_url: "",
+    instagram_url: "",
+    twitter_url: "",
+    tiktok_url: "",
+    youtube_url: "",
+    whatsapp_number: "",
+    email: "",
+  }
+}
+
+/** Public/footer: DB values with defaults only for keys missing from the table. */
+function rowsToPublicMap(rows: { key: string; value: string | null }[]): SiteSettingsMap {
   const map = { ...DEFAULT_SETTINGS }
+  for (const row of rows) {
+    if (row.key in map) {
+      map[row.key as SiteSettingKey] = row.value ?? ""
+    }
+  }
+  return map
+}
+
+/** Admin: exact DB values, no placeholder defaults mixed in. */
+function rowsToAdminMap(rows: { key: string; value: string | null }[]): SiteSettingsMap {
+  const map = emptySettingsMap()
   for (const row of rows) {
     if (row.key in map) {
       map[row.key as SiteSettingKey] = row.value ?? ""
@@ -32,19 +56,28 @@ export async function fetchSiteSettings(): Promise<SiteSettingsMap> {
   try {
     const supabase = getSupabasePublic()
     const { data, error } = await supabase.from("site_settings").select("key, value")
-    if (!error && data) return rowsToMap(data)
+    if (!error && data && data.length > 0) return rowsToPublicMap(data)
   } catch {
-    // fallback
+    // fallback below
   }
 
   try {
     const admin = getSupabaseAdmin()
     const { data, error } = await admin.from("site_settings").select("key, value")
-    if (error || !data) return DEFAULT_SETTINGS
-    return rowsToMap(data)
+    if (error) throw error
+    if (!data || data.length === 0) return DEFAULT_SETTINGS
+    return rowsToPublicMap(data)
   } catch {
     return DEFAULT_SETTINGS
   }
+}
+
+/** Server-only: read settings for admin UI (service role). */
+export async function fetchSiteSettingsAdmin(): Promise<SiteSettingsMap> {
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase.from("site_settings").select("key, value")
+  if (error) throw error
+  return rowsToAdminMap(data ?? [])
 }
 
 export async function upsertSiteSettings(
@@ -55,13 +88,23 @@ export async function upsertSiteSettings(
   for (const key of SITE_SETTING_KEYS) {
     if (settings[key] === undefined) continue
     const value = settings[key]?.trim() ?? ""
-    const { error } = await supabase
+
+    const { data: existing, error: findError } = await supabase
       .from("site_settings")
-      .upsert({ key, value }, { onConflict: "key" })
-    if (error) throw error
+      .select("id")
+      .eq("key", key)
+      .maybeSingle()
+
+    if (findError) throw findError
+
+    if (existing?.id) {
+      const { error } = await supabase.from("site_settings").update({ value }).eq("key", key)
+      if (error) throw error
+    } else {
+      const { error } = await supabase.from("site_settings").insert({ key, value })
+      if (error) throw error
+    }
   }
 
-  const { data, error } = await supabase.from("site_settings").select("key, value")
-  if (error) throw error
-  return rowsToMap(data ?? [])
+  return fetchSiteSettingsAdmin()
 }
