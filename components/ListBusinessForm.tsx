@@ -194,7 +194,6 @@ export default function ListBusinessForm() {
       !form.category ||
       !form.description.trim() ||
       !form.ownerName.trim() ||
-      !form.email.trim() ||
       !form.phone.trim() ||
       !form.address.trim()
     ) {
@@ -205,6 +204,12 @@ export default function ListBusinessForm() {
 
     const email = form.email.trim()
     const ownerName = form.ownerName.trim()
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setStatus("error")
+      setErrorMessage("Please provide a valid email address.")
+      return
+    }
 
     if (totalPhotoCount > photoLimit) {
       setStatus("error")
@@ -286,7 +291,9 @@ export default function ListBusinessForm() {
         )}
         {isPaidPlan(submittedPlan) && (
           <p className="mt-4 rounded-[10px] border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-sm font-semibold text-orange-brand">
-            Payment instructions will be sent to {submittedEmail} within 24 hours.
+            {submittedEmail
+              ? `Payment instructions will be sent to ${submittedEmail} within 24 hours.`
+              : "We will contact you by phone with payment instructions within 24 hours."}
           </p>
         )}
         <button
@@ -390,13 +397,13 @@ export default function ListBusinessForm() {
               disabled={isLoading}
             />
           </Field>
-          <Field label="Email">
+          <Field label="Email (optional)">
             <input
               type="email"
               className={inputClass}
               value={form.email}
               onChange={(e) => updateField("email", e.target.value)}
-              required
+              placeholder="you@example.com"
               disabled={isLoading}
             />
           </Field>

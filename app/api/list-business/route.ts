@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     price_range: data.price_range || null,
     opening_hours: data.opening_hours || null,
     owner_name: data.owner_name,
-    email: data.email,
+    email: data.email || "",
     phone: data.phone,
     whatsapp: data.whatsapp || null,
     website: data.website || null,
@@ -75,30 +75,33 @@ export async function POST(request: Request) {
 
   const resend = new Resend(resendKey)
   const adminEmail = buildAdminNotificationEmail(data)
-  const ownerEmail = buildOwnerConfirmationEmail(data)
+  const hasOwnerEmail = Boolean(data.email)
 
-  const [adminResult, ownerResult] = await Promise.all([
-    resend.emails.send({
-      from: FROM,
-      to: ADMIN_TO,
-      replyTo: data.email,
-      subject: adminEmail.subject,
-      html: adminEmail.html,
-      text: adminEmail.text,
-    }),
-    resend.emails.send({
+  const adminResult = await resend.emails.send({
+    from: FROM,
+    to: ADMIN_TO,
+    ...(hasOwnerEmail ? { replyTo: data.email } : {}),
+    subject: adminEmail.subject,
+    html: adminEmail.html,
+    text: adminEmail.text,
+  })
+
+  let ownerResult: { error: unknown } | null = null
+  if (hasOwnerEmail) {
+    const ownerEmail = buildOwnerConfirmationEmail(data)
+    ownerResult = await resend.emails.send({
       from: FROM,
       to: data.email,
       subject: ownerEmail.subject,
       html: ownerEmail.html,
       text: ownerEmail.text,
-    }),
-  ])
+    })
+  }
 
   if (adminResult.error) {
     console.error("Resend admin notification error:", adminResult.error)
   }
-  if (ownerResult.error) {
+  if (ownerResult?.error) {
     console.error("Resend owner confirmation error:", ownerResult.error)
   }
 
@@ -106,8 +109,9 @@ export async function POST(request: Request) {
     success: true,
     plan: data.plan,
     owner_name: data.owner_name,
-    emailWarning:
-      adminResult.error || ownerResult.error
+    emailWarning: adminResult.error
+      ? "Your listing was saved. We could not send the notification email — we will still review your submission."
+      : ownerResult?.error
         ? "Your listing was saved. Confirmation email could not be sent — we will still review your submission."
         : undefined,
   })

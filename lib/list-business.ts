@@ -82,10 +82,7 @@ export function validateListBusinessPayload(
   if (!owner_name) {
     return { data: null, error: "Owner name is required." }
   }
-  if (!email) {
-    return { data: null, error: "Email is required." }
-  }
-  if (!EMAIL_RE.test(email)) {
+  if (email && !EMAIL_RE.test(email)) {
     return { data: null, error: "Please provide a valid email address." }
   }
   if (!phone) {
