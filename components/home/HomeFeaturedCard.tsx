@@ -1,9 +1,12 @@
 import Link from "next/link"
 import ListingImage from "@/components/listings/ListingImage"
+import OpenNowBadge from "@/components/listings/OpenNowBadge"
 import type { BusinessListing } from "@/lib/business-listing"
+import { isNewListing } from "@/lib/listing-badges"
 import {
   getCategoryDisplay,
   getListingImage,
+  telUrl,
   truncateDescription,
   whatsappUrl,
 } from "@/lib/listings-catalog"
@@ -13,6 +16,9 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""
+  const callHref = listing.phone?.trim() ? telUrl(listing.phone) : ""
+  const isNew = isNewListing(listing.created_at)
+  const hasPlanBadge = isPremium || isFeatured
 
   return (
     <article
@@ -42,6 +48,15 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
             Featured
           </span>
         )}
+        {isNew && (
+          <span
+            className={`absolute top-3 rounded-full bg-green-brand px-2.5 py-1 text-[0.72rem] font-bold text-white ${
+              hasPlanBadge ? "right-3" : "left-3"
+            }`}
+          >
+            New
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-5">
@@ -51,6 +66,11 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
         <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-text-brand">
           {listing.business_name}
         </h3>
+        {listing.opening_hours?.trim() && (
+          <div className="mt-1">
+            <OpenNowBadge openingHours={listing.opening_hours} />
+          </div>
+        )}
         <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-text-light">
           {truncateDescription(listing.description, 80)}
         </p>
@@ -69,6 +89,14 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
           >
             View Details
           </Link>
+          {callHref && (
+            <a
+              href={callHref}
+              className="rounded-full border-[1.5px] border-green-brand px-4 py-1.5 text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white"
+            >
+              Call
+            </a>
+          )}
           {wa && (
             <a
               href={wa}

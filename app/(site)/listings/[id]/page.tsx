@@ -11,6 +11,7 @@ import {
   getCategoryDisplay,
   getListingImage,
   getPhotoUrls,
+  telUrl,
   whatsappUrl,
 } from "@/lib/listings-catalog"
 import { fetchApprovedListingById } from "@/lib/listings-fetch"
@@ -51,6 +52,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const photos = getPhotoUrls(listing)
   const heroImage = getListingImage(listing)
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""
+  const callHref = listing.phone?.trim() ? telUrl(listing.phone) : ""
   const listingUrl = `${SITE_URL}/listings/${id}`
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
@@ -151,14 +153,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
               Contact
             </h2>
             <ul className="mt-4 space-y-3 text-sm">
-              {listing.phone && (
+              {callHref && (
                 <li>
                   <span className="font-semibold text-text-light">Phone</span>
                   <br />
-                  <a
-                    href={`tel:${listing.phone.replace(/\D/g, "")}`}
-                    className="text-green-mid hover:underline"
-                  >
+                  <a href={callHref} className="text-green-mid hover:underline">
                     {listing.phone}
                   </a>
                 </li>
@@ -224,11 +223,8 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   WhatsApp
                 </a>
               )}
-              {listing.phone && (
-                <a
-                  href={`tel:${listing.phone.replace(/\D/g, "")}`}
-                  className="btn-primary block py-3 text-center"
-                >
+              {callHref && (
+                <a href={callHref} className="btn-primary block py-3 text-center">
                   Call Now
                 </a>
               )}

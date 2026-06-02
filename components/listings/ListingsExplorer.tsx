@@ -1,5 +1,6 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
@@ -14,6 +15,18 @@ import {
   type SortOptionId,
 } from "@/lib/listings-catalog"
 import BusinessListingCard from "./BusinessListingCard"
+import ListingsGridErrorBoundary from "./ListingsGridErrorBoundary"
+
+const ListingsMapView = dynamic(() => import("./ListingsMapView"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[min(70vh,520px)] items-center justify-center rounded-2xl border border-border-brand bg-cream">
+      <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-green-brand/30 border-t-green-brand" />
+    </div>
+  ),
+})
+
+type ViewMode = "grid" | "map"
 
 type ListingsExplorerProps = {
   listings: BusinessListing[]
@@ -33,6 +46,7 @@ export default function ListingsExplorer({
   const [sort, setSort] = useState<SortOptionId>("plan")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -153,12 +167,40 @@ export default function ListingsExplorer({
           })}
         </div>
 
-        <p className="mt-8 mb-6 text-sm text-text-light">
-          {totalApproved === 0
-            ? "No approved listings yet"
-            : `Showing ${showingCount} of ${filtered.length} listing${filtered.length === 1 ? "" : "s"}`}
-          {filtered.length !== totalApproved && ` (filtered from ${totalApproved})`}
-        </p>
+        <div className="mt-8 mb-6 flex flex-wrap items-center justify-between gap-4">
+          <p className="text-sm text-text-light">
+            {totalApproved === 0
+              ? "No approved listings yet"
+              : `Showing ${viewMode === "map" ? filtered.length : showingCount} of ${filtered.length} listing${filtered.length === 1 ? "" : "s"}`}
+            {filtered.length !== totalApproved && ` (filtered from ${totalApproved})`}
+          </p>
+          {filtered.length > 0 && (
+            <div className="flex rounded-full border border-border-brand bg-white p-1">
+              <button
+                type="button"
+                onClick={() => setViewMode("grid")}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  viewMode === "grid"
+                    ? "bg-green-brand text-white"
+                    : "text-text-mid hover:text-green-brand"
+                }`}
+              >
+                ⊞ Grid
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("map")}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  viewMode === "map"
+                    ? "bg-green-brand text-white"
+                    : "text-text-mid hover:text-green-brand"
+                }`}
+              >
+                🗺 Map
+              </button>
+            </div>
+          )}
+        </div>
 
         {totalApproved === 0 ? (
           <EmptyAll />
@@ -168,8 +210,12 @@ export default function ListingsExplorer({
             category={category}
             onClearSearch={clearSearch}
           />
+        ) : viewMode === "map" ? (
+          <div className="mb-16">
+            <ListingsMapView listings={filtered} />
+          </div>
         ) : (
-          <>
+          <ListingsGridErrorBoundary>
             <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {visible.map((listing) => (
                 <BusinessListingCard key={listing.id} listing={listing} />
@@ -184,7 +230,7 @@ export default function ListingsExplorer({
                 <p className="text-sm font-medium text-text-light">No more listings</p>
               )}
             </div>
-          </>
+          </ListingsGridErrorBoundary>
         )}
       </div>
     </>

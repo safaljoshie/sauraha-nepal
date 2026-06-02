@@ -18,7 +18,23 @@ function parseTimeToMinutes(token: string): number | null {
   return hours * 60 + minutes
 }
 
+/** e.g. 7am-10pm, 7:00-22:00, Daily 8am-9pm */
+const COMPACT_RANGE_RE =
+  /(?:daily\s+)?(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*[-–—]\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i
+
+function parseCompactRange(text: string): TimeRange | null {
+  const match = text.trim().match(COMPACT_RANGE_RE)
+  if (!match) return null
+  const start = parseTimeToMinutes(match[1])
+  const end = parseTimeToMinutes(match[2])
+  if (start === null || end === null) return null
+  return { start, end }
+}
+
 function parseRangeLine(line: string): TimeRange | null {
+  const compact = parseCompactRange(line)
+  if (compact) return compact
+
   const parts = line.split(/–|—|-/).map((p) => p.trim())
   if (parts.length !== 2) return null
   const start = parseTimeToMinutes(parts[0])
@@ -40,8 +56,14 @@ export function getNepalNowMinutes(): number {
   return hour * 60 + minute
 }
 
-export function isOpenNow(openingHours: string): boolean | null {
-  const lines = openingHours
+function collectRanges(openingHours: string): TimeRange[] {
+  const trimmed = openingHours.trim()
+  if (!trimmed) return []
+
+  const compact = parseCompactRange(trimmed)
+  if (compact) return [compact]
+
+  const lines = trimmed
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
@@ -54,16 +76,31 @@ export function isOpenNow(openingHours: string): boolean | null {
   }
 
   if (ranges.length === 0) {
-    const single = parseRangeLine(openingHours.trim())
-    if (!single) return null
-    ranges.push(single)
+    const single = parseRangeLine(trimmed)
+    if (single) ranges.push(single)
   }
 
+  return ranges
+}
+
+function isWithinRange(now: number, range: TimeRange): boolean {
+  if (range.start <= range.end) {
+    return now >= range.start && now < range.end
+  }
+  return now >= range.start || now < range.end
+}
+
+export function getOpenStatus(openingHours: string): "open" | "closed" | null {
+  const ranges = collectRanges(openingHours)
+  if (ranges.length === 0) return null
+
   const now = getNepalNowMinutes()
-  return ranges.some((range) => {
-    if (range.start <= range.end) {
-      return now >= range.start && now < range.end
-    }
-    return now >= range.start || now < range.end
-  })
+  const open = ranges.some((range) => isWithinRange(now, range))
+  return open ? "open" : "closed"
+}
+
+export function isOpenNow(openingHours: string): boolean | null {
+  const status = getOpenStatus(openingHours)
+  if (status === null) return null
+  return status === "open"
 }

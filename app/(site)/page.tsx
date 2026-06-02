@@ -8,6 +8,7 @@ import HeroSearch from "@/components/home/HeroSearch"
 import HeroStats from "@/components/home/HeroStats"
 import { BLOG_POSTS } from "@/lib/blog-posts"
 import { buildHomepageData } from "@/lib/homepage-data"
+import { fetchHomepageStats } from "@/lib/homepage-stats"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { fetchActiveHeroMedia } from "@/lib/site-content"
 
@@ -29,21 +30,30 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const listings = await fetchApprovedListings()
+  const [listings, stats] = await Promise.all([
+    fetchApprovedListings(),
+    fetchHomepageStats(),
+  ])
   const data = buildHomepageData(listings)
   const heroMedia = await fetchActiveHeroMedia()
   const primaryHeroMedia = heroMedia[0] ?? null
+
+  if (stats.businessCount > 0 && listings.length === 0) {
+    console.warn(
+      "Homepage: stats show approved listings but public fetch returned none — check RLS (supabase/rls-business-listings.sql).",
+    )
+  }
 
   const heroStats = [
     {
       label: "Businesses Listed",
       type: "animated" as const,
-      value: data.stats.businessCount,
+      value: stats.businessCount,
     },
     {
       label: "Categories",
       type: "animated" as const,
-      value: data.stats.categoryCount,
+      value: stats.categoryCount,
     },
     { label: "National Park", type: "static" as const, display: "932 km²" },
     { label: "To Explore", type: "static" as const, display: "Free" },

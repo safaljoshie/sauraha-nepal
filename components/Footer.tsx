@@ -94,7 +94,8 @@ export default function Footer() {
           <FooterColumn title="Company" links={companyLinks} />
         </div>
         <div className="border-t border-white/10 pt-6 text-center text-sm text-white/40">
-          © 2025 SaurahaNePal.com · Built with ❤️ for travellers exploring Chitwan
+          © {new Date().getFullYear()} SaurahaNePal.com · Built with ❤️ for travellers
+          exploring Chitwan
         </div>
       </div>
     </footer>

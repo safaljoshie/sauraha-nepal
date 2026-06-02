@@ -220,7 +220,12 @@ export function getPhotoUrls(listing: BusinessListing) {
     .filter(Boolean)
 }
 
-export { formatWhatsAppDisplay, whatsappShareUrl, whatsappUrl } from "@/lib/whatsapp"
+export {
+  formatWhatsAppDisplay,
+  telUrl,
+  whatsappShareUrl,
+  whatsappUrl,
+} from "@/lib/whatsapp"
 
 export function formatListingDate(iso: string) {
   return formatSubmittedDate(iso)

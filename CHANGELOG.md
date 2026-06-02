@@ -1,5 +1,36 @@
 # Changelog
 
+## Critical site fixes (stats, nav, listings UX, map)
+
+### Homepage stats (FIX 1)
+
+- `fetchHomepageStats()` uses service-role counts (approved businesses + distinct categories)
+- Fallback values when DB unreachable; warns when stats and public listing fetch disagree (RLS)
+
+### Footer & navigation (FIX 3–4)
+
+- Dynamic copyright year in footer
+- Mobile hamburger menu: slide-in panel, backdrop, Escape, body scroll lock
+
+### Listing cards & contact (FIX 6–9)
+
+- “New” badge for listings created in the last 7 days
+- `telUrl()` / `normalizeNepalPhoneDigits()` for consistent `tel:` links
+- Extended opening-hours parser (`7am-10pm`, `Daily 8am-9pm`, etc.)
+- `OpenNowBadge` on listing and featured cards
+
+### Share & map (FIX 10–11)
+
+- Share buttons: `Copied! ✓` and brand-colored actions
+- Leaflet map view on `/listings` with grid/map toggle; pins from `google_maps_link` coordinates
+
+### Performance (FIX 7)
+
+- `ListingsGridErrorBoundary` around the listings grid
+- `ListingImage` keeps lazy loading for non-priority images
+
+---
+
 ## Site fixes, blog, SEO & listing enhancements
 
 ### Homepage (FIX 1, FIX 3)

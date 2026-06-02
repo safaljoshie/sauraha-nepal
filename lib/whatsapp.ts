@@ -1,4 +1,8 @@
 /** Strip formatting and normalize to Nepal country code (977 + mobile digits). */
+export function normalizeNepalPhoneDigits(phone: string): string {
+  return normalizeNepalWhatsAppDigits(phone)
+}
+
 export function normalizeNepalWhatsAppDigits(phone: string): string {
   let digits = phone.replace(/\D/g, "")
   if (!digits) return ""
@@ -15,6 +19,12 @@ export function normalizeNepalWhatsAppDigits(phone: string): string {
   }
 
   return digits
+}
+
+/** tel: link using normalized digits */
+export function telUrl(phone: string): string {
+  const digits = normalizeNepalPhoneDigits(phone)
+  return digits ? `tel:${digits}` : ""
 }
 
 /** wa.me link: https://wa.me/977XXXXXXXXXX */
