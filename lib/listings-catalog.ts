@@ -34,7 +34,15 @@ export const CATEGORY_GROUPS: {
     id: "eat",
     label: "Eat & Drink",
     tabLabel: "🍽️ Eat & Drink",
-    matchers: ["Restaurant", "Cafe", "Bar"],
+    matchers: [
+      "Restaurant",
+      "Cafe",
+      "Bar",
+      "Tea Shop",
+      "Bakery",
+      "Street Food",
+      "Liquor Shop",
+    ],
   },
   {
     id: "activities",
@@ -46,13 +54,19 @@ export const CATEGORY_GROUPS: {
     id: "transport",
     label: "Transport",
     tabLabel: "🚗 Transport",
-    matchers: ["Taxi/Jeep", "Bus Service"],
+    matchers: ["Taxi/Jeep", "Bus Service", "Cycle Rental", "Scooty Rental"],
   },
   {
     id: "shopping",
     label: "Shopping",
     tabLabel: "🛍️ Shopping",
-    matchers: ["Souvenirs", "Clothing"],
+    matchers: [
+      "Souvenirs",
+      "Clothing",
+      "Tattoo Shop",
+      "Grocery Shop",
+      "Chemist/Pharmacy",
+    ],
   },
   {
     id: "guides",
