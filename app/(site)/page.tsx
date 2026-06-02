@@ -23,6 +23,7 @@ export const metadata: Metadata = {
     url: "https://www.saurahanepal.com",
     siteName: "Sauraha Nepal",
     type: "website",
+    images: ["/images/home-hero.png"],
   },
 }
 
@@ -48,20 +49,15 @@ export default async function HomePage() {
   return (
     <main>
       <section className="relative mt-[68px] flex min-h-[88vh] items-center justify-center overflow-hidden bg-[#0a2310] px-6 py-16 text-center">
-        <video
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1600&q=80"
-        >
-          <source
-            src="https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_25fps.mp4"
-            type="video/mp4"
-          />
-        </video>
-        <div className="absolute inset-0 z-10 bg-gradient-to-b from-[rgba(10,35,12,0.6)] via-[rgba(10,35,12,0.45)] to-[rgba(10,35,12,0.7)]" />
+        <Image
+          src="/images/home-hero.png"
+          alt="One-horned rhinoceros in Chitwan National Park near Sauraha"
+          fill
+          priority
+          className="pointer-events-none object-cover object-center"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 z-10 bg-gradient-to-b from-[rgba(10,35,12,0.65)] via-[rgba(10,35,12,0.5)] to-[rgba(10,35,12,0.75)]" />
 
         <div className="relative z-20 max-w-3xl">
           <span className="mb-6 inline-block rounded-full bg-orange-brand px-4 py-1.5 text-xs font-bold tracking-widest text-white uppercase">
