@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import type { ContactPageContent } from "@/lib/site-content"
@@ -106,6 +107,8 @@ export async function PUT(request: Request) {
       console.error("Contact content save error:", result.error)
       return NextResponse.json({ error: "Failed to save contact content." }, { status: 500 })
     }
+
+    revalidatePath("/contact")
 
     return NextResponse.json({ success: true, content: result.data as ContactPageContent })
   } catch {

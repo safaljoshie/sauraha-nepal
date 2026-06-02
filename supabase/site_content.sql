@@ -55,3 +55,21 @@ create trigger trg_hero_media_updated_at
 before update on hero_media
 for each row
 execute function set_hero_media_updated_at();
+
+-- Public read for site-facing pages (admin writes use service role)
+alter table contact_page_content enable row level security;
+alter table hero_media enable row level security;
+
+drop policy if exists "Public read contact page content" on contact_page_content;
+create policy "Public read contact page content"
+  on contact_page_content
+  for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "Public read active hero media" on hero_media;
+create policy "Public read active hero media"
+  on hero_media
+  for select
+  to anon, authenticated
+  using (is_active = true);
