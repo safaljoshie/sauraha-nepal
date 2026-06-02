@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
@@ -492,13 +493,21 @@ export default function AdminDashboard() {
           </h1>
           <p className="mt-1 text-sm text-text-light">Manage business listing submissions</p>
         </div>
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="cursor-pointer self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
-        >
-          Logout
-        </button>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/team"
+            className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
+          >
+            Manage Team
+          </Link>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="cursor-pointer self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
+          >
+            Logout
+          </button>
+        </div>
       </header>
 
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">

@@ -1,7 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
 import PageHeader from "@/components/PageHeader"
-import { missionCards, teamMembers } from "@/lib/data"
+import { missionCards } from "@/lib/data"
+import { fetchActiveTeamMembers } from "@/lib/team-members"
 
 export const metadata = {
   title: "About Us",
@@ -15,6 +16,12 @@ const stats = [
 ]
 
 export default function AboutPage() {
+  return <AboutPageContent />
+}
+
+async function AboutPageContent() {
+  const teamMembers = await fetchActiveTeamMembers()
+
   return (
     <main>
       <PageHeader
@@ -79,24 +86,33 @@ export default function AboutPage() {
         <div className="mx-auto max-w-3xl">
           <p className="section-label">The Team</p>
           <h2 className="section-title">People behind the directory</h2>
-          <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6">
-            {teamMembers.map((member) => (
-              <div key={member.name} className="text-center">
-                <div className="relative mx-auto mb-4 h-[90px] w-[90px] overflow-hidden rounded-full border-[3px] border-green-light">
-                  <Image
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    className="object-cover"
-                  />
+          {teamMembers.length === 0 ? (
+            <div className="mt-10 rounded-2xl border border-border-brand bg-cream p-8 text-center text-text-light">
+              Team details will be added soon.
+            </div>
+          ) : (
+            <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6">
+              {teamMembers.map((member) => (
+                <div key={member.id} className="text-center">
+                  <div className="relative mx-auto mb-4 h-[90px] w-[90px] overflow-hidden rounded-full border-[3px] border-green-light">
+                    <Image
+                      src={member.image}
+                      alt={member.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <h4 className="font-[family-name:var(--font-playfair)] text-lg text-text-brand">
+                    {member.name}
+                  </h4>
+                  <span className="text-sm text-text-light">{member.role}</span>
+                  {member.bio && (
+                    <p className="mt-1 text-xs text-text-light">{member.bio}</p>
+                  )}
                 </div>
-                <h4 className="font-[family-name:var(--font-playfair)] text-lg text-text-brand">
-                  {member.name}
-                </h4>
-                <span className="text-sm text-text-light">{member.role}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
