@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, type FormEvent } from "react"
 
 const listingPlans = [
   {
@@ -25,6 +25,29 @@ const listingPlans = [
     featured: false,
   },
 ]
+
+type SubmitStatus = "idle" | "loading" | "success" | "error"
+
+type ContactPayload = {
+  name: string
+  email: string
+  message: string
+  business: string
+}
+
+async function submitContact(payload: ContactPayload) {
+  const res = await fetch("/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+
+  const data = (await res.json().catch(() => ({}))) as { error?: string }
+
+  if (!res.ok) {
+    throw new Error(data.error ?? "Something went wrong. Please try again.")
+  }
+}
 
 export default function ContactForm() {
   const [tab, setTab] = useState<"general" | "listing">("general")
@@ -79,25 +102,108 @@ function FormField({
 }
 
 const inputClass =
-  "w-full rounded-[10px] border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white"
+  "w-full rounded-[10px] border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+
+function FormFeedback({
+  status,
+  errorMessage,
+  successMessage,
+}: {
+  status: SubmitStatus
+  errorMessage: string
+  successMessage: string
+}) {
+  if (status === "success") {
+    return (
+      <p
+        role="status"
+        className="mt-3 rounded-[10px] border border-green-mid/30 bg-green-mid/10 px-4 py-3 text-center text-sm font-semibold text-green-brand"
+      >
+        {successMessage}
+      </p>
+    )
+  }
+
+  if (status === "error") {
+    return (
+      <p
+        role="alert"
+        className="mt-3 rounded-[10px] border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-center text-sm font-semibold text-orange-brand"
+      >
+        {errorMessage}
+      </p>
+    )
+  }
+
+  return null
+}
 
 function GeneralForm() {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [subject, setSubject] = useState("General Question")
+  const [message, setMessage] = useState("")
+  const [status, setStatus] = useState<SubmitStatus>("idle")
+  const [errorMessage, setErrorMessage] = useState("")
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setStatus("loading")
+    setErrorMessage("")
+
+    try {
+      await submitContact({
+        name,
+        email,
+        message,
+        business: subject,
+      })
+      setStatus("success")
+      setName("")
+      setEmail("")
+      setSubject("General Question")
+      setMessage("")
+    } catch (err) {
+      setStatus("error")
+      setErrorMessage(err instanceof Error ? err.message : "Something went wrong.")
+    }
+  }
+
+  const isLoading = status === "loading"
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-      }}
-    >
+    <form onSubmit={handleSubmit}>
       <div className="grid gap-4 md:grid-cols-2">
         <FormField label="Your Name">
-          <input type="text" placeholder="e.g. John Smith" className={inputClass} />
+          <input
+            type="text"
+            placeholder="e.g. John Smith"
+            className={inputClass}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            disabled={isLoading}
+          />
         </FormField>
         <FormField label="Email Address">
-          <input type="email" placeholder="your@email.com" className={inputClass} />
+          <input
+            type="email"
+            placeholder="your@email.com"
+            className={inputClass}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={isLoading}
+          />
         </FormField>
       </div>
       <FormField label="Subject">
-        <select className={inputClass}>
+        <select
+          className={inputClass}
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          disabled={isLoading}
+        >
           <option>General Question</option>
           <option>Travel Advice</option>
           <option>Partnership</option>
@@ -108,31 +214,104 @@ function GeneralForm() {
         <textarea
           placeholder="What would you like to know about Sauraha?"
           className={`${inputClass} min-h-[110px] resize-y`}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          required
+          disabled={isLoading}
         />
       </FormField>
-      <button type="submit" className="btn-primary mt-2 w-full cursor-pointer py-3.5">
-        Send Message
+      <button
+        type="submit"
+        className="btn-primary mt-2 w-full cursor-pointer py-3.5 disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isLoading}
+      >
+        {isLoading ? "Sending…" : "Send Message"}
       </button>
-      <p className="mt-3 text-center text-sm text-text-light">
-        We&apos;ll reply within 24 hours to your email address.
-      </p>
+      <FormFeedback
+        status={status}
+        errorMessage={errorMessage}
+        successMessage="Thanks! Your message has been sent. We'll reply within 24 hours."
+      />
+      {status !== "success" && (
+        <p className="mt-3 text-center text-sm text-text-light">
+          We&apos;ll reply within 24 hours to your email address.
+        </p>
+      )}
     </form>
   )
 }
 
 function ListingForm() {
+  const [businessName, setBusinessName] = useState("")
+  const [category, setCategory] = useState("Stay")
+  const [name, setName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [email, setEmail] = useState("")
+  const [website, setWebsite] = useState("")
+  const [description, setDescription] = useState("")
+  const [plan, setPlan] = useState("Free Basic Listing")
+  const [status, setStatus] = useState<SubmitStatus>("idle")
+  const [errorMessage, setErrorMessage] = useState("")
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setStatus("loading")
+    setErrorMessage("")
+
+    const messageParts = [
+      `Category: ${category}`,
+      phone ? `Phone / WhatsApp: ${phone}` : null,
+      website ? `Website / social: ${website}` : null,
+      `Listing plan: ${plan}`,
+      "",
+      description,
+    ].filter(Boolean)
+
+    try {
+      await submitContact({
+        name,
+        email,
+        message: messageParts.join("\n"),
+        business: businessName,
+      })
+      setStatus("success")
+      setBusinessName("")
+      setCategory("Stay")
+      setName("")
+      setPhone("")
+      setEmail("")
+      setWebsite("")
+      setDescription("")
+      setPlan("Free Basic Listing")
+    } catch (err) {
+      setStatus("error")
+      setErrorMessage(err instanceof Error ? err.message : "Something went wrong.")
+    }
+  }
+
+  const isLoading = status === "loading"
+
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault()
-      }}
-    >
+    <form onSubmit={handleSubmit}>
       <div className="grid gap-4 md:grid-cols-2">
         <FormField label="Business Name">
-          <input type="text" placeholder="e.g. Jungle Safari Resort" className={inputClass} />
+          <input
+            type="text"
+            placeholder="e.g. Jungle Safari Resort"
+            className={inputClass}
+            value={businessName}
+            onChange={(e) => setBusinessName(e.target.value)}
+            required
+            disabled={isLoading}
+          />
         </FormField>
         <FormField label="Category">
-          <select className={inputClass}>
+          <select
+            className={inputClass}
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            disabled={isLoading}
+          >
             <option>Stay</option>
             <option>Eat & Drink</option>
             <option>Activities</option>
@@ -145,38 +324,88 @@ function ListingForm() {
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         <FormField label="Your Name">
-          <input type="text" placeholder="Owner / Manager name" className={inputClass} />
+          <input
+            type="text"
+            placeholder="Owner / Manager name"
+            className={inputClass}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            disabled={isLoading}
+          />
         </FormField>
         <FormField label="Phone / WhatsApp">
-          <input type="text" placeholder="+977 98XXXXXXXX" className={inputClass} />
+          <input
+            type="text"
+            placeholder="+977 98XXXXXXXX"
+            className={inputClass}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            disabled={isLoading}
+          />
         </FormField>
       </div>
       <FormField label="Email Address">
-        <input type="email" placeholder="business@email.com" className={inputClass} />
+        <input
+          type="email"
+          placeholder="business@email.com"
+          className={inputClass}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={isLoading}
+        />
       </FormField>
       <FormField label="Website or Facebook Page (optional)">
-        <input type="text" placeholder="https://..." className={inputClass} />
+        <input
+          type="text"
+          placeholder="https://..."
+          className={inputClass}
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          disabled={isLoading}
+        />
       </FormField>
       <FormField label="Brief Description of Your Business">
         <textarea
           placeholder="Tell us about your business — what you offer, location, and what makes it special..."
           className={`${inputClass} min-h-[110px] resize-y`}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          required
+          disabled={isLoading}
         />
       </FormField>
       <FormField label="Listing Plan">
-        <select className={inputClass}>
+        <select
+          className={inputClass}
+          value={plan}
+          onChange={(e) => setPlan(e.target.value)}
+          disabled={isLoading}
+        >
           <option>Free Basic Listing</option>
           <option>Featured Listing – $50/yr</option>
           <option>Premium Listing – $120/yr</option>
         </select>
       </FormField>
-      <button type="submit" className="btn-primary mt-2 w-full cursor-pointer py-3.5">
-        Submit My Business
+      <button
+        type="submit"
+        className="btn-primary mt-2 w-full cursor-pointer py-3.5 disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isLoading}
+      >
+        {isLoading ? "Submitting…" : "Submit My Business"}
       </button>
-      <p className="mt-3 text-center text-sm text-text-light">
-        Free listings are approved within 48 hours. We&apos;ll contact you to confirm
-        details.
-      </p>
+      <FormFeedback
+        status={status}
+        errorMessage={errorMessage}
+        successMessage="Thanks! Your listing request has been sent. We'll contact you within 48 hours."
+      />
+      {status !== "success" && (
+        <p className="mt-3 text-center text-sm text-text-light">
+          Free listings are approved within 48 hours. We&apos;ll contact you to confirm
+          details.
+        </p>
+      )}
     </form>
   )
 }
