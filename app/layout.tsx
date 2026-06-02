@@ -15,6 +15,7 @@ const nunito = Nunito({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.saurahanepal.com"),
   title: {
     default: "Sauraha Nepal – Your Complete Guide to Sauraha",
     template: "%s – Sauraha Nepal",
