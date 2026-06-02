@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import ReactMarkdown from "react-markdown"
+import BlogMarkdown from "@/components/blog/BlogMarkdown"
 import BlogShareBar from "@/components/blog/BlogShareBar"
 import {
   fetchPublishedBlogPostBySlug,
@@ -100,9 +100,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </header>
 
-        <div className="prose prose-green max-w-none prose-headings:font-[family-name:var(--font-playfair)] prose-headings:text-green-brand prose-a:text-green-mid">
-          <ReactMarkdown>{post.content ?? ""}</ReactMarkdown>
-        </div>
+        <BlogMarkdown content={post.content ?? ""} />
 
         <div className="mt-12">
           <BlogShareBar title={post.title} url={articleUrl} />
