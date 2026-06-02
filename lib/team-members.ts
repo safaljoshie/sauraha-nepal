@@ -14,22 +14,21 @@ export type TeamMember = {
 
 export async function fetchActiveTeamMembers(): Promise<TeamMember[]> {
   try {
-    const supabase = getSupabasePublic()
-    const { data, error } = await supabase
+    const admin = getSupabaseAdmin()
+    const { data, error } = await admin
       .from("team_members")
       .select("*")
       .eq("is_active", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: true })
-
     if (!error && data) return data as TeamMember[]
   } catch {
-    // fall through to admin fallback
+    // fall through to public fallback
   }
 
   try {
-    const admin = getSupabaseAdmin()
-    const { data, error } = await admin
+    const supabase = getSupabasePublic()
+    const { data, error } = await supabase
       .from("team_members")
       .select("*")
       .eq("is_active", true)
