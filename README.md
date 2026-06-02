@@ -39,6 +39,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 | `SUPABASE_LISTING_PHOTOS_BUCKET` | Storage bucket for list-your-business photo uploads (default: `Sauraha Nepal Listing uploads`) |
 | `NEXT_PUBLIC_SITE_URL` | Canonical site URL (default: `https://www.saurahanepal.com`) |
 | `NEXT_PUBLIC_GA_ID` | Google Analytics measurement ID (e.g. `G-XXXXXXXXXX`); loaded in production only |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Google Search Console HTML tag verification code (content value only, not the full meta tag) |
 | `RESEND_API_KEY` | Contact / listing notification emails |
 | `ADMIN_PASSWORD` | Admin panel login |
 

@@ -16,6 +16,8 @@ const nunito = Nunito({
   variable: "--font-nunito",
 })
 
+const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.saurahanepal.com"),
   title: {
@@ -24,6 +26,13 @@ export const metadata: Metadata = {
   },
   description:
     "Your complete guide to Sauraha — hotels, restaurants, activities, and everything at the gateway to Chitwan National Park.",
+  ...(googleSiteVerification
+    ? {
+        verification: {
+          google: googleSiteVerification,
+        },
+      }
+    : {}),
 }
 
 const gaId = process.env.NEXT_PUBLIC_GA_ID
