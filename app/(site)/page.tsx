@@ -54,10 +54,10 @@ export default async function HomePage() {
           alt="One-horned rhinoceros in Chitwan National Park near Sauraha"
           fill
           priority
-          className="pointer-events-none object-cover object-center"
+          className="pointer-events-none object-cover object-[center_45%]"
           sizes="100vw"
         />
-        <div className="absolute inset-0 z-10 bg-gradient-to-b from-[rgba(10,35,12,0.65)] via-[rgba(10,35,12,0.5)] to-[rgba(10,35,12,0.75)]" />
+        <div className="absolute inset-0 z-10 bg-gradient-to-b from-[rgba(26,92,42,0.12)] via-[rgba(26,92,42,0.22)] to-[rgba(10,35,12,0.52)]" />
 
         <div className="relative z-20 max-w-3xl">
           <span className="mb-6 inline-block rounded-full bg-orange-brand px-4 py-1.5 text-xs font-bold tracking-widest text-white uppercase">
