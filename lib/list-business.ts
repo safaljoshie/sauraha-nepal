@@ -1,3 +1,5 @@
+import { parsePhotoLinkLines, photoLimitForPlan } from "@/lib/list-business-photos"
+
 export type ListingPlan = "basic" | "featured" | "premium"
 
 export type ListBusinessPayload = {
@@ -38,9 +40,9 @@ export function planDisplayLabel(plan: ListingPlan) {
     case "basic":
       return "Basic (Free)"
     case "featured":
-      return "Featured ($50/yr)"
+      return "Featured (NPR 5,000/yr)"
     case "premium":
-      return "Premium ($120/yr)"
+      return "Premium (NPR 12,000/yr)"
   }
 }
 
@@ -97,6 +99,17 @@ export function validateListBusinessPayload(
   }
   if (!agreed_to_terms) {
     return { data: null, error: "You must agree to the listing terms." }
+  }
+
+  if (plan) {
+    const photoCount = parsePhotoLinkLines(photo_links).length
+    const limit = photoLimitForPlan(plan)
+    if (photoCount > limit) {
+      return {
+        data: null,
+        error: `You can include at most ${limit} photo${limit === 1 ? "" : "s"} on the ${plan} plan.`,
+      }
+    }
   }
 
   return {

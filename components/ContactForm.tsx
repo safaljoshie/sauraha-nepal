@@ -13,14 +13,14 @@ const listingPlans = [
   {
     name: "Featured Listing",
     desc: "Top placement, photos, WhatsApp button",
-    price: "$50",
+    price: "NPR 5,000",
     period: "per year",
     featured: true,
   },
   {
     name: "Premium Listing",
     desc: "Homepage feature, banner ad, priority support",
-    price: "$120",
+    price: "NPR 12,000",
     period: "per year",
     featured: false,
   },
@@ -384,8 +384,8 @@ function ListingForm() {
           disabled={isLoading}
         >
           <option>Free Basic Listing</option>
-          <option>Featured Listing – $50/yr</option>
-          <option>Premium Listing – $120/yr</option>
+          <option>Featured Listing – NPR 5,000/yr</option>
+          <option>Premium Listing – NPR 12,000/yr</option>
         </select>
       </FormField>
       <button

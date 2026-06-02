@@ -1,11 +1,18 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import Image from "next/image"
+import { useEffect, useState, type FormEvent } from "react"
 import {
   isPaidPlan,
   planFromFormName,
   type ListingPlan,
 } from "@/lib/list-business"
+import {
+  isAllowedPhotoFile,
+  mergePhotoLinks,
+  parsePhotoLinkLines,
+  photoLimitForPlan,
+} from "@/lib/list-business-photos"
 import { businessCategories, pricingPlans } from "@/lib/data"
 
 const inputClass =
@@ -53,9 +60,41 @@ async function submitListing(payload: Record<string, unknown>) {
   return data
 }
 
+async function uploadPhotos(files: File[], plan: ListingPlan, existingCount: number) {
+  const formData = new FormData()
+  formData.set("plan", plan)
+  formData.set("existingCount", String(existingCount))
+  for (const file of files) {
+    formData.append("files", file)
+  }
+
+  const res = await fetch("/api/list-business/upload-photos", {
+    method: "POST",
+    body: formData,
+  })
+
+  const data = (await res.json().catch(() => ({}))) as {
+    error?: string
+    urls?: string[]
+  }
+
+  if (!res.ok) {
+    throw new Error(data.error ?? "Failed to upload photos.")
+  }
+
+  return data.urls ?? []
+}
+
+type PhotoFileEntry = {
+  id: string
+  file: File
+  previewUrl: string
+}
+
 export default function ListBusinessForm() {
   const [plan, setPlan] = useState<(typeof pricingPlans)[number]["name"]>("Basic")
   const [form, setForm] = useState(initialForm)
+  const [photoFiles, setPhotoFiles] = useState<PhotoFileEntry[]>([])
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
   const [submittedPlan, setSubmittedPlan] = useState<ListingPlan>("basic")
@@ -68,6 +107,76 @@ export default function ListBusinessForm() {
     value: (typeof initialForm)[K],
   ) {
     setForm((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const planValue = planFromFormName(plan)
+  const photoLimit = photoLimitForPlan(planValue)
+  const pastedLinkCount = parsePhotoLinkLines(form.photoLinks).length
+  const totalPhotoCount = photoFiles.length + pastedLinkCount
+
+  useEffect(() => {
+    return () => {
+      for (const entry of photoFiles) {
+        URL.revokeObjectURL(entry.previewUrl)
+      }
+    }
+  }, [photoFiles])
+
+  function clearPhotoFiles() {
+    setPhotoFiles((prev) => {
+      for (const entry of prev) {
+        URL.revokeObjectURL(entry.previewUrl)
+      }
+      return []
+    })
+  }
+
+  function handlePhotoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files ?? [])
+    e.target.value = ""
+
+    if (selected.length === 0) return
+
+    const invalid = selected.find((f) => !isAllowedPhotoFile(f))
+    if (invalid) {
+      setStatus("error")
+      setErrorMessage("Only JPEG and PNG images are allowed.")
+      return
+    }
+
+    const remaining = photoLimit - pastedLinkCount - photoFiles.length
+    if (remaining <= 0) {
+      setStatus("error")
+      setErrorMessage(
+        `You can add at most ${photoLimit} photo${photoLimit === 1 ? "" : "s"} on the ${plan} plan.`,
+      )
+      return
+    }
+
+    const toAdd = selected.slice(0, remaining)
+    if (toAdd.length < selected.length) {
+      setErrorMessage(
+        `Only ${remaining} more photo${remaining === 1 ? "" : "s"} allowed on the ${plan} plan.`,
+      )
+      setStatus("error")
+    }
+
+    setPhotoFiles((prev) => [
+      ...prev,
+      ...toAdd.map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        previewUrl: URL.createObjectURL(file),
+      })),
+    ])
+  }
+
+  function removePhotoFile(id: string) {
+    setPhotoFiles((prev) => {
+      const entry = prev.find((p) => p.id === id)
+      if (entry) URL.revokeObjectURL(entry.previewUrl)
+      return prev.filter((p) => p.id !== id)
+    })
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -96,9 +205,27 @@ export default function ListBusinessForm() {
 
     const email = form.email.trim()
     const ownerName = form.ownerName.trim()
-    const planValue = planFromFormName(plan)
+
+    if (totalPhotoCount > photoLimit) {
+      setStatus("error")
+      setErrorMessage(
+        `You can add at most ${photoLimit} photo${photoLimit === 1 ? "" : "s"} on the ${plan} plan.`,
+      )
+      return
+    }
 
     try {
+      let uploadedUrls: string[] = []
+      if (photoFiles.length > 0) {
+        uploadedUrls = await uploadPhotos(
+          photoFiles.map((p) => p.file),
+          planValue,
+          pastedLinkCount,
+        )
+      }
+
+      const photo_links = mergePhotoLinks(uploadedUrls, form.photoLinks)
+
       const result = await submitListing({
         business_name: form.businessName.trim(),
         category: form.category,
@@ -113,7 +240,7 @@ export default function ListBusinessForm() {
         facebook: form.facebook.trim(),
         address: form.address.trim(),
         google_maps_link: form.googleMapsLink.trim(),
-        photo_links: form.photoLinks.trim(),
+        photo_links,
         plan: planValue,
         agreed_to_terms: form.agreedToTerms,
       })
@@ -125,9 +252,10 @@ export default function ListBusinessForm() {
       setStatus("success")
       setForm(initialForm)
       setPlan("Basic")
-    } catch {
+      clearPhotoFiles()
+    } catch (err) {
       setStatus("error")
-      setErrorMessage(GENERIC_ERROR)
+      setErrorMessage(err instanceof Error ? err.message : GENERIC_ERROR)
     }
   }
 
@@ -169,6 +297,7 @@ export default function ListBusinessForm() {
             setSubmittedOwnerName("")
             setSubmittedPlan("basic")
             setEmailWarning("")
+            clearPhotoFiles()
           }}
           className="btn-primary mt-8 cursor-pointer px-8 py-3"
         >
@@ -339,10 +468,55 @@ export default function ListBusinessForm() {
       </FormSection>
 
       <FormSection title="4. Photos">
-        <Field label="Photo URLs (one per line)">
+        <p className="text-sm text-text-light">
+          Upload JPEG or PNG files and/or paste image links (one per line).{" "}
+          <span className="font-semibold text-text-mid">
+            {totalPhotoCount} / {photoLimit} used
+          </span>{" "}
+          on your {plan} plan.
+        </p>
+        <Field label="Upload photos (JPEG or PNG)">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+            multiple
+            className={`${inputClass} cursor-pointer file:mr-4 file:rounded-full file:border-0 file:bg-green-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white`}
+            onChange={handlePhotoFileChange}
+            disabled={isLoading || totalPhotoCount >= photoLimit}
+          />
+        </Field>
+        {photoFiles.length > 0 && (
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {photoFiles.map((entry) => (
+              <li
+                key={entry.id}
+                className="relative aspect-square overflow-hidden rounded-xl border border-border-brand"
+              >
+                <Image
+                  src={entry.previewUrl}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="120px"
+                  unoptimized
+                />
+                <button
+                  type="button"
+                  onClick={() => removePhotoFile(entry.id)}
+                  disabled={isLoading}
+                  className="absolute top-1 right-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-white"
+                  aria-label="Remove photo"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <Field label="Photo links (one per line)">
           <textarea
             className={`${inputClass} min-h-[80px] resize-y`}
-            placeholder="Paste links to your photos..."
+            placeholder="https://example.com/photo1.jpg"
             value={form.photoLinks}
             onChange={(e) => updateField("photoLinks", e.target.value)}
             disabled={isLoading}

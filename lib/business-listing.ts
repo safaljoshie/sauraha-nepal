@@ -36,9 +36,9 @@ export function formatSubmittedDate(iso: string) {
 export function planLabel(plan: string) {
   switch (plan) {
     case "featured":
-      return "Featured ($50/yr)"
+      return "Featured (NPR 5,000/yr)"
     case "premium":
-      return "Premium ($120/yr)"
+      return "Premium (NPR 12,000/yr)"
     default:
       return "Basic (Free)"
   }

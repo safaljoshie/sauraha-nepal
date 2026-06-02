@@ -226,7 +226,7 @@ export const pricingPlans = [
   },
   {
     name: "Featured",
-    price: "$50",
+    price: "NPR 5,000",
     period: "per year",
     popular: true,
     features: [
@@ -241,14 +241,14 @@ export const pricingPlans = [
   },
   {
     name: "Premium",
-    price: "$120",
+    price: "NPR 12,000",
     period: "per year",
     popular: false,
     features: [
       "Everything in Featured",
       "Homepage featured section",
       "Banner ad placement",
-      "Unlimited photos",
+      "Up to 20 photos",
       "Video embed",
       "Priority review approval",
       "Monthly performance report",
