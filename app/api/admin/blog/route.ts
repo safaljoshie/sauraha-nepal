@@ -1,7 +1,7 @@
-import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import type { BlogPostPayload } from "@/lib/blog-db"
 import { createBlogPostAdmin } from "@/lib/blog-admin"
+import { revalidateBlogPaths } from "@/lib/blog-revalidate"
 import { fetchAllBlogPostsAdmin } from "@/lib/blog-db"
 import { requireAdminApi } from "@/lib/admin-auth"
 
@@ -35,9 +35,10 @@ export async function POST(request: Request) {
 
   try {
     const post = await createBlogPostAdmin(payload)
-    revalidatePath("/blog")
     if (post.status === "published") {
-      revalidatePath(`/blog/${post.slug}`)
+      revalidateBlogPaths(post.slug)
+    } else {
+      revalidateBlogPaths()
     }
     return NextResponse.json({ success: true, post })
   } catch (error) {

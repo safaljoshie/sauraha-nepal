@@ -1,7 +1,7 @@
-import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import type { BlogPostPayload } from "@/lib/blog-db"
 import { deleteBlogPostAdmin, toggleBlogPostStatusAdmin, updateBlogPostAdmin } from "@/lib/blog-admin"
+import { revalidateBlogPaths } from "@/lib/blog-revalidate"
 import { fetchBlogPostByIdAdmin } from "@/lib/blog-db"
 import { requireAdminApi } from "@/lib/admin-auth"
 
@@ -49,9 +49,10 @@ export async function PUT(request: Request, context: RouteContext) {
     }
 
     const post = await updateBlogPostAdmin(id, payload, existing.published_at)
-    revalidatePath("/blog")
-    revalidatePath(`/blog/${existing.slug}`)
-    revalidatePath(`/blog/${post.slug}`)
+    revalidateBlogPaths(post.slug)
+    if (existing.slug !== post.slug) {
+      revalidateBlogPaths(existing.slug)
+    }
     return NextResponse.json({ success: true, post })
   } catch (error) {
     console.error("Blog update error:", error)
@@ -72,9 +73,10 @@ export async function PATCH(_request: Request, context: RouteContext) {
     }
 
     const post = await toggleBlogPostStatusAdmin(existing)
-    revalidatePath("/blog")
-    revalidatePath(`/blog/${existing.slug}`)
-    revalidatePath(`/blog/${post.slug}`)
+    revalidateBlogPaths(post.slug)
+    if (existing.slug !== post.slug) {
+      revalidateBlogPaths(existing.slug)
+    }
     return NextResponse.json({ success: true, post })
   } catch (error) {
     console.error("Blog toggle error:", error)
@@ -95,8 +97,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     }
 
     await deleteBlogPostAdmin(id)
-    revalidatePath("/blog")
-    revalidatePath(`/blog/${existing.slug}`)
+    revalidateBlogPaths(existing.slug)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Blog delete error:", error)

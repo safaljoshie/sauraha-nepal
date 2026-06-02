@@ -35,61 +35,72 @@ export type BlogPostPayload = {
   meta_description?: string | null
 }
 
+async function fetchPublishedWithClient(
+  client: ReturnType<typeof getSupabasePublic>,
+  slug?: string,
+): Promise<BlogPostRow[] | BlogPostRow | null> {
+  if (slug) {
+    const { data, error } = await client
+      .from("blog_posts")
+      .select("*")
+      .eq("slug", slug)
+      .eq("status", "published")
+      .maybeSingle()
+    if (error) throw error
+    return (data ?? null) as BlogPostRow | null
+  }
+
+  const { data, error } = await client
+    .from("blog_posts")
+    .select("*")
+    .eq("status", "published")
+    .order("published_at", { ascending: false, nullsFirst: false })
+  if (error) throw error
+  return (data ?? []) as BlogPostRow[]
+}
+
+/** Server pages: prefer service role so published posts show even if anon RLS is missing. */
 export async function fetchPublishedBlogPosts(): Promise<BlogPostRow[]> {
   try {
-    const supabase = getSupabasePublic()
-    const { data, error } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .eq("status", "published")
-      .order("published_at", { ascending: false, nullsFirst: false })
-
-    if (!error && data) return data as BlogPostRow[]
-  } catch {
-    // fallback
+    const rows = await fetchPublishedWithClient(getSupabaseAdmin())
+    if (Array.isArray(rows)) return rows
+  } catch (adminError) {
+    console.error("Published blog fetch (admin):", adminError)
   }
 
   try {
-    const admin = getSupabaseAdmin()
-    const { data, error } = await admin
-      .from("blog_posts")
-      .select("*")
-      .eq("status", "published")
-      .order("published_at", { ascending: false, nullsFirst: false })
-    if (error || !data) return []
-    return data as BlogPostRow[]
-  } catch {
-    return []
+    const rows = await fetchPublishedWithClient(getSupabasePublic())
+    if (Array.isArray(rows)) {
+      if (rows.length === 0) {
+        console.warn(
+          "Published blog: anon returned no posts. Run supabase/blog_posts.sql (RLS policy) in Supabase.",
+        )
+      }
+      return rows
+    }
+  } catch (publicError) {
+    console.error("Published blog fetch (public):", publicError)
   }
+
+  return []
 }
 
 export async function fetchPublishedBlogPostBySlug(slug: string): Promise<BlogPostRow | null> {
   try {
-    const supabase = getSupabasePublic()
-    const { data, error } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .eq("slug", slug)
-      .eq("status", "published")
-      .maybeSingle()
-    if (!error && data) return data as BlogPostRow
-  } catch {
-    // fallback
+    const row = await fetchPublishedWithClient(getSupabaseAdmin(), slug)
+    if (row && !Array.isArray(row)) return row
+  } catch (adminError) {
+    console.error("Blog post by slug (admin):", adminError)
   }
 
   try {
-    const admin = getSupabaseAdmin()
-    const { data, error } = await admin
-      .from("blog_posts")
-      .select("*")
-      .eq("slug", slug)
-      .eq("status", "published")
-      .maybeSingle()
-    if (error || !data) return null
-    return data as BlogPostRow
-  } catch {
-    return null
+    const row = await fetchPublishedWithClient(getSupabasePublic(), slug)
+    if (row && !Array.isArray(row)) return row
+  } catch (publicError) {
+    console.error("Blog post by slug (public):", publicError)
   }
+
+  return null
 }
 
 export async function fetchAllBlogPostsAdmin(): Promise<BlogPostRow[]> {
