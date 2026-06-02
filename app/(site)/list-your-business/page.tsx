@@ -1,6 +1,6 @@
 import Image from "next/image"
 import ListBusinessForm from "@/components/ListBusinessForm"
-import { listingBenefits, listingSteps, pricingPlans } from "@/lib/data"
+import { listingSteps, pricingPlans } from "@/lib/data"
 
 export const metadata = {
   title: "List Your Business",
@@ -43,20 +43,17 @@ export default function ListYourBusinessPage() {
       <section className="bg-white px-8 py-20">
         <div className="mx-auto max-w-6xl">
           <p className="section-label">Why List With Us</p>
-          <h2 className="section-title">Grow your business in Sauraha</h2>
-          <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6">
-            {listingBenefits.map((benefit) => (
-              <div
-                key={benefit.title}
-                className="rounded-2xl border border-border-brand bg-cream p-8 text-center"
-              >
-                <div className="mb-4 text-4xl">{benefit.icon}</div>
-                <h3 className="mb-2 font-semibold text-green-brand">{benefit.title}</h3>
-                <p className="text-sm leading-relaxed text-text-light">
-                  {benefit.description}
-                </p>
-              </div>
-            ))}
+          <h2 className="sr-only">Grow your business in Sauraha</h2>
+          <div className="mt-8 overflow-hidden rounded-2xl border border-border-brand shadow-[0_12px_40px_rgba(26,92,42,0.1)]">
+            <Image
+              src="/images/grow-your-business-sauraha.png"
+              alt="Grow your business in Sauraha with saurahanepal.com — global reach, mobile-friendly listings, reviews, Google Maps, photo gallery, and direct WhatsApp"
+              width={1536}
+              height={1024}
+              className="h-auto w-full"
+              sizes="(max-width: 1152px) 100vw, 1152px"
+              priority
+            />
           </div>
         </div>
       </section>
