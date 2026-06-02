@@ -1,10 +1,11 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate, planLabel } from "@/lib/business-listing"
 import { businessCategories } from "@/lib/data"
+import { mergePhotoLinks } from "@/lib/list-business-photos"
 
 type FilterTab =
   | "all"
@@ -126,6 +127,7 @@ export default function AdminDashboard() {
   const [editErrors, setEditErrors] = useState<string>("")
   const [toasts, setToasts] = useState<Toast[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [uploadingPhotos, setUploadingPhotos] = useState(false)
 
   const loadListings = useCallback(async () => {
     setLoading(true)
@@ -276,6 +278,45 @@ export default function AdminDashboard() {
   function openEdit(listing: BusinessListing) {
     setEditErrors("")
     setEditForm(normalizeEditForm(listing))
+  }
+
+  async function handleAdminPhotoUpload(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    e.target.value = ""
+    if (!editForm || files.length === 0) return
+
+    setUploadingPhotos(true)
+    setEditErrors("")
+    try {
+      const formData = new FormData()
+      formData.set("folder", `admin/${editForm.id}`)
+      for (const file of files) {
+        formData.append("files", file)
+      }
+
+      const res = await fetch("/api/admin/upload-listing-photos", {
+        method: "POST",
+        body: formData,
+      })
+      if (res.status === 401) {
+        router.push("/admin")
+        return
+      }
+      const data = (await res.json()) as { error?: string; urls?: string[] }
+      if (!res.ok || !data.urls) {
+        throw new Error(data.error ?? "Failed to upload image.")
+      }
+
+      const merged = mergePhotoLinks(data.urls, editForm.photo_links)
+      setEditForm((prev) => (prev ? { ...prev, photo_links: merged } : prev))
+      showToast("success", `Uploaded ${data.urls.length} image${data.urls.length === 1 ? "" : "s"} successfully`)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to upload image. Please try again."
+      setEditErrors(message)
+      showToast("error", "Failed to upload image. Please try again.")
+    } finally {
+      setUploadingPhotos(false)
+    }
   }
 
   function validateEditForm(form: EditFormState) {
@@ -870,6 +911,20 @@ export default function AdminDashboard() {
                 />
               </EditField>
               <EditField label="Photo Links" className="md:col-span-2">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <label className="cursor-pointer rounded-full bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-200">
+                    {uploadingPhotos ? "Uploading..." : "Upload image"}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+                      multiple
+                      onChange={handleAdminPhotoUpload}
+                      disabled={uploadingPhotos || actionId === editForm.id}
+                      className="hidden"
+                    />
+                  </label>
+                  <span className="text-xs text-text-light">JPEG/PNG, max 5MB each</span>
+                </div>
                 <textarea
                   value={editForm.photo_links}
                   onChange={(e) => setEditForm({ ...editForm, photo_links: e.target.value })}
