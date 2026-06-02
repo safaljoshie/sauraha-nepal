@@ -95,17 +95,20 @@ export async function POST(request: Request) {
     }),
   ])
 
-  if (adminResult.error || ownerResult.error) {
-    console.error("Resend error:", adminResult.error ?? ownerResult.error)
-    return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
-      { status: 500 },
-    )
+  if (adminResult.error) {
+    console.error("Resend admin notification error:", adminResult.error)
+  }
+  if (ownerResult.error) {
+    console.error("Resend owner confirmation error:", ownerResult.error)
   }
 
   return NextResponse.json({
     success: true,
     plan: data.plan,
     owner_name: data.owner_name,
+    emailWarning:
+      adminResult.error || ownerResult.error
+        ? "Your listing was saved. Confirmation email could not be sent — we will still review your submission."
+        : undefined,
   })
 }

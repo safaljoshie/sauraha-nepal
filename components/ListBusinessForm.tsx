@@ -43,10 +43,11 @@ async function submitListing(payload: Record<string, unknown>) {
   const data = (await res.json().catch(() => ({}))) as {
     error?: string
     plan?: ListingPlan
+    emailWarning?: string
   }
 
   if (!res.ok) {
-    throw new Error(GENERIC_ERROR)
+    throw new Error(data.error ?? GENERIC_ERROR)
   }
 
   return data
@@ -60,6 +61,7 @@ export default function ListBusinessForm() {
   const [submittedPlan, setSubmittedPlan] = useState<ListingPlan>("basic")
   const [submittedEmail, setSubmittedEmail] = useState("")
   const [submittedOwnerName, setSubmittedOwnerName] = useState("")
+  const [emailWarning, setEmailWarning] = useState("")
 
   function updateField<K extends keyof typeof initialForm>(
     key: K,
@@ -73,6 +75,11 @@ export default function ListBusinessForm() {
     setStatus("loading")
     setErrorMessage("")
 
+    if (!form.agreedToTerms) {
+      setStatus("error")
+      setErrorMessage("Please agree to the listing terms before submitting.")
+      return
+    }
     if (
       !form.businessName.trim() ||
       !form.category ||
@@ -80,11 +87,10 @@ export default function ListBusinessForm() {
       !form.ownerName.trim() ||
       !form.email.trim() ||
       !form.phone.trim() ||
-      !form.address.trim() ||
-      !form.agreedToTerms
+      !form.address.trim()
     ) {
       setStatus("error")
-      setErrorMessage(GENERIC_ERROR)
+      setErrorMessage("Please fill in all required fields.")
       return
     }
 
@@ -115,6 +121,7 @@ export default function ListBusinessForm() {
       setSubmittedPlan(result.plan ?? planValue)
       setSubmittedEmail(email)
       setSubmittedOwnerName(ownerName)
+      setEmailWarning(result.emailWarning ?? "")
       setStatus("success")
       setForm(initialForm)
       setPlan("Basic")
@@ -144,6 +151,11 @@ export default function ListBusinessForm() {
         <p className="mt-2 text-sm leading-relaxed text-text-mid">
           We will review and get back to you within 48 hours.
         </p>
+        {emailWarning && (
+          <p className="mt-4 rounded-[10px] border border-yellow-500/30 bg-yellow-50 px-4 py-3 text-sm text-text-mid">
+            {emailWarning}
+          </p>
+        )}
         {isPaidPlan(submittedPlan) && (
           <p className="mt-4 rounded-[10px] border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-sm font-semibold text-orange-brand">
             Payment instructions will be sent to {submittedEmail} within 24 hours.
@@ -156,6 +168,7 @@ export default function ListBusinessForm() {
             setSubmittedEmail("")
             setSubmittedOwnerName("")
             setSubmittedPlan("basic")
+            setEmailWarning("")
           }}
           className="btn-primary mt-8 cursor-pointer px-8 py-3"
         >
@@ -280,19 +293,21 @@ export default function ListBusinessForm() {
           </Field>
           <Field label="Website (optional)">
             <input
-              type="url"
+              type="text"
               className={inputClass}
               value={form.website}
               onChange={(e) => updateField("website", e.target.value)}
+              placeholder="https://..."
               disabled={isLoading}
             />
           </Field>
           <Field label="Facebook (optional)">
             <input
-              type="url"
+              type="text"
               className={inputClass}
               value={form.facebook}
               onChange={(e) => updateField("facebook", e.target.value)}
+              placeholder="https://..."
               disabled={isLoading}
             />
           </Field>
@@ -313,7 +328,7 @@ export default function ListBusinessForm() {
         </Field>
         <Field label="Google Maps Link">
           <input
-            type="url"
+            type="text"
             placeholder="https://maps.google.com/..."
             className={inputClass}
             value={form.googleMapsLink}
