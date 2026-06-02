@@ -8,6 +8,7 @@ import {
   countByCategoryGroup,
   filterListings,
   PAGE_SIZE,
+  parseCategoryParam,
   type CategoryGroupId,
   type PlanFilterId,
   type SortOptionId,
@@ -16,12 +17,18 @@ import BusinessListingCard from "./BusinessListingCard"
 
 type ListingsExplorerProps = {
   listings: BusinessListing[]
+  initialSearch?: string
+  initialCategory?: CategoryGroupId
 }
 
-export default function ListingsExplorer({ listings }: ListingsExplorerProps) {
-  const [searchInput, setSearchInput] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [category, setCategory] = useState<CategoryGroupId>("all")
+export default function ListingsExplorer({
+  listings,
+  initialSearch = "",
+  initialCategory = "all",
+}: ListingsExplorerProps) {
+  const [searchInput, setSearchInput] = useState(initialSearch)
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
+  const [category, setCategory] = useState<CategoryGroupId>(initialCategory)
   const [planFilter, setPlanFilter] = useState<PlanFilterId>("all")
   const [sort, setSort] = useState<SortOptionId>("plan")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)

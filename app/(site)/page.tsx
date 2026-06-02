@@ -1,23 +1,50 @@
 import Image from "next/image"
 import Link from "next/link"
+import type { Metadata } from "next"
 import CategoryCard from "@/components/CategoryCard"
-import HeroSearch from "@/components/HeroSearch"
-import ListingCard from "@/components/ListingCard"
-import {
-  activities,
-  blogPosts,
-  categories,
-  featuredListings,
-} from "@/lib/data"
+import HomeActivityCard from "@/components/home/HomeActivityCard"
+import HomeFeaturedCard from "@/components/home/HomeFeaturedCard"
+import HeroSearch from "@/components/home/HeroSearch"
+import HeroStats from "@/components/home/HeroStats"
+import { blogPosts } from "@/lib/data"
+import { buildHomepageData } from "@/lib/homepage-data"
+import { fetchApprovedListings } from "@/lib/listings-fetch"
 
-const heroStats = [
-  { value: "120+", label: "Businesses Listed" },
-  { value: "7", label: "Categories" },
-  { value: "932 km²", label: "National Park" },
-  { value: "Free", label: "To Explore" },
-]
+export const revalidate = 60
 
-export default function HomePage() {
+export const metadata: Metadata = {
+  title: "Sauraha Nepal — Your Complete Guide to Sauraha & Chitwan",
+  description:
+    "Find the best hotels, restaurants, activities and tour guides in Sauraha, Nepal. Your complete directory for Chitwan National Park visitors.",
+  openGraph: {
+    title: "Sauraha Nepal — Your Complete Guide to Sauraha & Chitwan",
+    description:
+      "Find the best hotels, restaurants, activities and tour guides in Sauraha, Nepal. Your complete directory for Chitwan National Park visitors.",
+    url: "https://www.saurahanepal.com",
+    siteName: "Sauraha Nepal",
+    type: "website",
+  },
+}
+
+export default async function HomePage() {
+  const listings = await fetchApprovedListings()
+  const data = buildHomepageData(listings)
+
+  const heroStats = [
+    {
+      label: "Businesses Listed",
+      type: "animated" as const,
+      value: data.stats.businessCount,
+    },
+    {
+      label: "Categories",
+      type: "animated" as const,
+      value: data.stats.categoryCount,
+    },
+    { label: "National Park", type: "static" as const, display: "932 km²" },
+    { label: "To Explore", type: "static" as const, display: "Free" },
+  ]
+
   return (
     <main>
       <section className="relative mt-[68px] flex min-h-[88vh] items-center justify-center overflow-hidden bg-[#0a2310] px-6 py-16 text-center">
@@ -48,17 +75,8 @@ export default function HomePage() {
             Your complete guide to hotels, restaurants, activities, and everything
             in between — from jungle safaris to riverside sunsets.
           </p>
-          <HeroSearch />
-          <div className="flex flex-wrap justify-center gap-10">
-            {heroStats.map((stat) => (
-              <div key={stat.label} className="text-center text-white">
-                <strong className="block text-2xl font-bold text-orange-light">
-                  {stat.value}
-                </strong>
-                <span className="text-sm opacity-80">{stat.label}</span>
-              </div>
-            ))}
-          </div>
+          <HeroSearch listings={data.listings} />
+          <HeroStats stats={heroStats} />
         </div>
       </section>
 
@@ -67,8 +85,14 @@ export default function HomePage() {
           <p className="section-label">Browse by Category</p>
           <h2 className="section-title">What are you looking for?</h2>
           <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-5">
-            {categories.map((cat) => (
-              <CategoryCard key={cat.name} {...cat} />
+            {data.categories.map((cat) => (
+              <CategoryCard
+                key={cat.slug}
+                icon={cat.icon}
+                name={cat.name}
+                count={cat.countLabel}
+                href={cat.href}
+              />
             ))}
           </div>
         </div>
@@ -85,11 +109,22 @@ export default function HomePage() {
               View all listings →
             </Link>
           </div>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-6">
-            {featuredListings.map((listing) => (
-              <ListingCard key={listing.name} {...listing} />
-            ))}
-          </div>
+          {data.featured.length === 0 ? (
+            <div className="rounded-2xl border border-border-brand bg-white px-8 py-14 text-center">
+              <p className="text-lg text-text-mid">
+                No listings yet — be the first to list your business!
+              </p>
+              <Link href="/list-your-business" className="btn-primary mt-6 inline-block px-8 py-3">
+                List Your Business
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {data.featured.map((listing) => (
+                <HomeFeaturedCard key={listing.id} listing={listing} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -106,23 +141,8 @@ export default function HomePage() {
             something for every explorer.
           </p>
           <div className="mt-12 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-5">
-            {activities.map((activity) => (
-              <div
-                key={activity.name}
-                className="group relative h-60 cursor-pointer overflow-hidden rounded-2xl transition-transform hover:scale-[1.03]"
-              >
-                <Image
-                  src={activity.image}
-                  alt={activity.name}
-                  fill
-                  className="object-cover"
-                  sizes="240px"
-                />
-                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-[rgba(10,35,12,0.85)] to-transparent p-5">
-                  <p className="font-bold text-white">{activity.name}</p>
-                  <p className="text-sm text-white/75">{activity.description}</p>
-                </div>
-              </div>
+            {data.activities.map((item, i) => (
+              <HomeActivityCard key={item.type === "listing" ? item.listing.id : `p-${i}`} item={item} />
             ))}
           </div>
         </div>
@@ -135,35 +155,38 @@ export default function HomePage() {
               <p className="section-label">Travel Tips</p>
               <h2 className="section-title mb-0">Plan your perfect trip</h2>
             </div>
-            <Link href="#" className="view-all-link">
-              Read all guides →
+            <Link href="/listings" className="view-all-link">
+              Browse listings →
             </Link>
           </div>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
             {blogPosts.map((post) => (
-              <article
-                key={post.title}
-                className="card-hover overflow-hidden rounded-2xl border border-border-brand"
+              <Link
+                key={post.href}
+                href={post.href}
+                className="card-hover group overflow-hidden rounded-2xl border border-border-brand"
               >
-                <div className="relative h-[180px] overflow-hidden">
-                  <Image
-                    src={post.image}
-                    alt=""
-                    fill
-                    className="object-cover transition-transform duration-400 group-hover:scale-105"
-                    sizes="400px"
-                  />
-                </div>
-                <div className="p-5">
-                  <p className="mb-2 text-xs font-bold tracking-widest text-orange-brand uppercase">
-                    {post.tag}
-                  </p>
-                  <h3 className="font-[family-name:var(--font-playfair)] text-lg leading-snug text-text-brand">
-                    {post.title}
-                  </h3>
-                  <p className="mt-2 text-sm text-text-light">{post.meta}</p>
-                </div>
-              </article>
+                <article>
+                  <div className="relative h-[180px] overflow-hidden">
+                    <Image
+                      src={post.image}
+                      alt=""
+                      fill
+                      className="object-cover transition-transform duration-400 group-hover:scale-105"
+                      sizes="400px"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <p className="mb-2 text-xs font-bold tracking-widest text-orange-brand uppercase">
+                      {post.tag}
+                    </p>
+                    <h3 className="font-[family-name:var(--font-playfair)] text-lg leading-snug text-text-brand">
+                      {post.title}
+                    </h3>
+                    <p className="mt-2 text-sm text-text-light">{post.meta}</p>
+                  </div>
+                </article>
+              </Link>
             ))}
           </div>
         </div>

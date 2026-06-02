@@ -1,5 +1,6 @@
 import ListingsExplorer from "@/components/listings/ListingsExplorer"
 import PageHeader from "@/components/PageHeader"
+import { parseCategoryParam } from "@/lib/listings-catalog"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 
 export const dynamic = "force-dynamic"
@@ -10,8 +11,15 @@ export const metadata = {
     "Browse approved hotels, restaurants, activities, and services in Sauraha, Nepal.",
 }
 
-export default async function ListingsPage() {
+type ListingsPageProps = {
+  searchParams: Promise<{ search?: string; category?: string; q?: string }>
+}
+
+export default async function ListingsPage({ searchParams }: ListingsPageProps) {
+  const params = await searchParams
   const listings = await fetchApprovedListings()
+  const initialSearch = (params.search ?? params.q ?? "").trim()
+  const initialCategory = parseCategoryParam(params.category)
 
   return (
     <main>
@@ -24,7 +32,11 @@ export default async function ListingsPage() {
             : "Discover businesses in Sauraha"
         }
       />
-      <ListingsExplorer listings={listings} />
+      <ListingsExplorer
+        listings={listings}
+        initialSearch={initialSearch}
+        initialCategory={initialCategory}
+      />
     </main>
   )
 }

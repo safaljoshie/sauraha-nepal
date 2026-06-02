@@ -141,8 +141,22 @@ export function matchesSearch(listing: BusinessListing, query: string) {
   const q = query.trim().toLowerCase()
   return (
     listing.business_name.toLowerCase().includes(q) ||
+    listing.category.toLowerCase().includes(q) ||
     (listing.description?.toLowerCase().includes(q) ?? false)
   )
+}
+
+export function searchListings(listings: BusinessListing[], query: string, limit = 6) {
+  if (!query.trim()) return []
+  return listings.filter((l) => matchesSearch(l, query)).slice(0, limit)
+}
+
+export function parseCategoryParam(value: string | null | undefined): CategoryGroupId {
+  const id = value?.trim().toLowerCase()
+  if (id && CATEGORY_GROUPS.some((g) => g.id === id)) {
+    return id as CategoryGroupId
+  }
+  return "all"
 }
 
 export function filterListings(

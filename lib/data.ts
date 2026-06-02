@@ -102,7 +102,7 @@ export const allListings: Listing[] = [
   },
 ]
 
-export const activities = [
+export const activityPlaceholders = [
   {
     name: "Jungle Safari",
     description: "Jeep & elephant safaris",
@@ -130,24 +130,30 @@ export const activities = [
   },
 ] as const
 
+/** @deprecated Use activityPlaceholders */
+export const activities = activityPlaceholders
+
 export const blogPosts = [
   {
     tag: "Guide",
     title: "Best time to visit Sauraha & Chitwan",
     meta: "October to March is peak season · 5 min read",
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
+    href: "/blog/best-time-to-visit-sauraha",
   },
   {
     tag: "Transport",
     title: "How to get to Sauraha from Kathmandu",
     meta: "Bus, flight & private options · 4 min read",
     image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=600&q=80",
+    href: "/blog/how-to-get-to-sauraha",
   },
   {
     tag: "Info",
     title: "Chitwan National Park entry fees & permits",
     meta: "Updated 2025 · 3 min read",
     image: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=600&q=80",
+    href: "/blog/chitwan-national-park-entry-fees",
   },
 ] as const
 
