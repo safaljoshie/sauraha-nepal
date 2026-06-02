@@ -115,6 +115,13 @@ function mergeListing(existing: BusinessListing, updates: Partial<BusinessListin
   return { ...existing, ...updates }
 }
 
+function parsePhotoUrls(photoLinks: string) {
+  return photoLinks
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
   const [listings, setListings] = useState<BusinessListing[]>([])
@@ -930,6 +937,37 @@ export default function AdminDashboard() {
                   onChange={(e) => setEditForm({ ...editForm, photo_links: e.target.value })}
                   className={`${fieldClass} min-h-[90px]`}
                 />
+                {parsePhotoUrls(editForm.photo_links).length > 0 && (
+                  <div className="mt-3">
+                    <p className="mb-2 text-xs font-semibold text-text-light">Image preview</p>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                      {parsePhotoUrls(editForm.photo_links)
+                        .slice(0, 8)
+                        .map((url) => (
+                          <a
+                            key={url}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group relative aspect-square overflow-hidden rounded-lg border border-border-brand bg-cream"
+                            title={url}
+                          >
+                            <img
+                              src={url}
+                              alt=""
+                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                              loading="lazy"
+                            />
+                          </a>
+                        ))}
+                    </div>
+                    {parsePhotoUrls(editForm.photo_links).length > 8 && (
+                      <p className="mt-2 text-xs text-text-light">
+                        Showing first 8 images.
+                      </p>
+                    )}
+                  </div>
+                )}
               </EditField>
               <EditField label="Plan">
                 <select
