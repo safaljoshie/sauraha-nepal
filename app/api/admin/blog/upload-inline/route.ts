@@ -35,11 +35,11 @@ export async function POST(request: Request) {
       contentType: file.type || "image/jpeg",
       filename: sanitizePhotoFilename(file.name),
       postId,
-      purpose: "cover",
+      purpose: "inline",
     })
     return NextResponse.json({ url })
   } catch (error) {
-    console.error("Blog cover upload error:", error)
+    console.error("Blog inline image upload error:", error)
     const message = error instanceof Error ? error.message : "Failed to upload image."
     return NextResponse.json({ error: message }, { status: 500 })
   }

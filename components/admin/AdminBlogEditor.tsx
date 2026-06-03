@@ -64,7 +64,29 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
   const [loading, setLoading] = useState(!!postId)
   const [saving, setSaving] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
+  const [uploadingInline, setUploadingInline] = useState(false)
+  const [contentSelection, setContentSelection] = useState({ start: 0, end: 0 })
   const [error, setError] = useState("")
+
+  function syncContentSelection(target: EventTarget & HTMLTextAreaElement) {
+    setContentSelection({
+      start: target.selectionStart ?? 0,
+      end: target.selectionEnd ?? 0,
+    })
+  }
+
+  function insertImageIntoContent(url: string, alt: string) {
+    const snippet = `\n\n![${alt}](${url})\n\n`
+    const { start, end } = contentSelection
+    const content = form.content
+    const insertAt = start >= 0 && start <= content.length ? start : content.length
+    const endAt = end >= insertAt && end <= content.length ? end : insertAt
+    const next =
+      content.slice(0, insertAt) + snippet + content.slice(endAt)
+    setForm((prev) => ({ ...prev, content: next }))
+    const cursor = insertAt + snippet.length
+    setContentSelection({ start: cursor, end: cursor })
+  }
 
   const loadPost = useCallback(async () => {
     if (!postId) return
@@ -93,6 +115,43 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
   useEffect(() => {
     loadPost()
   }, [loadPost])
+
+  async function handleInlineImageUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
+
+    setUploadingInline(true)
+    setError("")
+    try {
+      const formData = new FormData()
+      formData.set("file", file)
+      if (postId) formData.set("postId", postId)
+
+      const res = await fetch("/api/admin/blog/upload-inline", {
+        method: "POST",
+        body: formData,
+      })
+      if (res.status === 401) {
+        router.push("/admin")
+        return
+      }
+      const data = (await res.json()) as { url?: string; error?: string }
+      if (!res.ok || !data.url) {
+        setError(data.error ?? "Failed to upload image.")
+        return
+      }
+      const alt =
+        file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim() ||
+        form.title.trim() ||
+        "Image"
+      insertImageIntoContent(data.url, alt)
+    } catch {
+      setError("Failed to upload image.")
+    } finally {
+      setUploadingInline(false)
+    }
+  }
 
   async function handleCoverUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -274,7 +333,7 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
           <label className="mb-1.5 block text-sm font-semibold text-text-mid">Cover image</label>
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <label className="cursor-pointer rounded-full bg-green-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-mid">
-              {uploadingCover ? "Uploading…" : "Upload image"}
+              {uploadingCover ? "Uploading…" : "Upload cover"}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
@@ -304,13 +363,34 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-text-mid">Content</label>
+          <div className="mb-1.5 flex flex-wrap items-center justify-between gap-3">
+            <label className="block text-sm font-semibold text-text-mid">Content</label>
+            <label className="cursor-pointer rounded-full border border-green-brand bg-white px-4 py-1.5 text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white">
+              {uploadingInline ? "Uploading…" : "Insert image in article"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                onChange={handleInlineImageUpload}
+                className="hidden"
+                disabled={uploadingInline || saving}
+              />
+            </label>
+          </div>
+          <p className="mb-2 text-xs text-text-light">
+            Place the cursor where you want the image, then upload. Markdown{" "}
+            <code className="rounded bg-cream px-1">![alt](url)</code> is inserted automatically.
+          </p>
           <div className="overflow-hidden rounded-xl border border-border-brand">
             <MDEditor
               value={form.content}
               onChange={(value) => setForm((prev) => ({ ...prev, content: value ?? "" }))}
               height={400}
               preview="live"
+              textareaProps={{
+                onSelect: (e) => syncContentSelection(e.currentTarget),
+                onClick: (e) => syncContentSelection(e.currentTarget),
+                onKeyUp: (e) => syncContentSelection(e.currentTarget),
+              }}
             />
           </div>
         </div>
