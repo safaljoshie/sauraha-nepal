@@ -9,19 +9,19 @@ export const HOMEPAGE_BLOG_FALLBACK = [
     href: "/blog/best-time-to-visit-sauraha",
   },
   {
-    slug: "how-to-get-to-sauraha",
+    slug: "how-to-get-to-sauraha-from-kathmandu-and-pokhara-2026-travel-guide",
     title: "How to get to Sauraha from Kathmandu",
     tag: "Transport",
     readTime: "4 min read",
     image: "/images/kathmandu-to-sauraha.jpg",
-    href: "/blog/how-to-get-to-sauraha",
+    href: "/blog/how-to-get-to-sauraha-from-kathmandu-and-pokhara-2026-travel-guide",
   },
   {
-    slug: "chitwan-national-park-entry-fees",
+    slug: "park-permits-to-visit-sauraha-community-forest-vs-national-forest-2026-guide",
     title: "Chitwan National Park entry fees & permits",
     tag: "Info",
     readTime: "3 min read",
     image: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=600&q=80",
-    href: "/blog/chitwan-national-park-entry-fees",
+    href: "/blog/park-permits-to-visit-sauraha-community-forest-vs-national-forest-2026-guide",
   },
 ] as const

@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import type { Metadata } from "next"
 import BlogMarkdown from "@/components/blog/BlogMarkdown"
 import BlogShareBar from "@/components/blog/BlogShareBar"
@@ -10,6 +10,7 @@ import {
   formatBlogDate,
   getRelatedPublishedPosts,
 } from "@/lib/blog-db"
+import { getBlogSlugRedirect } from "@/lib/blog-slug-redirects"
 import { SITE_URL } from "@/lib/blog-posts"
 
 export const revalidate = 60
@@ -20,6 +21,15 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
+  const redirectSlug = getBlogSlugRedirect(slug)
+  if (redirectSlug) {
+    const post = await fetchPublishedBlogPostBySlug(redirectSlug)
+    if (post) {
+      const title = post.meta_title?.trim() || post.title
+      const description = post.meta_description?.trim() || post.excerpt || undefined
+      return { title, description }
+    }
+  }
   const post = await fetchPublishedBlogPostBySlug(slug)
   if (!post) {
     return { title: "Post Not Found" }
@@ -44,6 +54,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const { slug } = await params
+  const redirectSlug = getBlogSlugRedirect(slug)
+  if (redirectSlug) redirect(`/blog/${redirectSlug}`)
+
   const post = await fetchPublishedBlogPostBySlug(slug)
   if (!post) notFound()
 
