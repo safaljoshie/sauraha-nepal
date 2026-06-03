@@ -52,6 +52,15 @@ body {
     @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_40px_rgba(26,92,42,0.14)];
   }
 
+  .listing-card-interactive {
+    @apply relative cursor-pointer transition-all duration-[250ms];
+  }
+
+  .listing-card-interactive:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(26, 92, 42, 0.14);
+  }
+
   .view-all-link {
     @apply text-green-mid font-semibold text-[0.95rem] border-b-2 border-green-light pb-0.5 hover:text-green-brand transition-colors;
   }

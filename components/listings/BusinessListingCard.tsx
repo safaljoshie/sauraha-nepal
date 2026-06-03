@@ -1,4 +1,5 @@
 import Link from "next/link"
+import ListingCardActions from "@/components/listings/ListingCardActions"
 import ListingImage from "@/components/listings/ListingImage"
 import OpenNowBadge from "@/components/listings/OpenNowBadge"
 import type { BusinessListing } from "@/lib/business-listing"
@@ -19,6 +20,7 @@ export default function BusinessListingCard({
   listing: BusinessListing
 }) {
   const image = getListingImage(listing)
+  const detailHref = `/listings/${listing.id}`
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
   const highlighted = isHighlightedPlan(listing.plan)
@@ -29,7 +31,7 @@ export default function BusinessListingCard({
 
   return (
     <article
-      className={`card-hover flex h-full flex-col overflow-hidden rounded-[18px] border bg-white ${
+      className={`listing-card-interactive flex h-full flex-col overflow-hidden rounded-[18px] border bg-white ${
         isPremium
           ? "border-orange-brand shadow-[0_8px_32px_rgba(232,98,26,0.18)] ring-2 ring-orange-brand/35"
           : isFeatured
@@ -37,99 +39,78 @@ export default function BusinessListingCard({
             : "border-border-brand"
       }`}
     >
-      <div className="relative h-[210px] overflow-hidden">
-        <ListingImage
-          src={image}
-          alt={listing.business_name}
-          fill
-          className="object-cover"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-        />
-        {isPremium && (
-          <span className="absolute top-3 left-3 rounded-full bg-orange-brand px-2.5 py-1 text-[0.72rem] font-bold text-white">
-            ⭐ Premium
-          </span>
-        )}
-        {isFeatured && !isPremium && (
-          <span className="absolute top-3 left-3 rounded-full bg-green-brand px-2.5 py-1 text-[0.72rem] font-bold text-white">
-            Featured
-          </span>
-        )}
-        {isNew && (
-          <span
-            className={`absolute top-3 rounded-full bg-green-brand px-2.5 py-1 text-[0.72rem] font-bold text-white ${
-              hasPlanBadge ? "right-3" : "left-3"
-            }`}
-          >
-            New
-          </span>
-        )}
-      </div>
+      <Link
+        href={detailHref}
+        className="absolute inset-0 z-0 rounded-[18px]"
+        aria-label={`View details for ${listing.business_name}`}
+      />
 
-      <div className="flex flex-1 flex-col p-5">
-        <p className="mb-1 text-[0.78rem] font-bold tracking-wide text-green-mid">
-          {getCategoryDisplay(listing.category)}
-        </p>
-        <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-text-brand">
-          {listing.business_name}
-        </h3>
-        {listing.opening_hours?.trim() && (
-          <div className="mt-1">
-            <OpenNowBadge openingHours={listing.opening_hours} />
-          </div>
-        )}
-        <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-text-light">
-          {truncateDescription(listing.description)}
-        </p>
-        <p className="mt-2 text-sm text-text-mid">📍 {listing.address ?? "Sauraha, Nepal"}</p>
-
-        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-brand pt-3 text-sm">
-          {listing.price_range && (
-            <span className="font-bold text-green-brand">{listing.price_range}</span>
+      <div className="pointer-events-none relative z-[1]">
+        <div className="relative h-[210px] overflow-hidden">
+          <ListingImage
+            src={image}
+            alt={listing.business_name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+          {isPremium && (
+            <span className="absolute top-3 left-3 rounded-full bg-orange-brand px-2.5 py-1 text-[0.72rem] font-bold text-white">
+              ⭐ Premium
+            </span>
           )}
-          <span className="text-xs text-text-light">
-            Listed {formatListingDate(listing.created_at)}
-          </span>
-        </div>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Link
-            href={`/listings/${listing.id}`}
-            className="rounded-full bg-green-brand px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-mid"
-          >
-            View Details
-          </Link>
-          {callHref && (
-            <a
-              href={callHref}
-              className="rounded-full border-[1.5px] border-green-brand px-4 py-1.5 text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white"
-            >
-              Call
-            </a>
+          {isFeatured && !isPremium && (
+            <span className="absolute top-3 left-3 rounded-full bg-green-brand px-2.5 py-1 text-[0.72rem] font-bold text-white">
+              Featured
+            </span>
           )}
-          {wa && (
-            <a
-              href={wa}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
-                highlighted ? "bg-orange-brand hover:bg-orange-light" : "bg-green-mid hover:bg-green-brand"
+          {isNew && (
+            <span
+              className={`absolute top-3 rounded-full bg-green-brand px-2.5 py-1 text-[0.72rem] font-bold text-white ${
+                hasPlanBadge ? "right-3" : "left-3"
               }`}
             >
-              WhatsApp
-            </a>
-          )}
-          {listing.website && (
-            <a
-              href={listing.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full border border-border-brand px-4 py-1.5 text-sm font-semibold text-text-mid hover:border-green-mid"
-            >
-              Website
-            </a>
+              New
+            </span>
           )}
         </div>
+
+        <div className="flex flex-1 flex-col p-5 pb-0">
+          <p className="mb-1 text-[0.78rem] font-bold tracking-wide text-green-mid">
+            {getCategoryDisplay(listing.category)}
+          </p>
+          <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-text-brand">
+            {listing.business_name}
+          </h3>
+          {listing.opening_hours?.trim() && (
+            <div className="mt-1">
+              <OpenNowBadge openingHours={listing.opening_hours} />
+            </div>
+          )}
+          <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-text-light">
+            {truncateDescription(listing.description)}
+          </p>
+          <p className="mt-2 text-sm text-text-mid">📍 {listing.address ?? "Sauraha, Nepal"}</p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-brand pt-3 text-sm">
+            {listing.price_range && (
+              <span className="font-bold text-green-brand">{listing.price_range}</span>
+            )}
+            <span className="text-xs text-text-light">
+              Listed {formatListingDate(listing.created_at)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-[1] px-5 pb-5">
+        <ListingCardActions
+          listingId={listing.id}
+          callHref={callHref || undefined}
+          whatsappHref={wa || undefined}
+          website={listing.website}
+          whatsappHighlighted={highlighted}
+        />
       </div>
     </article>
   )
