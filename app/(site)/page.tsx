@@ -134,7 +134,9 @@ export default async function HomePage() {
           </span>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl leading-tight font-bold text-white md:text-6xl">
             Discover the Wild Heart of{" "}
-            <span className="text-orange-light">Sauraha</span>
+            <span className="inline-block text-5xl tracking-wide text-orange-light uppercase md:text-7xl">
+              Sauraha
+            </span>
           </h1>
           <p className="mx-auto mt-5 mb-8 max-w-xl text-lg font-light text-white/88">
             Your complete guide to hotels, restaurants, activities, and everything
