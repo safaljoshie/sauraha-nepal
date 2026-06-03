@@ -4,7 +4,7 @@ import "@uiw/react-md-editor/markdown-editor.css"
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useState, type ChangeEvent } from "react"
 import { BLOG_TAGS, type BlogPostRow } from "@/lib/blog-db"
 import { slugifyTitle } from "@/lib/blog-slug"
 
@@ -63,6 +63,7 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
   const [slugManual, setSlugManual] = useState(false)
   const [loading, setLoading] = useState(!!postId)
   const [saving, setSaving] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
   const [error, setError] = useState("")
 
   const loadPost = useCallback(async () => {
@@ -92,6 +93,39 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
   useEffect(() => {
     loadPost()
   }, [loadPost])
+
+  async function handleCoverUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file) return
+
+    setUploadingCover(true)
+    setError("")
+    try {
+      const formData = new FormData()
+      formData.set("file", file)
+      if (postId) formData.set("postId", postId)
+
+      const res = await fetch("/api/admin/blog/upload-cover", {
+        method: "POST",
+        body: formData,
+      })
+      if (res.status === 401) {
+        router.push("/admin")
+        return
+      }
+      const data = (await res.json()) as { url?: string; error?: string }
+      if (!res.ok || !data.url) {
+        setError(data.error ?? "Failed to upload cover image.")
+        return
+      }
+      setForm((prev) => ({ ...prev, cover_image: data.url! }))
+    } catch {
+      setError("Failed to upload cover image.")
+    } finally {
+      setUploadingCover(false)
+    }
+  }
 
   function updateTitle(title: string) {
     setForm((prev) => ({
@@ -237,18 +271,34 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-text-mid">Cover Image URL</label>
+          <label className="mb-1.5 block text-sm font-semibold text-text-mid">Cover image</label>
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <label className="cursor-pointer rounded-full bg-green-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-mid">
+              {uploadingCover ? "Uploading…" : "Upload image"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                onChange={handleCoverUpload}
+                className="hidden"
+                disabled={uploadingCover || saving}
+              />
+            </label>
+            <span className="text-xs text-text-light">JPEG, PNG, or WEBP · max 10 MB</span>
+          </div>
+          <p className="mb-2 text-xs text-text-light">
+            Or paste an image URL below (optional if you uploaded a file).
+          </p>
           <input
             value={form.cover_image}
             onChange={(e) => setForm((prev) => ({ ...prev, cover_image: e.target.value }))}
             className={fieldClass}
-            placeholder="/images/example.jpg or https://..."
+            placeholder="https://… after upload, or /images/…"
           />
           {form.cover_image.trim() && (
             <img
               src={form.cover_image}
               alt="Cover preview"
-              className="mt-3 max-h-48 rounded-xl border border-border-brand object-cover"
+              className="mt-3 max-h-56 w-full rounded-xl border border-border-brand object-cover"
             />
           )}
         </div>
