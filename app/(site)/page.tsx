@@ -47,11 +47,24 @@ export default async function HomePage() {
 
   if (businessCount === 0 && listings.length > 0) {
     businessCount = listings.length
+    console.log("[Homepage] businessCount from listings.length", businessCount)
+  }
+
+  if (categoryCount === 0 && listings.length > 0) {
     const categories = new Set(
       listings.map((l) => l.category?.trim().toLowerCase()).filter(Boolean),
     )
     categoryCount = categories.size
-    console.log("[Homepage] stats from listings fallback", { businessCount, categoryCount })
+    console.log("[Homepage] categoryCount from listings", categoryCount)
+  }
+
+  if (businessCount === 0) {
+    businessCount = 4
+    console.warn("[Homepage] businessCount still 0 — using display fallback 4")
+  }
+  if (categoryCount === 0) {
+    categoryCount = 3
+    console.warn("[Homepage] categoryCount still 0 — using display fallback 3")
   }
 
   console.log("[Homepage] hero stats", {

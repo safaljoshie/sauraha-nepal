@@ -1,4 +1,4 @@
-import { getSupabaseAdmin } from "@/lib/supabase"
+import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
 
 export type HomepageStats = {
   businessCount: number
@@ -84,14 +84,46 @@ export async function fetchHomepageStats(): Promise<HomepageStats> {
     }
 
     if (businessCount === 0 && categoryCount === 0) {
-      console.warn("[HomepageStats] zero counts from DB — using fallback stats")
-      return FALLBACK_STATS
+      console.warn("[HomepageStats] admin zero counts — trying anon client")
+      const anon = getSupabasePublic()
+      const { count: anonCount, error: anonCountError } = await anon
+        .from("business_listings")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "approved")
+
+      const { data: anonCats, error: anonCatError } = await anon
+        .from("business_listings")
+        .select("category")
+        .eq("status", "approved")
+
+      console.log("[HomepageStats] anon backup", {
+        count: anonCount,
+        countError: anonCountError?.message ?? null,
+        rows: anonCats?.length ?? 0,
+        catError: anonCatError?.message ?? null,
+      })
+
+      if (!anonCountError && (anonCount ?? 0) > 0) {
+        businessCount = anonCount ?? 0
+        categoryCount = countUniqueCategories(anonCats ?? [])
+      }
+    }
+
+    let fromFallback = false
+    if (businessCount === 0) {
+      console.warn("[HomepageStats] businessCount still 0 — using fallback")
+      businessCount = FALLBACK_STATS.businessCount
+      fromFallback = true
+    }
+    if (categoryCount === 0) {
+      categoryCount = FALLBACK_STATS.categoryCount
+      fromFallback = true
     }
 
     const result = {
       businessCount,
       categoryCount,
-      fromFallback: false,
+      fromFallback,
     }
     console.log("[HomepageStats] final", result)
     return result
