@@ -3,11 +3,15 @@ import { BLOG_SLUG_REDIRECTS } from "./lib/blog-slug-redirects"
 
 const nextConfig: NextConfig = {
   async redirects() {
-    return Object.entries(BLOG_SLUG_REDIRECTS).map(([source, destination]) => ({
+    const blogRedirects = Object.entries(BLOG_SLUG_REDIRECTS).map(([source, destination]) => ({
       source: `/blog/${source}`,
       destination: `/blog/${destination}`,
       permanent: true,
     }))
+    return [
+      { source: "/sitemap", destination: "/sitemap.xml", permanent: true },
+      ...blogRedirects,
+    ]
   },
   images: {
     remotePatterns: [
