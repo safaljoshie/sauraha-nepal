@@ -11,8 +11,14 @@ const exploreLinks = [
 
 const infoLinks = [
   { href: "/blog", label: "Travel Tips" },
-  { href: "/blog/chitwan-national-park-entry-fees", label: "Park Permits" },
-  { href: "/blog/how-to-get-to-sauraha", label: "Getting Here" },
+  {
+    href: "/blog/park-permits-to-visit-sauraha-community-forest-vs-national-forest-2026-guide",
+    label: "Park Permits",
+  },
+  {
+    href: "/blog/how-to-get-to-sauraha-from-kathmandu-and-pokhara-2026-travel-guide",
+    label: "Getting Here",
+  },
   { href: "/blog", label: "Blog" },
 ]
 
