@@ -68,10 +68,10 @@ body {
   @keyframes chat-pulse {
     0%,
     100% {
-      box-shadow: 0 4px 20px rgba(26, 92, 42, 0.35);
+      box-shadow: 0 4px 20px rgba(232, 98, 26, 0.4);
     }
     50% {
-      box-shadow: 0 4px 28px rgba(26, 92, 42, 0.55), 0 0 0 8px rgba(26, 92, 42, 0.12);
+      box-shadow: 0 4px 28px rgba(232, 98, 26, 0.55), 0 0 0 8px rgba(232, 98, 26, 0.15);
     }
   }
 

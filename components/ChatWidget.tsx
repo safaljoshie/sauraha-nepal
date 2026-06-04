@@ -1,7 +1,19 @@
 "use client"
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
+
+function BotAvatar({ size = 32 }: { size?: number }) {
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full"
+      aria-hidden
+    >
+      <ChatAssistantAvatar size={size} variant="avatar" />
+    </span>
+  )
+}
 
 const WELCOME =
   "Hi! 👋 I'm your Sauraha travel assistant. I can help you discover the best of Sauraha and Chitwan National Park. What would you like to know? 🐘"
@@ -134,11 +146,8 @@ export default function ChatWidget() {
         >
           <header className="flex shrink-0 items-start justify-between gap-2 bg-green-brand px-4 py-3 text-white">
             <div className="flex items-center gap-3">
-              <span
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-xl"
-                aria-hidden
-              >
-                🐘
+              <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm">
+                <ChatAssistantAvatar size={40} variant="avatar" />
               </span>
               <div>
                 <p className="font-semibold leading-tight">Sauraha Assistant</p>
@@ -161,12 +170,7 @@ export default function ChatWidget() {
           <div ref={listRef} className="flex-1 overflow-y-auto bg-cream/50 p-4">
             {showWelcome && (
               <div className="mb-4 flex gap-2">
-                <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-brand/10 text-sm"
-                  aria-hidden
-                >
-                  🐘
-                </span>
+                <BotAvatar />
                 <div className="max-w-[85%] rounded-2xl rounded-tl-sm bg-cream px-3 py-2 text-sm text-text-brand">
                   {WELCOME}
                 </div>
@@ -194,14 +198,7 @@ export default function ChatWidget() {
                 key={msg.id}
                 className={`mb-3 flex gap-2 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
               >
-                {msg.role === "assistant" && (
-                  <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-brand/10 text-sm"
-                    aria-hidden
-                  >
-                    🐘
-                  </span>
-                )}
+                {msg.role === "assistant" && <BotAvatar />}
                 <div
                   className={`max-w-[85%] ${
                     msg.role === "user" ? "items-end text-right" : ""
@@ -229,12 +226,7 @@ export default function ChatWidget() {
 
             {loading && (
               <div className="mb-2 flex gap-2 pl-0">
-                <span
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green-brand/10 text-sm"
-                  aria-hidden
-                >
-                  🐘
-                </span>
+                <BotAvatar />
                 <div className="rounded-2xl rounded-tl-sm bg-cream px-3 py-3">
                   <div className="flex items-center gap-1" aria-hidden>
                     <span className="chat-typing-dot inline-block h-2 w-2 rounded-full bg-green-mid" />
@@ -298,13 +290,15 @@ export default function ChatWidget() {
       <button
         type="button"
         onClick={() => (open ? handleClose() : handleOpen())}
-        className="chat-bubble-pulse fixed right-6 bottom-6 z-[1000] flex h-14 w-14 items-center justify-center rounded-full bg-green-brand text-2xl text-white shadow-[0_4px_20px_rgba(26,92,42,0.35)] transition-transform hover:scale-105"
+        className={`chat-bubble-pulse fixed right-6 bottom-6 z-[1000] flex h-14 w-14 items-center justify-center overflow-hidden rounded-full shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105 ${
+          open ? "bg-orange-brand" : "bg-transparent"
+        }`}
         aria-label={open ? "Close Sauraha Assistant" : "Open Sauraha Assistant"}
       >
         {open ? (
-          <span className="text-lg">✕</span>
+          <span className="text-lg font-semibold text-white">✕</span>
         ) : (
-          <span aria-hidden>🐘</span>
+          <ChatAssistantAvatar size={56} variant="bubble" />
         )}
         {!open && unread && (
           <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-brand text-[10px] font-bold text-white">
