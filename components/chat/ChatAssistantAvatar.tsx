@@ -9,7 +9,7 @@ type ChatAssistantAvatarProps = {
   variant?: "bubble" | "avatar"
 }
 
-/** Elephant with headphones — Sauraha Assistant mascot */
+/** Elephant with headphones — transparent PNG mascot */
 export default function ChatAssistantAvatar({
   size = 40,
   className = "",
@@ -19,10 +19,10 @@ export default function ChatAssistantAvatar({
 
   return (
     <span
-      className={`relative inline-flex shrink-0 overflow-hidden rounded-full ${
+      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full ${
         isBubble
           ? "bg-orange-brand shadow-[0_2px_12px_rgba(232,98,26,0.45)] ring-2 ring-orange-light"
-          : "bg-orange-brand ring-2 ring-orange-brand/30"
+          : "bg-cream ring-2 ring-orange-brand/25"
       } ${className}`}
       style={{ width: size, height: size }}
       aria-hidden
@@ -32,7 +32,7 @@ export default function ChatAssistantAvatar({
         alt=""
         width={size}
         height={size}
-        className="h-full w-full object-cover object-center"
+        className="h-[88%] w-[88%] object-contain object-center"
         sizes={`${size}px`}
         priority={isBubble}
       />
