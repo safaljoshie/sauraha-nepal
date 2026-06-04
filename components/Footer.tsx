@@ -1,5 +1,4 @@
 import Link from "next/link"
-import type { ReactNode } from "react"
 import {
   buildFooterExploreLinks,
   type CategoryCatalog,
@@ -18,62 +17,6 @@ const companyLinks = [
 
 function hasSocialUrl(url: string) {
   return url.trim().length > 0
-}
-
-function FacebookIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={20}
-      height={20}
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-    </svg>
-  )
-}
-
-function InstagramIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={20}
-      height={20}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden
-    >
-      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-    </svg>
-  )
-}
-
-function SocialIconLink({
-  href,
-  label,
-  children,
-}: {
-  href: string
-  label: string
-  children: ReactNode
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={label}
-      className="inline-flex text-white transition-colors hover:text-[#e8621a]"
-    >
-      {children}
-    </a>
-  )
 }
 
 function FooterColumn({
@@ -126,16 +69,42 @@ export default async function Footer({ catalog }: { catalog: CategoryCatalog }) 
               Find the best stays, food, activities, and local experiences.
             </p>
             {(showFacebook || showInstagram) && (
-              <div className="mt-6 flex items-center gap-4">
+              <div className="mt-6 flex items-center gap-3">
                 {showFacebook && (
-                  <SocialIconLink href={facebookUrl} label="Facebook">
-                    <FacebookIcon />
-                  </SocialIconLink>
+                  <a
+                    href={facebookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Facebook"
+                    className="text-white transition-colors hover:text-orange-400"
+                  >
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
+                      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+                    </svg>
+                  </a>
                 )}
                 {showInstagram && (
-                  <SocialIconLink href={instagramUrl} label="Instagram">
-                    <InstagramIcon />
-                  </SocialIconLink>
+                  <a
+                    href={instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                    className="text-white transition-colors hover:text-orange-400"
+                  >
+                    <svg
+                      width="20"
+                      height="20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                      aria-hidden
+                    >
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                    </svg>
+                  </a>
                 )}
               </div>
             )}
