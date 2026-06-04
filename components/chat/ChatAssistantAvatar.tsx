@@ -19,7 +19,7 @@ export default function ChatAssistantAvatar({
 
   return (
     <span
-      className={`relative inline-flex shrink-0 overflow-hidden rounded-full ${
+      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full ${
         isBubble
           ? "bg-orange-brand shadow-[0_2px_12px_rgba(232,98,26,0.45)] ring-2 ring-orange-light"
           : "bg-cream ring-2 ring-orange-brand/25"
@@ -33,7 +33,7 @@ export default function ChatAssistantAvatar({
         width={size}
         height={size}
         unoptimized
-        className="h-full w-full object-cover object-[center_42%]"
+        className="h-[95%] w-[95%] object-cover object-[center_42%]"
         sizes={`${size}px`}
         priority={isBubble}
       />
