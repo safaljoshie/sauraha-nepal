@@ -4,8 +4,8 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useMemo, useState } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
-import { MAP_FILTER_GROUPS } from "@/lib/homepage-constants"
-import { listingsForMapFilter } from "@/lib/homepage-data"
+import type { CategoryCatalog } from "@/lib/category-catalog"
+import { buildMapFilterGroups, listingsForMapFilter } from "@/lib/homepage-data"
 import type { CategoryGroupId } from "@/lib/listings-catalog"
 
 const ListingsMapView = dynamic(
@@ -26,12 +26,19 @@ const ListingsMapView = dynamic(
 
 type MapFilterId = CategoryGroupId | "medical" | "all"
 
-export default function HomeMapSection({ listings }: { listings: BusinessListing[] }) {
+export default function HomeMapSection({
+  listings,
+  catalog,
+}: {
+  listings: BusinessListing[]
+  catalog: CategoryCatalog
+}) {
   const [filter, setFilter] = useState<MapFilterId>("all")
+  const mapFilters = useMemo(() => buildMapFilterGroups(catalog), [catalog])
 
   const filtered = useMemo(
-    () => listingsForMapFilter(listings, filter),
-    [listings, filter],
+    () => listingsForMapFilter(listings, filter, catalog),
+    [listings, filter, catalog],
   )
 
   return (
@@ -53,7 +60,7 @@ export default function HomeMapSection({ listings }: { listings: BusinessListing
           role="tablist"
           aria-label="Map filters"
         >
-          {MAP_FILTER_GROUPS.map((group) => (
+          {mapFilters.map((group) => (
             <button
               key={group.id}
               type="button"

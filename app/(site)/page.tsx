@@ -19,6 +19,7 @@ import { fetchPublishedBlogPosts } from "@/lib/blog-db"
 import { buildHomepageData } from "@/lib/homepage-data"
 import { fetchHomepageStats } from "@/lib/homepage-stats"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
+import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { fetchActiveHeroMedia } from "@/lib/site-content"
 
 export const revalidate = 60
@@ -46,14 +47,15 @@ export const metadata: Metadata = {
 }
 
 export default async function HomePage() {
-  const [listings, stats, heroMedia, blogPosts] = await Promise.all([
+  const [listings, stats, heroMedia, blogPosts, catalog] = await Promise.all([
     fetchApprovedListings(),
     fetchHomepageStats(),
     fetchActiveHeroMedia(),
     fetchPublishedBlogPosts(),
+    fetchCategoryCatalog(),
   ])
 
-  const data = buildHomepageData(listings)
+  const data = buildHomepageData(listings, catalog)
   const primaryHeroMedia = heroMedia[0] ?? null
   const useBlogFallback = blogPosts.length === 0
 
@@ -70,7 +72,11 @@ export default async function HomePage() {
         blogCount={blogPosts.length}
       />
       <main className="bg-surface pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
-        <HomeHero primaryHeroMedia={primaryHeroMedia} listings={data.listings} />
+        <HomeHero
+          primaryHeroMedia={primaryHeroMedia}
+          listings={data.listings}
+          searchCategories={catalog}
+        />
         <HomeIntro />
         <HomePlacesToGo />
         <HomeExperiences experiences={data.experiences} />
@@ -78,7 +84,7 @@ export default async function HomePage() {
         <HomePlanTrip />
         <HomeWhereToStay stayListings={data.stayListings} />
         <HomeEatDrink />
-        <HomeMapSection listings={data.listings} />
+        <HomeMapSection listings={data.listings} catalog={catalog} />
         <HomeTravelGuides posts={blogPosts.slice(0, 4)} useFallback={useBlogFallback} />
         <HomeTrust businessCount={businessCount} guidesCount={guidesCount} />
         <HomeListBusiness />

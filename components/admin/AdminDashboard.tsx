@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate, planLabel } from "@/lib/business-listing"
-import { businessCategories } from "@/lib/data"
+import { DEFAULT_CATEGORY_CATALOG, getActiveCategoryNames } from "@/lib/category-catalog"
 import { mergePhotoLinks } from "@/lib/list-business-photos"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
@@ -89,11 +89,11 @@ type EditFormState = {
   status: "pending" | "approved" | "rejected"
 }
 
-function normalizeEditForm(listing: BusinessListing): EditFormState {
+function normalizeEditForm(listing: BusinessListing, defaultCategory: string): EditFormState {
   return {
     id: listing.id,
     business_name: listing.business_name ?? "",
-    category: listing.category ?? businessCategories[0],
+    category: listing.category ?? defaultCategory,
     description: listing.description ?? "",
     price_range: listing.price_range ?? "",
     opening_hours: listing.opening_hours ?? "",
@@ -140,6 +140,26 @@ export default function AdminDashboard() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [uploadingPhotos, setUploadingPhotos] = useState(false)
   const [adminTab, setAdminTab] = useState<AdminTab>("listings")
+  const [categoryOptions, setCategoryOptions] = useState<string[]>(
+    getActiveCategoryNames(DEFAULT_CATEGORY_CATALOG),
+  )
+
+  const loadCategoryOptions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/categories")
+      if (res.status === 401) return
+      const data = (await res.json()) as {
+        categories?: { name: string; is_active: boolean }[]
+      }
+      if (!res.ok) return
+      const names = (data.categories ?? [])
+        .filter((c) => c.is_active)
+        .map((c) => c.name)
+      if (names.length > 0) setCategoryOptions(names)
+    } catch {
+      // keep defaults
+    }
+  }, [])
 
   const loadListings = useCallback(async () => {
     setLoading(true)
@@ -169,7 +189,10 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     loadListings()
-  }, [loadListings])
+    loadCategoryOptions()
+  }, [loadListings, loadCategoryOptions])
+
+  const defaultCategory = categoryOptions[0] ?? ""
 
   const stats = useMemo(() => {
     const total = listings.length
@@ -289,7 +312,7 @@ export default function AdminDashboard() {
 
   function openEdit(listing: BusinessListing) {
     setEditErrors("")
-    setEditForm(normalizeEditForm(listing))
+    setEditForm(normalizeEditForm(listing, defaultCategory))
   }
 
   async function handleAdminPhotoUpload(e: ChangeEvent<HTMLInputElement>) {
@@ -517,6 +540,12 @@ export default function AdminDashboard() {
             className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
           >
             Edit Hero Video
+          </Link>
+          <Link
+            href="/admin/content/categories"
+            className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
+          >
+            Manage Categories
           </Link>
           <button
             type="button"
@@ -864,7 +893,7 @@ export default function AdminDashboard() {
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                   className={fieldClass}
                 >
-                  {businessCategories.map((cat) => (
+                  {categoryOptions.map((cat) => (
                     <option key={cat}>{cat}</option>
                   ))}
                 </select>

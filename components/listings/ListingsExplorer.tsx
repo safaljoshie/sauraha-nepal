@@ -3,13 +3,12 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { BusinessListing } from "@/lib/business-listing"
 import {
-  CATEGORY_GROUPS,
   countByCategoryGroup,
   filterListings,
   PAGE_SIZE,
-  parseCategoryParam,
   type CategoryGroupId,
   type PlanFilterId,
   type SortOptionId,
@@ -30,12 +29,14 @@ type ViewMode = "grid" | "map"
 
 type ListingsExplorerProps = {
   listings: BusinessListing[]
+  catalog: CategoryCatalog
   initialSearch?: string
   initialCategory?: CategoryGroupId
 }
 
 export default function ListingsExplorer({
   listings,
+  catalog,
   initialSearch = "",
   initialCategory = "all",
 }: ListingsExplorerProps) {
@@ -56,13 +57,17 @@ export default function ListingsExplorer({
 
   const filtered = useMemo(
     () =>
-      filterListings(listings, {
-        search: debouncedSearch,
-        category,
-        plan: planFilter,
-        sort,
-      }),
-    [listings, debouncedSearch, category, planFilter, sort],
+      filterListings(
+        listings,
+        {
+          search: debouncedSearch,
+          category,
+          plan: planFilter,
+          sort,
+        },
+        catalog,
+      ),
+    [listings, debouncedSearch, category, planFilter, sort, catalog],
   )
 
   useEffect(() => {
@@ -143,8 +148,8 @@ export default function ListingsExplorer({
 
       <div className="mx-auto max-w-6xl px-4 pt-8 md:px-8">
         <div className="flex flex-wrap gap-2.5">
-          {CATEGORY_GROUPS.map((tab) => {
-            const count = countByCategoryGroup(listings, tab.id)
+          {catalog.builtGroups.map((tab) => {
+            const count = countByCategoryGroup(listings, tab.id, catalog)
             const active = category === tab.id
             return (
               <button
@@ -208,6 +213,7 @@ export default function ListingsExplorer({
           <EmptyFiltered
             search={debouncedSearch}
             category={category}
+            catalog={catalog}
             onClearSearch={clearSearch}
           />
         ) : viewMode === "map" ? (
@@ -253,10 +259,12 @@ function EmptyAll() {
 function EmptyFiltered({
   search,
   category,
+  catalog,
   onClearSearch,
 }: {
   search: string
   category: CategoryGroupId
+  catalog: CategoryCatalog
   onClearSearch: () => void
 }) {
   if (search) {
@@ -276,7 +284,7 @@ function EmptyFiltered({
     )
   }
 
-  const group = CATEGORY_GROUPS.find((g) => g.id === category)
+  const group = catalog.builtGroups.find((g) => g.id === category)
   return (
     <div className="mb-16 rounded-2xl border border-border-brand bg-white px-8 py-16 text-center">
       <p className="text-lg text-text-mid">

@@ -1,5 +1,3 @@
-import type { CategoryGroupId } from "@/lib/listings-catalog"
-
 export const HOME_EXPERIENCES = [
   {
     name: "Jungle Safari",
@@ -80,16 +78,6 @@ export const EAT_SHOWCASE = [
   },
 ] as const
 
-export const MAP_FILTER_GROUPS: { id: CategoryGroupId | "medical"; label: string }[] = [
-  { id: "all", label: "All" },
-  { id: "stay", label: "Hotels" },
-  { id: "eat", label: "Restaurants" },
-  { id: "activities", label: "Activities" },
-  { id: "shopping", label: "Shopping" },
-  { id: "transport", label: "Transport" },
-  { id: "medical", label: "Medical" },
-]
-
 export const TESTIMONIALS = [
   {
     quote: "Our jungle safari from Sauraha was the highlight of our Nepal trip — well organised and unforgettable.",
@@ -163,9 +151,3 @@ export const PLACES_TO_GO = [
   },
 ] as const
 
-export const SEARCH_CATEGORIES = [
-  { label: "Hotels", href: "/listings?category=stay" },
-  { label: "Activities", href: "/listings?category=activities" },
-  { label: "Restaurants", href: "/listings?category=eat" },
-  { label: "Travel Guides", href: "/blog" },
-] as const

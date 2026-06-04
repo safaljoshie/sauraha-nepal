@@ -1,14 +1,16 @@
 import Link from "next/link"
 import HomeDestinationSearch from "@/components/home/HomeDestinationSearch"
+import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { HeroMedia } from "@/lib/site-content"
 import type { BusinessListing } from "@/lib/business-listing"
 
 type HomeHeroProps = {
   primaryHeroMedia: HeroMedia | null
   listings: BusinessListing[]
+  searchCategories: CategoryCatalog
 }
 
-export default function HomeHero({ primaryHeroMedia, listings }: HomeHeroProps) {
+export default function HomeHero({ primaryHeroMedia, listings, searchCategories }: HomeHeroProps) {
   const heroVideo = primaryHeroMedia?.type === "video" ? primaryHeroMedia : null
 
   return (
@@ -65,7 +67,7 @@ export default function HomeHero({ primaryHeroMedia, listings }: HomeHeroProps) 
         </div>
 
         <div className="mt-10 max-w-2xl">
-          <HomeDestinationSearch listings={listings} />
+          <HomeDestinationSearch listings={listings} searchCategories={searchCategories} />
         </div>
       </div>
     </section>

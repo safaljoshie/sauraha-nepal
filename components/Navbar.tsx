@@ -3,17 +3,25 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { getStayListingsHref, type CategoryCatalog } from "@/lib/category-catalog"
 
-const navLinks = [
+const baseNavLinks = [
   { href: "/#places", label: "Places" },
-  { href: "/listings?category=stay", label: "Stay" },
   { href: "/#experiences", label: "Things to do" },
   { href: "/blog", label: "Articles" },
   { href: "/#map", label: "Map" },
 ]
 
-export default function Navbar() {
+export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
+  const navLinks = useMemo(
+    () => [
+      baseNavLinks[0],
+      { href: getStayListingsHref(catalog), label: "Stay" },
+      ...baseNavLinks.slice(1),
+    ],
+    [catalog],
+  )
   const pathname = usePathname()
   const isHome = pathname === "/"
   const [menuOpen, setMenuOpen] = useState(false)

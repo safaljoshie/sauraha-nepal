@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { hasListingContactEmail, type BusinessListing } from "@/lib/business-listing"
-import { businessCategories } from "@/lib/data"
+import { fetchCategoryCatalog, isValidCategoryName } from "@/lib/category-catalog"
 import { buildApprovalEmail, buildRejectionEmail } from "@/lib/emails/listing-status"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
@@ -67,7 +67,8 @@ export async function PUT(request: Request) {
   if (!EMAIL_RE.test(email)) {
     return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 })
   }
-  if (!businessCategories.includes(category as (typeof businessCategories)[number])) {
+  const catalog = await fetchCategoryCatalog({ includeInactive: true })
+  if (!isValidCategoryName(category, catalog, { includeInactive: true })) {
     return NextResponse.json({ error: "Invalid category." }, { status: 400 })
   }
 

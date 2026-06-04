@@ -1,6 +1,7 @@
 import Image from "next/image"
 import type { Metadata } from "next"
 import ListBusinessForm from "@/components/ListBusinessForm"
+import { fetchCategoryCatalog, getActiveCategoryNames } from "@/lib/category-catalog"
 import { listingSteps, pricingPlans } from "@/lib/data"
 import { pageMetadata } from "@/lib/seo"
 
@@ -18,7 +19,10 @@ const heroStats = [
   { value: "24hr", label: "Approval" },
 ]
 
-export default function ListYourBusinessPage() {
+export default async function ListYourBusinessPage() {
+  const catalog = await fetchCategoryCatalog()
+  const categories = getActiveCategoryNames(catalog)
+
   return (
     <main>
       <section className="relative mt-[68px] overflow-hidden bg-gradient-to-br from-green-brand to-[#0d3a18] px-8 py-20 text-center">
@@ -124,7 +128,7 @@ export default function ListYourBusinessPage() {
           <p className="section-label text-center">Apply Now</p>
           <h2 className="section-title text-center">Submit your listing</h2>
           <div className="mt-10">
-            <ListBusinessForm />
+            <ListBusinessForm categories={categories} />
           </div>
         </div>
       </section>

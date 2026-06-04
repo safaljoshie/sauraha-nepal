@@ -1,13 +1,10 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
+import {
+  buildFooterExploreLinks,
+  type CategoryCatalog,
+} from "@/lib/category-catalog"
 import { fetchSiteSettings } from "@/lib/site-settings"
-
-const exploreLinks = [
-  { href: "/listings?category=stay", label: "Hotels" },
-  { href: "/listings?category=eat", label: "Restaurants" },
-  { href: "/listings?category=activities", label: "Activities" },
-  { href: "/blog", label: "Travel Guides" },
-]
 
 const businessLinks = [
   { href: "/list-your-business", label: "List Your Business" },
@@ -107,8 +104,9 @@ function FooterColumn({
   )
 }
 
-export default async function Footer() {
+export default async function Footer({ catalog }: { catalog: CategoryCatalog }) {
   const settings = await fetchSiteSettings()
+  const exploreLinks = buildFooterExploreLinks(catalog)
 
   const facebookUrl = settings.facebook_url.trim()
   const instagramUrl = settings.instagram_url.trim()

@@ -1,8 +1,11 @@
 import type { BusinessListing } from "@/lib/business-listing"
+import type { CategoryCatalog } from "@/lib/category-catalog"
+import { DEFAULT_CATEGORY_CATALOG } from "@/lib/category-catalog"
 import { HOME_EXPERIENCES } from "@/lib/homepage-constants"
 import {
   countByCategoryGroup,
   filterByCategoryGroup,
+  matchesCategoryGroup,
   sortListingsForDisplay,
   type CategoryGroupId,
 } from "@/lib/listings-catalog"
@@ -41,31 +44,8 @@ export type HomepageData = {
   experiences: typeof HOME_EXPERIENCES
 }
 
-const HOMEPAGE_CATEGORIES: {
-  slug: CategoryGroupId
-  icon: string
-  name: string
-}[] = [
-  { slug: "stay", icon: "🏨", name: "Stay" },
-  { slug: "eat", icon: "🍽️", name: "Eat & Drink" },
-  { slug: "activities", icon: "🐘", name: "Activities" },
-  { slug: "transport", icon: "🚗", name: "Transport" },
-  { slug: "shopping", icon: "🛍️", name: "Shopping" },
-  { slug: "guides", icon: "🧭", name: "Tour Guides" },
-  { slug: "info", icon: "ℹ️", name: "Travel Info" },
-]
-
-export function isActivityListing(listing: BusinessListing) {
-  const c = listing.category.toLowerCase()
-  return (
-    c.includes("activ") ||
-    c.includes("safari") ||
-    c.includes("canoe") ||
-    c.includes("bird") ||
-    c.includes("cultural") ||
-    c.includes("culture") ||
-    c.includes("walk")
-  )
+export function isActivityListing(listing: BusinessListing, catalog: CategoryCatalog) {
+  return matchesCategoryGroup(listing, "activities", catalog)
 }
 
 function countUniqueCategories(listings: BusinessListing[]) {
@@ -77,34 +57,40 @@ function countUniqueCategories(listings: BusinessListing[]) {
   return seen.size
 }
 
-export function buildHomepageData(listings: BusinessListing[]): HomepageData {
+export function buildHomepageData(
+  listings: BusinessListing[],
+  catalog: CategoryCatalog = DEFAULT_CATEGORY_CATALOG,
+): HomepageData {
   const sorted = sortListingsForDisplay(listings)
 
-  const categories: HomepageCategory[] = HOMEPAGE_CATEGORIES.map(({ slug, icon, name }) => {
-    const count = countByCategoryGroup(listings, slug)
-    return {
-      icon,
-      name,
-      slug,
-      count,
-      countLabel:
-        count === 0 ? "Coming soon" : `${count} listing${count === 1 ? "" : "s"}`,
-      href: `/listings?category=${slug}`,
-    }
-  })
+  const categories: HomepageCategory[] = catalog.builtGroups
+    .filter((g) => g.id !== "all")
+    .map((g) => {
+      const dbGroup = catalog.groups.find((row) => row.slug === g.id)
+      const count = countByCategoryGroup(listings, g.id, catalog)
+      return {
+        icon: dbGroup?.icon ?? "📍",
+        name: g.label,
+        slug: g.id,
+        count,
+        countLabel:
+          count === 0 ? "Coming soon" : `${count} listing${count === 1 ? "" : "s"}`,
+        href: g.id === "info" ? "/listings?category=info" : `/listings?category=${g.id}`,
+      }
+    })
 
   const categoryCount = countUniqueCategories(listings)
 
   const featured = sorted.slice(0, 6)
 
-  const realActivities = sorted.filter(isActivityListing).slice(0, 5)
+  const realActivities = sorted.filter((l) => isActivityListing(l, catalog)).slice(0, 5)
   const activities: ActivityCardItem[] = realActivities.map((listing) => ({
     type: "listing",
     listing,
   }))
 
-  const stayListings = filterByCategoryGroup(sorted, "stay").slice(0, 4)
-  const eatListings = filterByCategoryGroup(sorted, "eat").slice(0, 4)
+  const stayListings = filterByCategoryGroup(sorted, "stay", catalog).slice(0, 4)
+  const eatListings = filterByCategoryGroup(sorted, "eat", catalog).slice(0, 4)
 
   return {
     listings: sorted,
@@ -125,6 +111,7 @@ export function buildHomepageData(listings: BusinessListing[]): HomepageData {
 export function listingsForMapFilter(
   listings: BusinessListing[],
   filter: CategoryGroupId | "medical" | "all",
+  catalog: CategoryCatalog = DEFAULT_CATEGORY_CATALOG,
 ): BusinessListing[] {
   if (filter === "all") return listings
   if (filter === "medical") {
@@ -132,5 +119,15 @@ export function listingsForMapFilter(
       /chemist|pharmacy|medical|clinic|hospital/i.test(l.category),
     )
   }
-  return filterByCategoryGroup(listings, filter)
+  return filterByCategoryGroup(listings, filter, catalog)
+}
+
+export function buildMapFilterGroups(catalog: CategoryCatalog) {
+  return [
+    { id: "all" as const, label: "All" },
+    ...catalog.builtGroups
+      .filter((g) => g.id !== "all" && g.id !== "info")
+      .map((g) => ({ id: g.id as CategoryGroupId, label: g.label })),
+    { id: "medical" as const, label: "Medical" },
+  ]
 }

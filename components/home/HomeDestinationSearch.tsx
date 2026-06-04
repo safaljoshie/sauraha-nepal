@@ -2,14 +2,20 @@
 
 import Link from "next/link"
 import HeroSearch from "@/components/home/HeroSearch"
-import { SEARCH_CATEGORIES } from "@/lib/homepage-constants"
+import { buildSearchCategoryChips, type CategoryCatalog } from "@/lib/category-catalog"
 import type { BusinessListing } from "@/lib/business-listing"
 
 type HomeDestinationSearchProps = {
   listings: BusinessListing[]
+  searchCategories: CategoryCatalog
 }
 
-export default function HomeDestinationSearch({ listings }: HomeDestinationSearchProps) {
+export default function HomeDestinationSearch({
+  listings,
+  searchCategories,
+}: HomeDestinationSearchProps) {
+  const chips = buildSearchCategoryChips(searchCategories)
+
   return (
     <div id="hero-search" className="w-full scroll-mt-28">
       <HeroSearch listings={listings} variant="hero" />
@@ -18,9 +24,9 @@ export default function HomeDestinationSearch({ listings }: HomeDestinationSearc
         role="navigation"
         aria-label="Search by category"
       >
-        {SEARCH_CATEGORIES.map((cat) => (
+        {chips.map((cat) => (
           <Link
-            key={cat.label}
+            key={cat.href}
             href={cat.href}
             className="rounded-lg border border-white/40 bg-black/25 px-3 py-1.5 text-xs font-semibold tracking-wide text-white uppercase backdrop-blur-sm transition-colors hover:bg-black/40"
           >

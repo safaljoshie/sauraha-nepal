@@ -13,7 +13,11 @@ import {
   parsePhotoLinkLines,
   photoLimitForPlan,
 } from "@/lib/list-business-photos"
-import { businessCategories, pricingPlans } from "@/lib/data"
+import {
+  DEFAULT_CATEGORY_CATALOG,
+  getActiveCategoryNames,
+} from "@/lib/category-catalog"
+import { pricingPlans } from "@/lib/data"
 
 const inputClass =
   "w-full rounded-xl border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
@@ -22,22 +26,42 @@ type SubmitStatus = "idle" | "loading" | "success" | "error"
 
 const GENERIC_ERROR = "Something went wrong. Please try again."
 
-const initialForm = {
-  businessName: "",
-  category: businessCategories[0] as string,
-  description: "",
-  priceRange: "$ Budget",
-  openingHours: "",
-  ownerName: "",
-  email: "",
-  phone: "",
-  whatsapp: "",
-  website: "",
-  facebook: "",
-  address: "",
-  googleMapsLink: "",
-  photoLinks: "",
-  agreedToTerms: false,
+type ListBusinessFormState = {
+  businessName: string
+  category: string
+  description: string
+  priceRange: string
+  openingHours: string
+  ownerName: string
+  email: string
+  phone: string
+  whatsapp: string
+  website: string
+  facebook: string
+  address: string
+  googleMapsLink: string
+  photoLinks: string
+  agreedToTerms: boolean
+}
+
+function buildInitialForm(defaultCategory: string): ListBusinessFormState {
+  return {
+    businessName: "",
+    category: defaultCategory,
+    description: "",
+    priceRange: "$ Budget",
+    openingHours: "",
+    ownerName: "",
+    email: "",
+    phone: "",
+    whatsapp: "",
+    website: "",
+    facebook: "",
+    address: "",
+    googleMapsLink: "",
+    photoLinks: "",
+    agreedToTerms: false,
+  }
 }
 
 async function submitListing(payload: Record<string, unknown>) {
@@ -97,10 +121,16 @@ type PhotoFileEntry = {
   previewUrl: string
 }
 
-export default function ListBusinessForm() {
+export default function ListBusinessForm({ categories }: { categories: string[] }) {
+  const categoryOptions =
+    categories.length > 0
+      ? categories
+      : getActiveCategoryNames(DEFAULT_CATEGORY_CATALOG)
+  const defaultCategory = categoryOptions[0] ?? ""
+
   const [submissionId] = useState(() => crypto.randomUUID())
   const [plan, setPlan] = useState<(typeof pricingPlans)[number]["name"]>("Basic")
-  const [form, setForm] = useState(initialForm)
+  const [form, setForm] = useState(() => buildInitialForm(defaultCategory))
   const [photoFiles, setPhotoFiles] = useState<PhotoFileEntry[]>([])
   const [uploadingPhotos, setUploadingPhotos] = useState(false)
   const [status, setStatus] = useState<SubmitStatus>("idle")
@@ -110,9 +140,9 @@ export default function ListBusinessForm() {
   const [submittedOwnerName, setSubmittedOwnerName] = useState("")
   const [emailWarning, setEmailWarning] = useState("")
 
-  function updateField<K extends keyof typeof initialForm>(
+  function updateField<K extends keyof ListBusinessFormState>(
     key: K,
-    value: (typeof initialForm)[K],
+    value: ListBusinessFormState[K],
   ) {
     setForm((prev) => ({ ...prev, [key]: value }))
   }
@@ -269,7 +299,7 @@ export default function ListBusinessForm() {
       setSubmittedOwnerName(ownerName)
       setEmailWarning(result.emailWarning ?? "")
       setStatus("success")
-      setForm(initialForm)
+      setForm(buildInitialForm(defaultCategory))
       setPlan("Basic")
       clearPhotoFiles()
     } catch (err) {
@@ -355,7 +385,7 @@ export default function ListBusinessForm() {
               required
               disabled={isLoading}
             >
-              {businessCategories.map((cat) => (
+              {categoryOptions.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>

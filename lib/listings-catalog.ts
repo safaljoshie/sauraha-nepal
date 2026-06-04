@@ -1,87 +1,19 @@
 import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate } from "@/lib/business-listing"
+import {
+  DEFAULT_CATEGORY_CATALOG,
+  type BuiltCategoryGroup,
+  type CategoryCatalog,
+  type CategoryGroupId,
+} from "@/lib/category-catalog"
 
-export type CategoryGroupId =
-  | "all"
-  | "stay"
-  | "eat"
-  | "activities"
-  | "transport"
-  | "shopping"
-  | "guides"
-  | "info"
+export type { CategoryGroupId } from "@/lib/category-catalog"
 
 export type PlanFilterId = "all" | "basic" | "featured" | "premium"
 
 export type SortOptionId = "newest" | "az" | "plan"
 
 export const PAGE_SIZE = 9
-
-export const CATEGORY_GROUPS: {
-  id: CategoryGroupId
-  label: string
-  tabLabel: string
-  matchers: string[]
-}[] = [
-  { id: "all", label: "All", tabLabel: "All", matchers: [] },
-  {
-    id: "stay",
-    label: "Stay",
-    tabLabel: "🏨 Stay",
-    matchers: ["Hotel", "Resort", "Guesthouse", "Homestay"],
-  },
-  {
-    id: "eat",
-    label: "Eat & Drink",
-    tabLabel: "🍽️ Eat & Drink",
-    matchers: [
-      "Restaurant",
-      "Cafe",
-      "Bar",
-      "Tea Shop",
-      "Bakery",
-      "Street Food",
-      "Liquor Shop",
-    ],
-  },
-  {
-    id: "activities",
-    label: "Activities",
-    tabLabel: "🐘 Activities",
-    matchers: [
-      "Safari",
-      "Canoe/Boat",
-      "Birdwatching",
-      "Cultural Show",
-      "Animal Sanctuary",
-    ],
-  },
-  {
-    id: "transport",
-    label: "Transport",
-    tabLabel: "🚗 Transport",
-    matchers: ["Taxi/Jeep", "Bus Service", "Cycle Rental", "Scooty Rental"],
-  },
-  {
-    id: "shopping",
-    label: "Shopping",
-    tabLabel: "🛍️ Shopping",
-    matchers: [
-      "Souvenirs",
-      "Clothing",
-      "Tattoo Shop",
-      "Grocery Shop",
-      "Chemist/Pharmacy",
-    ],
-  },
-  {
-    id: "guides",
-    label: "Tour Guides",
-    tabLabel: "🧭 Tour Guides",
-    matchers: ["Licensed Guide", "Tour Operator"],
-  },
-  { id: "info", label: "Travel Info", tabLabel: "ℹ️ Travel Info", matchers: [] },
-]
 
 const PLAN_ORDER: Record<string, number> = {
   premium: 0,
@@ -92,17 +24,22 @@ const PLAN_ORDER: Record<string, number> = {
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80"
 
-export function getCategoryGroupId(category: string): CategoryGroupId {
-  const group = CATEGORY_GROUPS.find(
-    (g) => g.id !== "all" && g.matchers.includes(category),
-  )
+function resolveGroups(catalog?: CategoryCatalog): BuiltCategoryGroup[] {
+  return catalog?.builtGroups ?? DEFAULT_CATEGORY_CATALOG.builtGroups
+}
+
+export function getCategoryGroupId(
+  category: string,
+  catalog?: CategoryCatalog,
+): CategoryGroupId {
+  const groups = resolveGroups(catalog)
+  const group = groups.find((g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(category))
   return group?.id ?? "info"
 }
 
-export function getCategoryDisplay(category: string) {
-  const group = CATEGORY_GROUPS.find(
-    (g) => g.id !== "all" && g.matchers.includes(category),
-  )
+export function getCategoryDisplay(category: string, catalog?: CategoryCatalog) {
+  const groups = resolveGroups(catalog)
+  const group = groups.find((g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(category))
   if (group) return group.tabLabel
   return `ℹ️ ${category}`
 }
@@ -139,12 +76,14 @@ export function sortListingsByOption(
 export function matchesCategoryGroup(
   listing: BusinessListing,
   groupId: CategoryGroupId,
+  catalog?: CategoryCatalog,
 ) {
   if (groupId === "all") return true
-  const group = CATEGORY_GROUPS.find((g) => g.id === groupId)
+  const groups = resolveGroups(catalog)
+  const group = groups.find((g) => g.id === groupId)
   if (!group) return false
   if (groupId === "info") {
-    return !CATEGORY_GROUPS.some(
+    return !groups.some(
       (g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(listing.category),
     )
   }
@@ -171,9 +110,14 @@ export function searchListings(listings: BusinessListing[], query: string, limit
   return listings.filter((l) => matchesSearch(l, query)).slice(0, limit)
 }
 
-export function parseCategoryParam(value: string | null | undefined): CategoryGroupId {
+export function parseCategoryParam(
+  value: string | null | undefined,
+  catalog?: CategoryCatalog,
+): CategoryGroupId {
   const id = value?.trim().toLowerCase()
-  if (id && CATEGORY_GROUPS.some((g) => g.id === id)) {
+  if (!id) return "all"
+  const groups = resolveGroups(catalog)
+  if (groups.some((g) => g.id === id)) {
     return id as CategoryGroupId
   }
   return "all"
@@ -187,11 +131,12 @@ export function filterListings(
     plan: PlanFilterId
     sort: SortOptionId
   },
+  catalog?: CategoryCatalog,
 ) {
   const filtered = listings.filter(
     (l) =>
       matchesSearch(l, options.search) &&
-      matchesCategoryGroup(l, options.category) &&
+      matchesCategoryGroup(l, options.category, catalog) &&
       matchesPlanFilter(l, options.plan),
   )
   return sortListingsByOption(filtered, options.sort)
@@ -200,15 +145,17 @@ export function filterListings(
 export function countByCategoryGroup(
   listings: BusinessListing[],
   groupId: CategoryGroupId,
+  catalog?: CategoryCatalog,
 ) {
-  return listings.filter((l) => matchesCategoryGroup(l, groupId)).length
+  return listings.filter((l) => matchesCategoryGroup(l, groupId, catalog)).length
 }
 
 export function filterByCategoryGroup(
   listings: BusinessListing[],
   groupId: CategoryGroupId,
+  catalog?: CategoryCatalog,
 ) {
-  return listings.filter((l) => matchesCategoryGroup(l, groupId))
+  return listings.filter((l) => matchesCategoryGroup(l, groupId, catalog))
 }
 
 export function truncateDescription(text: string | null, max = 100) {

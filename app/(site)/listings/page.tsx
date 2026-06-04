@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import ListingsExplorer from "@/components/listings/ListingsExplorer"
 import PageHeader from "@/components/PageHeader"
+import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { parseCategoryParam } from "@/lib/listings-catalog"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { pageMetadata } from "@/lib/seo"
@@ -20,9 +21,12 @@ type ListingsPageProps = {
 
 export default async function ListingsPage({ searchParams }: ListingsPageProps) {
   const params = await searchParams
-  const listings = await fetchApprovedListings()
+  const [listings, catalog] = await Promise.all([
+    fetchApprovedListings(),
+    fetchCategoryCatalog(),
+  ])
   const initialSearch = (params.search ?? params.q ?? "").trim()
-  const initialCategory = parseCategoryParam(params.category)
+  const initialCategory = parseCategoryParam(params.category, catalog)
 
   return (
     <main>
@@ -37,6 +41,7 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
       />
       <ListingsExplorer
         listings={listings}
+        catalog={catalog}
         initialSearch={initialSearch}
         initialCategory={initialCategory}
       />
