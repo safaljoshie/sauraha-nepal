@@ -1,6 +1,5 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { CategoryCatalog } from "@/lib/category-catalog"
@@ -15,15 +14,7 @@ import {
 } from "@/lib/listings-catalog"
 import BusinessListingCard from "./BusinessListingCard"
 import ListingsGridErrorBoundary from "./ListingsGridErrorBoundary"
-
-const ListingsMapView = dynamic(() => import("./ListingsMapView"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-[min(70vh,520px)] items-center justify-center rounded-2xl border border-border-brand bg-cream">
-      <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-green-brand/30 border-t-green-brand" />
-    </div>
-  ),
-})
+import ListingsMapView from "./ListingsMapView"
 
 type ViewMode = "grid" | "map"
 

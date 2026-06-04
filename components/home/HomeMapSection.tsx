@@ -1,28 +1,12 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useMemo, useState } from "react"
+import ListingsMapView from "@/components/listings/ListingsMapView"
 import type { BusinessListing } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import { buildMapFilterGroups, listingsForMapFilter } from "@/lib/homepage-data"
 import type { CategoryGroupId } from "@/lib/listings-catalog"
-
-const ListingsMapView = dynamic(
-  () => import("@/components/listings/ListingsMapView"),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        className="flex h-[420px] items-center justify-center bg-surface-muted text-ink-muted"
-        role="status"
-        aria-label="Loading map"
-      >
-        <span className="animate-pulse">Loading map…</span>
-      </div>
-    ),
-  },
-)
 
 type MapFilterId = CategoryGroupId | "medical" | "all"
 
