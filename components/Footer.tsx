@@ -126,8 +126,8 @@ export default async function Footer({ catalog }: { catalog: CategoryCatalog }) 
           </div>
         </div>
         <div className="border-t border-white/10 pt-6 text-center text-sm text-white/40">
-          © {new Date().getFullYear()} SaurahaNePal.com · Built with ❤️ for travellers
-          exploring Chitwan
+          © {new Date().getFullYear()} SaurahaNepal.com · Built with 💚 for travellers
+          exploring Sauraha
         </div>
       </div>
     </footer>
