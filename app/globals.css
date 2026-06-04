@@ -65,6 +65,60 @@ body {
     @apply text-green-mid font-semibold text-[0.95rem] border-b-2 border-green-light pb-0.5 hover:text-green-brand transition-colors;
   }
 
+  @keyframes chat-pulse {
+    0%,
+    100% {
+      box-shadow: 0 4px 20px rgba(26, 92, 42, 0.35);
+    }
+    50% {
+      box-shadow: 0 4px 28px rgba(26, 92, 42, 0.55), 0 0 0 8px rgba(26, 92, 42, 0.12);
+    }
+  }
+
+  .chat-bubble-pulse {
+    animation: chat-pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes chat-slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .chat-window-enter {
+    animation: chat-slide-up 0.25s ease-out;
+  }
+
+  @keyframes chat-typing-bounce {
+    0%,
+    80%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.4;
+    }
+    40% {
+      transform: translateY(-4px);
+      opacity: 1;
+    }
+  }
+
+  .chat-typing-dot {
+    animation: chat-typing-bounce 1.2s ease-in-out infinite;
+  }
+
+  .chat-typing-dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+
+  .chat-typing-dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
   /* Published blog body — aligned with admin markdown editor preview */
   .blog-content {
     @apply text-[1.05rem] leading-[1.75] text-text-mid;

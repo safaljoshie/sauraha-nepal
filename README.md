@@ -42,6 +42,9 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 | `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` | Google Search Console HTML tag verification code (content value only, not the full meta tag) |
 | `RESEND_API_KEY` | Contact / listing notification emails |
 | `ADMIN_PASSWORD` | Admin panel login |
+| `ANTHROPIC_API_KEY` | Server-only; Sauraha AI travel assistant (`/api/chat`). Get a key at [console.anthropic.com](https://console.anthropic.com) |
+
+**Chat rate limiting:** `/api/chat` allows 20 messages per IP per hour using an in-memory counter (resets on serverless cold starts).
 
 ## Deploy on Vercel
 
