@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import type { HeroMedia } from "@/lib/site-content"
+import { getSupabasePublic } from "@/lib/supabase"
 
 type Toast = { id: string; type: "success" | "error"; message: string }
 type HeroForm = {
@@ -197,6 +198,56 @@ export default function AdminHeroMediaManager() {
     }
   }
 
+  async function uploadHeroFileDirect(
+    file: File,
+    type: "image" | "video",
+  ): Promise<{ url: string } | { error: string }> {
+    const initRes = await fetch("/api/admin/site/hero/upload/init", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type,
+        filename: file.name,
+        size: file.size,
+        mimeType: file.type,
+      }),
+    })
+    if (initRes.status === 401) {
+      router.push("/admin")
+      return { error: "Unauthorized." }
+    }
+    const initData = (await initRes.json()) as {
+      bucket?: string
+      token?: string
+      path?: string
+      contentType?: string
+      url?: string
+      error?: string
+    }
+    if (!initRes.ok || !initData.token || !initData.path || !initData.bucket || !initData.url) {
+      return { error: initData.error ?? "Failed to prepare upload." }
+    }
+
+    const supabase = getSupabasePublic()
+    const { error: uploadError } = await supabase.storage
+      .from(initData.bucket)
+      .uploadToSignedUrl(initData.path, initData.token, file, {
+        contentType: initData.contentType ?? file.type ?? "video/mp4",
+        upsert: false,
+      })
+
+    if (uploadError) {
+      const msg = uploadError.message?.trim() || "Upload to storage failed."
+      const hint =
+        msg.toLowerCase().includes("size") || msg.toLowerCase().includes("limit")
+          ? " In Supabase → Storage → your bucket, set max file size to at least 50 MB and allow video/mp4."
+          : ""
+      return { error: `${msg}${hint}` }
+    }
+
+    return { url: initData.url }
+  }
+
   async function handleUpload(e: ChangeEvent<HTMLInputElement>, type: "image" | "video") {
     const file = e.target.files?.[0]
     e.target.value = ""
@@ -205,29 +256,42 @@ export default function AdminHeroMediaManager() {
     setUploading(true)
     setError("")
     try {
-      const body = new FormData()
-      body.set("file", file)
-      body.set("type", type)
-      const res = await fetch("/api/admin/site/hero/upload", {
-        method: "POST",
-        body,
-      })
-      if (res.status === 401) {
-        router.push("/admin")
-        return
-      }
-      const data = (await res.json()) as { url?: string; error?: string }
-      if (!res.ok || !data.url) {
-        setError(data.error ?? "Failed to upload media.")
-        showToast("error", "Failed to upload media.")
-        return
-      }
-      if (type === "image") {
-        setForm((prev) => (prev ? { ...prev, type: "image", url: data.url! } : prev))
+      let publicUrl: string | undefined
+      let uploadError: string | undefined
+
+      if (type === "video") {
+        const result = await uploadHeroFileDirect(file, "video")
+        if ("error" in result) uploadError = result.error
+        else publicUrl = result.url
+      } else if (file.size <= 4 * 1024 * 1024) {
+        const body = new FormData()
+        body.set("file", file)
+        body.set("type", type)
+        const res = await fetch("/api/admin/site/hero/upload", {
+          method: "POST",
+          body,
+        })
+        if (res.status === 401) {
+          router.push("/admin")
+          return
+        }
+        const data = (await res.json()) as { url?: string; error?: string }
+        if (!res.ok || !data.url) uploadError = data.error ?? "Failed to upload media."
+        else publicUrl = data.url
       } else {
-        setForm((prev) => (prev ? { ...prev, type: "video", url: data.url! } : prev))
+        const result = await uploadHeroFileDirect(file, "image")
+        if ("error" in result) uploadError = result.error
+        else publicUrl = result.url
       }
-      showToast("success", "Upload complete.")
+
+      if (!publicUrl) {
+        setError(uploadError ?? "Failed to upload media.")
+        showToast("error", uploadError ?? "Failed to upload media.")
+        return
+      }
+
+      setForm((prev) => (prev ? { ...prev, type, url: publicUrl! } : prev))
+      showToast("success", "Upload complete. Click Save Media to publish.")
     } catch {
       setError("Failed to upload media.")
       showToast("error", "Failed to upload media.")
@@ -425,7 +489,9 @@ export default function AdminHeroMediaManager() {
                       disabled={uploading}
                     />
                   </label>
-                  <span className="text-xs text-text-light">Image: 10MB max, Video: 50MB max</span>
+                  <span className="text-xs text-text-light">
+                    MP4 or WEBM. Image 10MB max, video 50MB max (uploads go direct to storage).
+                  </span>
                 </div>
               </Field>
 
