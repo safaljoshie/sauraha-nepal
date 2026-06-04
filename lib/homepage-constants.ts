@@ -23,7 +23,7 @@ export const HOME_EXPERIENCES = [
   {
     name: "Bird Watching",
     description: "Over 500 species — guided walks and hides for beginners and enthusiasts.",
-    image: "https://images.unsplash.com/photo-1497206365907-f5e630693df0?w=1200&q=85",
+    image: "/images/birdwatching-sauraha.png",
     href: "/listings?category=activities",
     cta: "Explore birding",
   },
@@ -99,7 +99,10 @@ export const TESTIMONIALS = [
 /** Gallery below testimonials — same images as Things to do. */
 export const TRAVELLER_PHOTOS = HOME_EXPERIENCES.map((exp) => ({
   src: exp.image,
-  alt: `${exp.name} in Sauraha and Chitwan`,
+  alt:
+    exp.name === "Bird Watching"
+      ? "Chinese pond heron in a green marsh — birdwatching in Sauraha and Chitwan"
+      : `${exp.name} in Sauraha and Chitwan`,
 }))
 
 export const WHY_VISIT_HIGHLIGHTS = [
