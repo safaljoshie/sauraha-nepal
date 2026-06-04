@@ -134,7 +134,7 @@ export default async function HomePage() {
           </span>
           <h1 className="font-[family-name:var(--font-playfair)] text-4xl leading-tight font-bold text-white md:text-6xl">
             Discover the Wild Heart of{" "}
-            <span className="inline-block text-5xl font-extrabold tracking-[0.08em] text-orange-light md:text-7xl">
+            <span className="inline-block text-[3.3rem] font-extrabold tracking-[0.08em] text-orange-brand md:text-[4.95rem]">
               SAURAHA
             </span>
           </h1>
