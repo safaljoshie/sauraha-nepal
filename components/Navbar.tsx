@@ -80,7 +80,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <Link
             href="/list-your-business"
-            className="hidden rounded-full bg-orange-brand px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-brand md:inline-block"
+            className="hidden rounded-full bg-orange-brand px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-green-brand md:inline-block"
           >
             List Your Business
           </Link>
@@ -142,7 +142,7 @@ export default function Navbar() {
           <Link
             href="/list-your-business"
             onClick={closeMenu}
-            className="btn-orange mt-8 block py-3 text-center text-base font-semibold"
+            className="btn-orange mt-8 block py-3 text-center text-base font-bold"
           >
             List Your Business
           </Link>
