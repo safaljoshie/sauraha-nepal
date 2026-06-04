@@ -1,90 +1,79 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet"
-import type { Icon } from "leaflet"
+import L from "leaflet"
+import type { MapListingMarker } from "@/lib/map-markers"
 import { getCategoryDisplay } from "@/lib/listings-catalog"
 import "leaflet/dist/leaflet.css"
 
-export type MapListingMarker = {
-  id: string
-  business_name: string
-  category: string
-  lat: number
-  lng: number
-}
-
 const SAURAHA_CENTER: [number, number] = [27.5833, 84.5]
 const DEFAULT_ZOOM = 14
+
+function fixLeafletIcons() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  delete (L.Icon.Default.prototype as any)._getIconUrl
+  L.Icon.Default.mergeOptions({
+    iconRetinaUrl: "/leaflet/marker-icon-2x.png",
+    iconUrl: "/leaflet/marker-icon.png",
+    shadowUrl: "/leaflet/marker-shadow.png",
+  })
+}
 
 function FitBounds({ listings }: { listings: MapListingMarker[] }) {
   const map = useMap()
 
   useEffect(() => {
-    let cancelled = false
-
-    void import("leaflet").then(({ default: L }) => {
-      if (cancelled) return
-
-      if (listings.length === 0) {
-        map.setView(SAURAHA_CENTER, DEFAULT_ZOOM)
-        return
-      }
-      if (listings.length === 1) {
-        map.setView([listings[0].lat, listings[0].lng], DEFAULT_ZOOM)
-        return
-      }
-      const bounds = L.latLngBounds(
-        listings.map((l) => [l.lat, l.lng] as [number, number]),
-      )
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
-    })
-
-    return () => {
-      cancelled = true
+    if (listings.length === 0) {
+      map.setView(SAURAHA_CENTER, DEFAULT_ZOOM)
+      return
     }
+    if (listings.length === 1) {
+      map.setView([listings[0].lat, listings[0].lng], DEFAULT_ZOOM)
+      return
+    }
+    const bounds = L.latLngBounds(
+      listings.map((l) => [l.lat, l.lng] as [number, number]),
+    )
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 })
   }, [listings, map])
 
   return null
 }
 
 export default function Map({ listings }: { listings: MapListingMarker[] }) {
-  const [mounted, setMounted] = useState(false)
-  const [markerIcon, setMarkerIcon] = useState<Icon | null>(null)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-
-    void import("leaflet").then(({ default: L }) => {
-      setMarkerIcon(
-        L.icon({
-          iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-          iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-          shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-          popupAnchor: [1, -34],
-          shadowSize: [41, 41],
-        }),
-      )
-    })
+    fixLeafletIcons()
+    setReady(true)
   }, [])
 
-  if (!mounted || !markerIcon) {
+  const markerIcon = useMemo(
+    () =>
+      L.icon({
+        iconUrl: "/leaflet/marker-icon.png",
+        iconRetinaUrl: "/leaflet/marker-icon-2x.png",
+        shadowUrl: "/leaflet/marker-shadow.png",
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41],
+      }),
+    [],
+  )
+
+  if (!ready) {
     return (
-      <div
-        className="flex h-[min(70vh,520px)] items-center justify-center bg-surface-muted text-ink-muted"
-        role="status"
-        aria-label="Loading map"
-      >
-        <span className="animate-pulse">Loading map…</span>
+      <div className="flex h-96 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
+        Loading map...
       </div>
     )
   }
 
   return (
-    <div className="h-[min(70vh,520px)] overflow-hidden rounded-2xl border border-border-brand">
+    <div className="h-[min(70vh,520px)] min-h-96 overflow-hidden rounded-2xl border border-border-brand">
       <MapContainer
         center={SAURAHA_CENTER}
         zoom={DEFAULT_ZOOM}

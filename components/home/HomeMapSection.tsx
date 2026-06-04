@@ -1,12 +1,22 @@
 "use client"
 
+import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useMemo, useState } from "react"
-import ListingsMapView from "@/components/listings/ListingsMapView"
 import type { BusinessListing } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import { buildMapFilterGroups, listingsForMapFilter } from "@/lib/homepage-data"
 import type { CategoryGroupId } from "@/lib/listings-catalog"
+import { listingsToMapMarkers } from "@/lib/map-markers"
+
+const MapComponent = dynamic(() => import("@/components/Map"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-96 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
+      Loading map...
+    </div>
+  ),
+})
 
 type MapFilterId = CategoryGroupId | "medical" | "all"
 
@@ -24,6 +34,8 @@ export default function HomeMapSection({
     () => listingsForMapFilter(listings, filter, catalog),
     [listings, filter, catalog],
   )
+
+  const { onMap, withoutCoords } = useMemo(() => listingsToMapMarkers(filtered), [filtered])
 
   return (
     <section id="map" className="home-section scroll-mt-24">
@@ -62,7 +74,12 @@ export default function HomeMapSection({
           ))}
         </div>
         <div className="overflow-hidden rounded-2xl border border-black/8">
-          <ListingsMapView listings={filtered} />
+          <p className="mb-4 px-1 text-sm text-text-light">
+            {onMap.length} listing{onMap.length === 1 ? "" : "s"} shown on map
+            {withoutCoords > 0 &&
+              ` (${withoutCoords} need a Google Maps link with coordinates to appear)`}
+          </p>
+          <MapComponent listings={onMap} />
         </div>
       </div>
     </section>
