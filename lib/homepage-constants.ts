@@ -4,7 +4,7 @@ export const HOME_EXPERIENCES = [
   {
     name: "Jungle Safari",
     description: "Jeep and elephant safaris through Chitwan's forests with expert naturalists.",
-    image: "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=800&q=80",
+    image: "/images/jungle-safari-sauraha.png",
     href: "/listings?category=activities",
     cta: "Find safaris",
   },
@@ -18,7 +18,7 @@ export const HOME_EXPERIENCES = [
   {
     name: "Tharu Cultural Show",
     description: "Traditional Tharu dance, music, and storytelling at community cultural centres.",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    image: "/images/tharu-cultural-show-sauraha.png",
     href: "/listings?category=activities",
     cta: "See cultural shows",
   },
@@ -32,14 +32,14 @@ export const HOME_EXPERIENCES = [
   {
     name: "Elephant Breeding Centre",
     description: "Visit the conservation centre and learn about ethical elephant care in Chitwan.",
-    image: "https://images.unsplash.com/photo-1557050543-4d1f39a78991?w=800&q=80",
+    image: "/images/elephant-breeding-centre-sauraha.png",
     href: "/listings?category=activities",
     cta: "Plan your visit",
   },
   {
     name: "Cycling Tour",
     description: "Village roads, rice fields, and quiet trails around Sauraha at your own pace.",
-    image: "https://images.unsplash.com/photo-1541625602330-2277a96fc581?w=800&q=80",
+    image: "/images/cycling-tour-sauraha.png",
     href: "/listings?category=transport",
     cta: "Find bike rentals",
   },
