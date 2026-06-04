@@ -9,7 +9,7 @@ type ChatAssistantAvatarProps = {
   variant?: "bubble" | "avatar"
 }
 
-/** Elephant with headphones — preserve artwork; corner background removed only. */
+/** Elephant with headphones — fills circular frame (desktop + mobile). */
 export default function ChatAssistantAvatar({
   size = 40,
   className = "",
@@ -19,7 +19,7 @@ export default function ChatAssistantAvatar({
 
   return (
     <span
-      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full ${
+      className={`relative inline-flex shrink-0 overflow-hidden rounded-full ${
         isBubble
           ? "bg-orange-brand shadow-[0_2px_12px_rgba(232,98,26,0.45)] ring-2 ring-orange-light"
           : "bg-cream ring-2 ring-orange-brand/25"
@@ -33,7 +33,7 @@ export default function ChatAssistantAvatar({
         width={size}
         height={size}
         unoptimized
-        className="h-[80%] w-[80%] object-contain object-center"
+        className="h-full w-full object-cover object-[center_42%]"
         sizes={`${size}px`}
         priority={isBubble}
       />

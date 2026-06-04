@@ -146,9 +146,7 @@ export default function ChatWidget() {
         >
           <header className="flex shrink-0 items-start justify-between gap-2 bg-green-brand px-4 py-3 text-white">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm">
-                <ChatAssistantAvatar size={34} variant="avatar" />
-              </span>
+              <ChatAssistantAvatar size={40} variant="avatar" className="shadow-sm" />
               <div>
                 <p className="font-semibold leading-tight">Sauraha Assistant</p>
                 <p className="flex items-center gap-1.5 text-xs text-white/85">
