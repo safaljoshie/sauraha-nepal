@@ -290,9 +290,7 @@ export default function ChatWidget() {
       <button
         type="button"
         onClick={() => (open ? handleClose() : handleOpen())}
-        className={`chat-bubble-pulse fixed right-6 bottom-6 z-[1000] flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105 ${
-          open ? "bg-orange-brand" : "bg-transparent"
-        }`}
+        className="chat-bubble-pulse fixed right-6 bottom-6 z-[1000] flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-brand shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105"
         aria-label={open ? "Close Sauraha Assistant" : "Open Sauraha Assistant"}
       >
         {open ? (

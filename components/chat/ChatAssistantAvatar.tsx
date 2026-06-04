@@ -5,11 +5,11 @@ const CHAT_AVATAR_SRC = "/images/chat-assistant-elephant.png"
 type ChatAssistantAvatarProps = {
   size?: number
   className?: string
-  /** Larger launcher with orange ring. Smaller avatars in messages/header. */
+  /** Launcher: image only (orange bg on parent button). Messages: small ring avatar. */
   variant?: "bubble" | "avatar"
 }
 
-/** Elephant with headphones — transparent PNG mascot */
+/** Elephant with headphones — transparent PNG (unoptimized to preserve alpha on mobile). */
 export default function ChatAssistantAvatar({
   size = 40,
   className = "",
@@ -19,10 +19,10 @@ export default function ChatAssistantAvatar({
 
   return (
     <span
-      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full ${
+      className={`relative inline-flex shrink-0 items-center justify-center ${
         isBubble
-          ? "bg-orange-brand shadow-[0_2px_12px_rgba(232,98,26,0.45)] ring-2 ring-orange-light"
-          : "bg-cream ring-2 ring-orange-brand/25"
+          ? "overflow-visible bg-transparent"
+          : "overflow-hidden rounded-full bg-cream ring-2 ring-orange-brand/25"
       } ${className}`}
       style={{ width: size, height: size }}
       aria-hidden
@@ -32,6 +32,7 @@ export default function ChatAssistantAvatar({
         alt=""
         width={size}
         height={size}
+        unoptimized
         className="h-[80%] w-[80%] object-contain object-center"
         sizes={`${size}px`}
         priority={isBubble}
