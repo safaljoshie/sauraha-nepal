@@ -11,27 +11,27 @@ const BENEFITS = [
 
 export default function HomeListBusiness() {
   return (
-    <section className="relative overflow-hidden">
-      <div className="relative min-h-[320px] overflow-hidden rounded-2xl md:min-h-[380px]">
-        <Image
-          src="/images/home-hero.png"
-          alt=""
-          fill
-          className="object-cover"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-green-brand/88" aria-hidden />
-      </div>
-      <div className="absolute inset-0 flex items-center">
-        <div className="mx-auto grid w-full max-w-[1400px] gap-10 px-6 py-14 md:grid-cols-2 md:px-10 md:py-20">
+    <section className="home-section py-12 md:py-16">
+      <div className="relative overflow-hidden rounded-2xl">
+        <div className="absolute inset-0" aria-hidden>
+          <Image
+            src="/images/home-hero.png"
+            alt=""
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 1400px"
+          />
+          <div className="absolute inset-0 bg-green-brand/88" />
+        </div>
+        <div className="relative z-10 mx-auto grid w-full max-w-[1400px] gap-8 px-6 py-10 sm:gap-10 sm:py-12 md:grid-cols-2 md:gap-10 md:px-10 md:py-16 lg:py-20">
           <div className="text-white">
-            <p className="text-xs font-bold tracking-[0.2em] uppercase text-white/70">
+            <p className="text-xs font-bold tracking-[0.2em] text-white/70 uppercase">
               For local businesses
             </p>
-            <h2 className="mt-3 font-heading text-3xl font-bold md:text-4xl">
+            <h2 className="mt-3 font-heading text-2xl leading-tight font-bold sm:text-3xl md:text-4xl">
               Grow your business in Sauraha
             </h2>
-            <p className="mt-4 max-w-md text-lg text-white/85">
+            <p className="mt-4 max-w-md text-base leading-relaxed text-white/85 sm:text-lg">
               List your hotel, restaurant, or tour operation — free to start.
             </p>
             <Link
@@ -45,7 +45,7 @@ export default function HomeListBusiness() {
             {BENEFITS.map((benefit) => (
               <li
                 key={benefit}
-                className="border-l-2 border-orange-brand bg-black/20 px-5 py-3 text-white/90 backdrop-blur-sm"
+                className="border-l-2 border-orange-brand bg-black/20 px-5 py-3 text-sm text-white/90 backdrop-blur-sm sm:text-base"
               >
                 {benefit}
               </li>
