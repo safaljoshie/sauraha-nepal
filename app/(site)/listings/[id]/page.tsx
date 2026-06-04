@@ -101,7 +101,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
       <div className="mx-auto grid max-w-4xl gap-10 px-4 py-10 md:px-8 lg:grid-cols-[1fr_320px]">
         <div className="space-y-8">
-          <div className="relative h-64 overflow-hidden rounded-2xl md:h-80">
+          <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
             <ListingImage
               src={heroImage}
               alt={listing.business_name}
