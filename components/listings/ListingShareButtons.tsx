@@ -33,7 +33,7 @@ export default function ListingShareButtons({ businessName, url }: ListingShareB
         <button
           type="button"
           onClick={copyLink}
-          className="rounded-full bg-green-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-mid"
+          className="rounded-xl bg-green-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-mid"
         >
           {copied ? "Copied! ✓" : "Copy link"}
         </button>
@@ -41,7 +41,7 @@ export default function ListingShareButtons({ businessName, url }: ListingShareB
           href={whatsappShareUrl(waText)}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-full bg-green-mid px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-brand"
+          className="rounded-xl bg-green-mid px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-brand"
         >
           WhatsApp
         </a>
@@ -49,7 +49,7 @@ export default function ListingShareButtons({ businessName, url }: ListingShareB
           href={facebookShare}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-full bg-orange-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-light"
+          className="rounded-xl bg-orange-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-light"
         >
           Facebook
         </a>

@@ -137,7 +137,7 @@ async function AboutPageContent() {
           </Link>
           <Link
             href="/listings"
-            className="inline-block rounded-full bg-white px-9 py-3.5 font-bold text-green-brand transition-colors hover:bg-cream"
+            className="inline-block rounded-xl bg-white px-9 py-3.5 font-bold text-green-brand transition-colors hover:bg-cream"
           >
             Browse Listings
           </Link>

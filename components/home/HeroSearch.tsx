@@ -8,9 +8,11 @@ import { getCategoryDisplay, searchListings } from "@/lib/listings-catalog"
 
 type HeroSearchProps = {
   listings: BusinessListing[]
+  variant?: "hero" | "default"
 }
 
-export default function HeroSearch({ listings }: HeroSearchProps) {
+export default function HeroSearch({ listings, variant = "default" }: HeroSearchProps) {
+  const isHero = variant === "hero"
   const router = useRouter()
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
@@ -51,10 +53,14 @@ export default function HeroSearch({ listings }: HeroSearchProps) {
   const showDropdown = open && debouncedQuery.trim().length > 0
 
   return (
-    <div ref={containerRef} className="relative mx-auto mb-8 max-w-[560px]">
+    <div ref={containerRef} className="relative w-full">
       <form
         onSubmit={handleSubmit}
-        className="flex overflow-hidden rounded-full bg-white shadow-[0_8px_32px_rgba(0,0,0,0.25)]"
+        className={`flex overflow-hidden rounded-2xl bg-white ${
+          isHero
+            ? "shadow-[0_4px_24px_rgba(0,0,0,0.2)]"
+            : "mx-auto max-w-[600px] shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+        }`}
       >
         <input
           type="search"
@@ -65,12 +71,12 @@ export default function HeroSearch({ listings }: HeroSearchProps) {
           }}
           onFocus={() => setOpen(true)}
           placeholder="Search hotels, restaurants, activities..."
-          className="flex-1 border-none bg-transparent px-6 py-4 font-[family-name:var(--font-nunito)] text-base text-text-brand outline-none"
+          className="flex-1 border-none bg-transparent px-5 py-4 text-base text-ink outline-none md:px-6"
           autoComplete="off"
         />
         <button
           type="submit"
-          className="cursor-pointer bg-green-mid px-7 font-semibold text-white transition-colors hover:bg-green-brand"
+          className="cursor-pointer bg-green-brand px-6 font-bold tracking-wide text-white uppercase transition-colors hover:bg-green-mid md:px-8"
         >
           Search
         </button>

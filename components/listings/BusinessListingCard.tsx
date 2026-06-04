@@ -31,7 +31,7 @@ export default function BusinessListingCard({
 
   return (
     <article
-      className={`listing-card-interactive flex h-full flex-col overflow-hidden rounded-[18px] border bg-white ${
+      className={`listing-card-interactive flex h-full flex-col overflow-hidden rounded-2xl border bg-white ${
         isPremium
           ? "border-orange-brand shadow-[0_8px_32px_rgba(232,98,26,0.18)] ring-2 ring-orange-brand/35"
           : isFeatured
@@ -41,7 +41,7 @@ export default function BusinessListingCard({
     >
       <Link
         href={detailHref}
-        className="absolute inset-0 z-0 rounded-[18px]"
+        className="absolute inset-0 z-0 rounded-2xl"
         aria-label={`View details for ${listing.business_name}`}
       />
 

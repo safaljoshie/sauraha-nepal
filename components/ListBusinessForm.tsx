@@ -16,7 +16,7 @@ import {
 import { businessCategories, pricingPlans } from "@/lib/data"
 
 const inputClass =
-  "w-full rounded-[10px] border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+  "w-full rounded-xl border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 
 type SubmitStatus = "idle" | "loading" | "success" | "error"
 
@@ -284,7 +284,7 @@ export default function ListBusinessForm() {
     return (
       <div
         role="status"
-        className="rounded-[20px] border border-green-mid/30 bg-white p-10 text-center shadow-[0_8px_32px_rgba(26,92,42,0.08)]"
+        className="rounded-2xl border border-green-mid/30 bg-white p-10 text-center shadow-[0_8px_32px_rgba(26,92,42,0.08)]"
       >
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-mid/15 text-2xl">
           ✓
@@ -299,12 +299,12 @@ export default function ListBusinessForm() {
           We will review and get back to you within 48 hours.
         </p>
         {emailWarning && (
-          <p className="mt-4 rounded-[10px] border border-yellow-500/30 bg-yellow-50 px-4 py-3 text-sm text-text-mid">
+          <p className="mt-4 rounded-xl border border-yellow-500/30 bg-yellow-50 px-4 py-3 text-sm text-text-mid">
             {emailWarning}
           </p>
         )}
         {isPaidPlan(submittedPlan) && (
-          <p className="mt-4 rounded-[10px] border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-sm font-semibold text-orange-brand">
+          <p className="mt-4 rounded-xl border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-sm font-semibold text-orange-brand">
             {submittedEmail
               ? `Payment instructions will be sent to ${submittedEmail} within 24 hours.`
               : "We will contact you by phone with payment instructions within 24 hours."}
@@ -330,7 +330,7 @@ export default function ListBusinessForm() {
 
   return (
     <form
-      className="rounded-[20px] border border-border-brand bg-white p-10 shadow-[0_8px_32px_rgba(26,92,42,0.08)]"
+      className="rounded-2xl border border-border-brand bg-white p-10 shadow-[0_8px_32px_rgba(26,92,42,0.08)]"
       onSubmit={handleSubmit}
       noValidate
     >
@@ -501,15 +501,15 @@ export default function ListBusinessForm() {
             type="file"
             accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
             multiple
-            className={`${inputClass} cursor-pointer file:mr-4 file:rounded-full file:border-0 file:bg-green-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white`}
+            className={`${inputClass} cursor-pointer file:mr-4 file:rounded-xl file:border-0 file:bg-green-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white`}
             onChange={handlePhotoFileChange}
             disabled={isLoading || uploadingPhotos || totalPhotoCount >= photoLimit}
           />
         </Field>
         {uploadingPhotos && (
           <div className="mt-2">
-            <div className="h-2 overflow-hidden rounded-full bg-cream">
-              <div className="h-full w-2/3 animate-pulse rounded-full bg-green-brand" />
+            <div className="h-2 overflow-hidden rounded-xl bg-cream">
+              <div className="h-full w-2/3 animate-pulse rounded-xl bg-green-brand" />
             </div>
             <p className="mt-1 text-xs text-text-light">Uploading photos…</p>
           </div>
@@ -533,7 +533,7 @@ export default function ListBusinessForm() {
                   type="button"
                   onClick={() => removePhotoFile(entry.id)}
                   disabled={isLoading}
-                  className="absolute top-1 right-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-white"
+                  className="absolute top-1 right-1 rounded-xl bg-black/60 px-2 py-0.5 text-xs font-bold text-white"
                   aria-label="Remove photo"
                 >
                   ×
@@ -561,7 +561,7 @@ export default function ListBusinessForm() {
               type="button"
               onClick={() => setPlan(p.name)}
               disabled={isLoading}
-              className={`cursor-pointer rounded-2xl border-2 p-5 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+              className={`cursor-pointer rounded-xl border-2 p-5 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
                 plan === p.name
                   ? "border-orange-brand bg-orange-brand/5"
                   : "border-border-brand hover:border-green-mid"
@@ -602,7 +602,7 @@ export default function ListBusinessForm() {
       {status === "error" && (
         <p
           role="alert"
-          className="mt-4 rounded-[10px] border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-center text-sm font-semibold text-orange-brand"
+          className="mt-4 rounded-xl border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-center text-sm font-semibold text-orange-brand"
         >
           {errorMessage}
         </p>

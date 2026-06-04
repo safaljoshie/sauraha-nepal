@@ -30,7 +30,7 @@ export default function BlogShareBar({ title, url }: BlogShareBarProps) {
       <button
         type="button"
         onClick={copyLink}
-        className="rounded-full border border-border-brand bg-white px-4 py-2 text-sm font-semibold text-green-brand hover:bg-cream"
+        className="rounded-xl border border-border-brand bg-white px-4 py-2 text-sm font-semibold text-green-brand hover:bg-cream"
       >
         {copied ? "Copied!" : "Copy link"}
       </button>
@@ -38,7 +38,7 @@ export default function BlogShareBar({ title, url }: BlogShareBarProps) {
         href={waShare}
         target="_blank"
         rel="noopener noreferrer"
-        className="rounded-full bg-green-mid/15 px-4 py-2 text-sm font-semibold text-green-brand hover:bg-green-mid/25"
+        className="rounded-xl bg-green-mid/15 px-4 py-2 text-sm font-semibold text-green-brand hover:bg-green-mid/25"
       >
         WhatsApp
       </a>

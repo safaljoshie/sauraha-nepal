@@ -36,7 +36,7 @@ export default function ListingMapSection({
         <iframe
           title="Map location"
           src={embedUrl}
-          className="mt-4 h-56 w-full rounded-xl border border-border-brand"
+          className="mt-4 h-56 w-full rounded-2xl border border-border-brand"
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
         />

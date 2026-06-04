@@ -3,29 +3,20 @@ import type { ReactNode } from "react"
 import { fetchSiteSettings } from "@/lib/site-settings"
 
 const exploreLinks = [
-  { href: "/listings", label: "All Listings" },
-  { href: "/listings?category=stay", label: "Stay" },
-  { href: "/listings?category=eat", label: "Eat & Drink" },
+  { href: "/listings?category=stay", label: "Hotels" },
+  { href: "/listings?category=eat", label: "Restaurants" },
   { href: "/listings?category=activities", label: "Activities" },
+  { href: "/blog", label: "Travel Guides" },
 ]
 
-const infoLinks = [
-  { href: "/blog", label: "Travel Tips" },
-  {
-    href: "/blog/park-permits-to-visit-sauraha-community-forest-vs-national-forest-2026-guide",
-    label: "Park Permits",
-  },
-  {
-    href: "/blog/how-to-get-to-sauraha-from-kathmandu-and-pokhara-2026-travel-guide",
-    label: "Getting Here",
-  },
-  { href: "/blog", label: "Blog" },
+const businessLinks = [
+  { href: "/list-your-business", label: "List Your Business" },
+  { href: "/contact", label: "Advertising" },
 ]
 
 const companyLinks = [
-  { href: "/about", label: "About Us" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
-  { href: "/list-your-business", label: "List Your Business" },
 ]
 
 function hasSocialUrl(url: string) {
@@ -127,7 +118,7 @@ export default async function Footer() {
   return (
     <footer className="bg-text-brand px-8 py-14 text-white/75">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-10 grid gap-8 md:grid-cols-[2fr_1fr_1fr_1fr]">
+        <div className="mb-10 grid gap-8 md:grid-cols-[2fr_1fr_1fr_1fr_1fr]">
           <div>
             <h4 className="font-[family-name:var(--font-playfair)] text-xl text-white">
               Sauraha Nepal
@@ -152,8 +143,20 @@ export default async function Footer() {
             )}
           </div>
           <FooterColumn title="Explore" links={exploreLinks} />
-          <FooterColumn title="Info" links={infoLinks} />
+          <FooterColumn title="Business" links={businessLinks} />
           <FooterColumn title="Company" links={companyLinks} />
+          <div>
+            <h4 className="mb-4 text-sm font-bold tracking-widest text-white uppercase">
+              Newsletter
+            </h4>
+            <p className="text-sm leading-relaxed text-white/60">
+              Travel tips and Chitwan updates — subscribe on our{" "}
+              <Link href="/#newsletter" className="text-orange-light hover:underline">
+                homepage
+              </Link>
+              .
+            </p>
+          </div>
         </div>
         <div className="border-t border-white/10 pt-6 text-center text-sm text-white/40">
           © {new Date().getFullYear()} SaurahaNePal.com · Built with ❤️ for travellers

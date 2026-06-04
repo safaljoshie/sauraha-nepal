@@ -198,6 +198,13 @@ export function countByCategoryGroup(
   return listings.filter((l) => matchesCategoryGroup(l, groupId)).length
 }
 
+export function filterByCategoryGroup(
+  listings: BusinessListing[],
+  groupId: CategoryGroupId,
+) {
+  return listings.filter((l) => matchesCategoryGroup(l, groupId))
+}
+
 export function truncateDescription(text: string | null, max = 100) {
   if (!text) return ""
   if (text.length <= max) return text

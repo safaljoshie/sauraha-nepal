@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import { Analytics } from "@vercel/analytics/next"
 import ChatWidgetLoader from "@/components/ChatWidgetLoader"
-import { Nunito, Playfair_Display } from "next/font/google"
+import { Inter, Nunito, Playfair_Display, Poppins } from "next/font/google"
 import "./globals.css"
 
 const playfair = Playfair_Display({
@@ -15,6 +15,18 @@ const nunito = Nunito({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
   variable: "--font-nunito",
+})
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-poppins",
+})
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
 })
 
 const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
@@ -44,8 +56,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${nunito.variable}`}>
-      <body className="antialiased">
+    <html
+      lang="en"
+      className={`${playfair.variable} ${nunito.variable} ${poppins.variable} ${inter.variable}`}
+    >
+      <body className="font-[family-name:var(--font-inter)] antialiased">
         {children}
         <ChatWidgetLoader />
         <Analytics />

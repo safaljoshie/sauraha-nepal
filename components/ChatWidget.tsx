@@ -1,5 +1,6 @@
 "use client"
 
+import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
@@ -51,6 +52,8 @@ function toApiHistory(messages: ChatUiMessage[]): AnthropicHistoryMessage[] {
 }
 
 export default function ChatWidget() {
+  const pathname = usePathname()
+  const onHomeMobile = pathname === "/"
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatUiMessage[]>([])
   const [input, setInput] = useState("")
@@ -288,7 +291,9 @@ export default function ChatWidget() {
       <button
         type="button"
         onClick={() => (open ? handleClose() : handleOpen())}
-        className="chat-bubble-pulse fixed right-6 bottom-6 z-[1000] flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-brand shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105"
+        className={`chat-bubble-pulse fixed right-4 z-[1000] flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-brand shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105 md:right-6 ${
+          onHomeMobile ? "bottom-20 md:bottom-6" : "bottom-6"
+        }`}
         aria-label={open ? "Close Sauraha Assistant" : "Open Sauraha Assistant"}
       >
         {open ? (

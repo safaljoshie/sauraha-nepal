@@ -1,8 +1,8 @@
 import type { BusinessListing } from "@/lib/business-listing"
-import { activityPlaceholders } from "@/lib/data"
+import { HOME_EXPERIENCES } from "@/lib/homepage-constants"
 import {
-  CATEGORY_GROUPS,
   countByCategoryGroup,
+  filterByCategoryGroup,
   sortListingsForDisplay,
   type CategoryGroupId,
 } from "@/lib/listings-catalog"
@@ -31,10 +31,14 @@ export type HomepageData = {
   stats: {
     businessCount: number
     categoryCount: number
+    guidesCount: number
   }
   categories: HomepageCategory[]
   featured: BusinessListing[]
+  stayListings: BusinessListing[]
+  eatListings: BusinessListing[]
   activities: ActivityCardItem[]
+  experiences: typeof HOME_EXPERIENCES
 }
 
 const HOMEPAGE_CATEGORIES: {
@@ -99,25 +103,34 @@ export function buildHomepageData(listings: BusinessListing[]): HomepageData {
     listing,
   }))
 
-  for (let i = 0; activities.length < 5 && i < activityPlaceholders.length; i++) {
-    const p = activityPlaceholders[i]
-    activities.push({
-      type: "placeholder",
-      name: p.name,
-      description: p.description,
-      image: p.image,
-      href: "/listings?category=activities",
-    })
-  }
+  const stayListings = filterByCategoryGroup(sorted, "stay").slice(0, 4)
+  const eatListings = filterByCategoryGroup(sorted, "eat").slice(0, 4)
 
   return {
     listings: sorted,
     stats: {
       businessCount: listings.length,
       categoryCount,
+      guidesCount: 0,
     },
     categories,
     featured,
+    stayListings,
+    eatListings,
     activities,
+    experiences: HOME_EXPERIENCES,
   }
+}
+
+export function listingsForMapFilter(
+  listings: BusinessListing[],
+  filter: CategoryGroupId | "medical" | "all",
+): BusinessListing[] {
+  if (filter === "all") return listings
+  if (filter === "medical") {
+    return listings.filter((l) =>
+      /chemist|pharmacy|medical|clinic|hospital/i.test(l.category),
+    )
+  }
+  return filterByCategoryGroup(listings, filter)
 }

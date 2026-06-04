@@ -15,6 +15,17 @@
   --color-border-brand: rgba(46, 139, 63, 0.15);
   --font-playfair: var(--font-playfair);
   --font-nunito: var(--font-nunito);
+  --font-poppins: var(--font-poppins);
+  --font-inter: var(--font-inter);
+  --color-earth: #7a4f2d;
+  --color-earth-light: #c4a882;
+  --color-sand: #f5efe6;
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #4a4a4a;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f4f4f4;
+  --radius-card: 1rem;
+  --radius-control: 0.75rem;
 }
 
 html {
@@ -36,16 +47,110 @@ body {
     @apply font-[family-name:var(--font-playfair)] text-3xl md:text-4xl font-bold text-green-brand mb-4;
   }
 
+  .font-heading {
+    font-family: var(--font-poppins), "Poppins", sans-serif;
+  }
+
+  .home-section {
+    @apply bg-surface px-6 py-16 md:px-10 md:py-24;
+  }
+
+  .home-section-muted {
+    @apply bg-surface-muted;
+  }
+
+  .home-card {
+    @apply overflow-hidden rounded-2xl bg-white;
+  }
+
+  /* Visit NSW–inspired editorial patterns */
+  .nsw-hero-line {
+    @apply block text-[clamp(2.75rem,9vw,5.5rem)] leading-[0.92] font-bold tracking-[-0.02em] text-white uppercase;
+    font-family: var(--font-poppins), "Poppins", sans-serif;
+  }
+
+  .nsw-section-title {
+    @apply text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-[-0.02em] text-ink;
+    font-family: var(--font-poppins), "Poppins", sans-serif;
+  }
+
+  .nsw-view-all {
+    @apply inline-flex items-center gap-1 text-[0.95rem] font-semibold text-ink underline decoration-ink/30 underline-offset-4 transition-colors hover:decoration-green-brand hover:text-green-brand;
+  }
+
+  .nsw-destination-card {
+    @apply relative block aspect-[3/4] min-w-[240px] shrink-0 overflow-hidden rounded-2xl md:min-w-0;
+  }
+
+  .nsw-destination-card .nsw-card-image,
+  .nsw-experience-card .nsw-card-image {
+    @apply object-cover transition-transform duration-700 ease-out;
+  }
+
+  .nsw-destination-card:hover .nsw-card-image,
+  .nsw-experience-card:hover .nsw-card-image {
+    transform: scale(1.05);
+  }
+
+  .nsw-destination-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent;
+  }
+
+  .nsw-experience-card {
+    @apply relative block aspect-[4/3] overflow-hidden rounded-2xl;
+  }
+
+  .nsw-promo-banner {
+    @apply relative overflow-hidden bg-green-brand px-8 py-14 text-white md:px-12 md:py-20;
+  }
+
+  @keyframes home-bounce {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(6px);
+    }
+  }
+
+  .scroll-indicator {
+    animation: home-bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.6s ease-out forwards;
+  }
+
   .section-sub {
     @apply text-text-light text-[1.05rem] leading-relaxed max-w-xl;
   }
 
   .btn-primary {
-    @apply bg-green-brand text-white px-6 py-2 rounded-full font-semibold hover:bg-green-mid transition-colors;
+    @apply bg-green-brand text-white px-6 py-2 rounded-xl font-semibold hover:bg-green-mid transition-colors;
   }
 
   .btn-orange {
-    @apply bg-orange-brand text-white px-6 py-2 rounded-full font-semibold hover:bg-orange-light transition-colors;
+    @apply bg-orange-brand text-white px-6 py-2 rounded-xl font-semibold hover:bg-orange-light transition-colors;
+  }
+
+  .nsw-panel {
+    @apply rounded-2xl border border-black/8 bg-white;
+  }
+
+  .nsw-input {
+    @apply w-full rounded-xl border border-black/15 bg-white px-4 py-3 text-sm text-ink outline-none focus:border-green-brand;
   }
 
   .card-hover {
@@ -53,7 +158,7 @@ body {
   }
 
   .listing-card-interactive {
-    @apply relative cursor-pointer transition-all duration-[250ms];
+    @apply relative cursor-pointer overflow-hidden rounded-2xl transition-all duration-[250ms];
   }
 
   .listing-card-interactive:hover {

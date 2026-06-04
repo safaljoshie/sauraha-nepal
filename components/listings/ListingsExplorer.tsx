@@ -114,12 +114,12 @@ export default function ListingsExplorer({
               placeholder="🔍 Search listings..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="min-w-0 flex-1 rounded-full border-[1.5px] border-border-brand px-4 py-2.5 text-sm outline-none focus:border-green-mid sm:min-w-[200px]"
+              className="min-w-0 flex-1 rounded-xl border-[1.5px] border-border-brand px-4 py-2.5 text-sm outline-none focus:border-green-mid sm:min-w-[200px]"
             />
             <select
               value={planFilter}
               onChange={(e) => setPlanFilter(e.target.value as PlanFilterId)}
-              className="rounded-full border-[1.5px] border-border-brand bg-white px-4 py-2.5 text-sm text-text-mid outline-none focus:border-green-mid"
+              className="rounded-xl border-[1.5px] border-border-brand bg-white px-4 py-2.5 text-sm text-text-mid outline-none focus:border-green-mid"
               aria-label="Filter by plan"
             >
               <option value="all">All Plans</option>
@@ -130,7 +130,7 @@ export default function ListingsExplorer({
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortOptionId)}
-              className="rounded-full border-[1.5px] border-border-brand bg-white px-4 py-2.5 text-sm text-text-mid outline-none focus:border-green-mid"
+              className="rounded-xl border-[1.5px] border-border-brand bg-white px-4 py-2.5 text-sm text-text-mid outline-none focus:border-green-mid"
               aria-label="Sort listings"
             >
               <option value="plan">Plan (Premium first)</option>

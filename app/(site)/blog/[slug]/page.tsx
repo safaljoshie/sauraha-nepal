@@ -129,7 +129,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <Link
                   key={item.id}
                   href={`/blog/${item.slug}`}
-                  className="rounded-xl border border-border-brand bg-white p-5 transition-shadow hover:shadow-md"
+                  className="rounded-2xl border border-border-brand bg-white p-5 transition-shadow hover:shadow-md"
                 >
                   <span className="text-xs font-bold text-orange-brand uppercase">
                     {item.tag}

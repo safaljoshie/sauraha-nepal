@@ -21,7 +21,7 @@ export default function ListingCard({
   const imageHeight = variant === "full" ? "h-[210px]" : "h-[200px]"
 
   return (
-    <article className="card-hover overflow-hidden rounded-[18px] border border-border-brand bg-white">
+    <article className="card-hover overflow-hidden rounded-2xl border border-border-brand bg-white">
       <div className={`relative ${imageHeight} overflow-hidden`}>
         <Image
           src={image}
@@ -73,12 +73,12 @@ export default function ListingCard({
 
         {variant === "full" && (
           <div className="mt-3 flex gap-2">
-            <Link href="#" className="rounded-full bg-green-brand px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-mid">
+            <Link href="#" className="rounded-xl bg-green-brand px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-mid">
               View Details
             </Link>
             <Link
               href="/contact"
-              className="rounded-full border-[1.5px] border-green-brand px-4 py-1.5 text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white"
+              className="rounded-xl border-[1.5px] border-green-brand px-4 py-1.5 text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white"
             >
               WhatsApp
             </Link>

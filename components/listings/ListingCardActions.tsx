@@ -31,7 +31,7 @@ export default function ListingCardActions({
     >
       <Link
         href={detailHref}
-        className="rounded-full bg-green-brand px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-mid"
+        className="rounded-xl bg-green-brand px-4 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-green-mid"
       >
         View Details
       </Link>
@@ -39,7 +39,7 @@ export default function ListingCardActions({
         <a
           href={callHref}
           onClick={stopCardNavigation}
-          className="rounded-full border-[1.5px] border-green-brand px-4 py-1.5 text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white"
+          className="rounded-xl border-[1.5px] border-green-brand px-4 py-1.5 text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white"
         >
           Call
         </a>
@@ -50,7 +50,7 @@ export default function ListingCardActions({
           target="_blank"
           rel="noopener noreferrer"
           onClick={stopCardNavigation}
-          className={`rounded-full px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
+          className={`rounded-xl px-4 py-1.5 text-sm font-semibold text-white transition-colors ${
             whatsappHighlighted
               ? "bg-orange-brand hover:bg-orange-light"
               : "bg-green-mid hover:bg-green-brand"
@@ -65,7 +65,7 @@ export default function ListingCardActions({
           target="_blank"
           rel="noopener noreferrer"
           onClick={stopCardNavigation}
-          className="rounded-full border border-border-brand px-4 py-1.5 text-sm font-semibold text-text-mid hover:border-green-mid"
+          className="rounded-xl border border-border-brand px-4 py-1.5 text-sm font-semibold text-text-mid hover:border-green-mid"
         >
           Website
         </a>

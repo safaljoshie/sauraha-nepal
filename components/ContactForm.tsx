@@ -54,12 +54,12 @@ export default function ContactForm() {
   const [tab, setTab] = useState<"general" | "listing">("general")
 
   return (
-    <div className="rounded-[20px] border border-border-brand bg-white p-10 shadow-[0_8px_32px_rgba(26,92,42,0.08)]">
-      <div className="mb-8 flex gap-1 rounded-[10px] bg-cream p-1">
+    <div className="rounded-2xl border border-border-brand bg-white p-10 shadow-[0_8px_32px_rgba(26,92,42,0.08)]">
+      <div className="mb-8 flex gap-1 rounded-xl bg-cream p-1">
         <button
           type="button"
           onClick={() => setTab("general")}
-          className={`flex-1 cursor-pointer rounded-lg py-2.5 text-sm font-semibold transition-all ${
+          className={`flex-1 cursor-pointer rounded-xl py-2.5 text-sm font-semibold transition-all ${
             tab === "general"
               ? "bg-white text-green-brand shadow-sm"
               : "text-text-light"
@@ -70,7 +70,7 @@ export default function ContactForm() {
         <button
           type="button"
           onClick={() => setTab("listing")}
-          className={`flex-1 cursor-pointer rounded-lg py-2.5 text-sm font-semibold transition-all ${
+          className={`flex-1 cursor-pointer rounded-xl py-2.5 text-sm font-semibold transition-all ${
             tab === "listing"
               ? "bg-white text-green-brand shadow-sm"
               : "text-text-light"
@@ -103,7 +103,7 @@ function FormField({
 }
 
 const inputClass =
-  "w-full rounded-[10px] border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+  "w-full rounded-xl border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
 
 function FormFeedback({
   status,
@@ -118,7 +118,7 @@ function FormFeedback({
     return (
       <p
         role="status"
-        className="mt-3 rounded-[10px] border border-green-mid/30 bg-green-mid/10 px-4 py-3 text-center text-sm font-semibold text-green-brand"
+        className="mt-3 rounded-xl border border-green-mid/30 bg-green-mid/10 px-4 py-3 text-center text-sm font-semibold text-green-brand"
       >
         {successMessage}
       </p>
@@ -129,7 +129,7 @@ function FormFeedback({
     return (
       <p
         role="alert"
-        className="mt-3 rounded-[10px] border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-center text-sm font-semibold text-orange-brand"
+        className="mt-3 rounded-xl border border-orange-brand/30 bg-orange-brand/10 px-4 py-3 text-center text-sm font-semibold text-orange-brand"
       >
         {errorMessage}
       </p>
@@ -472,7 +472,7 @@ export function ContactSidebarContent({
         {listingPlans.map((plan) => (
           <div
             key={plan.name}
-            className={`mb-3 flex items-center justify-between rounded-[14px] border-[1.5px] p-5 ${
+            className={`mb-3 flex items-center justify-between rounded-xl border-[1.5px] p-5 ${
               plan.featured
                 ? "border-orange-brand bg-orange-brand/5"
                 : "border-border-brand bg-white"

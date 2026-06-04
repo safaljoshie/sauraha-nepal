@@ -24,17 +24,17 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
 
   return (
     <article
-      className={`listing-card-interactive flex h-full flex-col overflow-hidden rounded-[18px] border bg-white ${
+      className={`listing-card-interactive flex h-full flex-col overflow-hidden border bg-white ${
         isPremium
-          ? "border-orange-brand ring-2 ring-orange-brand/30"
+          ? "border-orange-brand"
           : isFeatured
-            ? "border-green-mid ring-2 ring-green-mid/25"
-            : "border-border-brand"
+            ? "border-green-mid"
+            : "border-black/8"
       }`}
     >
       <Link
         href={detailHref}
-        className="absolute inset-0 z-0 rounded-[18px]"
+        className="absolute inset-0 z-0"
         aria-label={`View details for ${listing.business_name}`}
       />
 
@@ -72,7 +72,7 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
           <p className="mb-1 text-[0.78rem] font-bold tracking-wide text-green-mid">
             {getCategoryDisplay(listing.category)}
           </p>
-          <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-text-brand">
+          <h3 className="font-heading text-lg font-bold text-ink">
             {listing.business_name}
           </h3>
           {listing.opening_hours?.trim() && (

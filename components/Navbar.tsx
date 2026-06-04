@@ -6,18 +6,33 @@ import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/listings", label: "Listings" },
-  { href: "/#activities", label: "Activities" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/#places", label: "Places" },
+  { href: "/listings?category=stay", label: "Stay" },
+  { href: "/#experiences", label: "Things to do" },
+  { href: "/blog", label: "Articles" },
+  { href: "/#map", label: "Map" },
 ]
 
 export default function Navbar() {
   const pathname = usePathname()
+  const isHome = pathname === "/"
   const [menuOpen, setMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   const closeMenu = useCallback(() => setMenuOpen(false), [])
+
+  useEffect(() => {
+    if (!isHome) {
+      setScrolled(true)
+      return
+    }
+    function onScroll() {
+      setScrolled(window.scrollY > 48)
+    }
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [isHome])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -36,58 +51,78 @@ export default function Navbar() {
     closeMenu()
   }, [pathname, closeMenu])
 
+  const transparent = isHome && !scrolled && !menuOpen
+
   return (
     <>
-      <nav className="fixed top-0 right-0 left-0 z-[100] flex items-center justify-between border-b border-border-brand bg-white/96 px-5 py-3 backdrop-blur-sm md:px-10">
+      <nav
+        className={`fixed top-0 right-0 left-0 z-[100] flex items-center justify-between px-5 py-3 transition-colors duration-300 md:px-10 ${
+          transparent
+            ? "border-transparent bg-transparent text-white"
+            : "border-b border-black/8 bg-white text-ink shadow-sm"
+        }`}
+      >
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/one.png"
-            alt="Sauraha Nepal Logo"
-            width={48}
-            height={48}
-            className="h-12 w-12 rounded-full object-cover"
+            alt="Sauraha Nepal"
+            width={44}
+            height={44}
+            className="h-11 w-11 rounded-full object-cover ring-2 ring-white/30"
             priority
           />
-          <span className="font-[family-name:var(--font-playfair)] text-xl font-semibold text-green-brand">
+          <span
+            className={`font-heading text-lg font-bold tracking-tight ${
+              transparent ? "text-white" : "text-green-brand"
+            }`}
+          >
             Sauraha Nepal
           </span>
         </Link>
 
-        <ul className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => {
-            const isActive =
-              link.href === "/"
-                ? pathname === "/"
-                : link.href.startsWith("/#")
-                  ? false
-                  : pathname === link.href
-
-            return (
-              <li key={link.href}>
-                <Link
-                  href={link.href}
-                  className={`text-[0.95rem] font-medium transition-colors ${
-                    isActive ? "text-green-mid" : "text-text-mid hover:text-green-mid"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              </li>
-            )
-          })}
+        <ul className="hidden items-center gap-7 lg:flex">
+          {navLinks.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className={`text-[0.9rem] font-semibold tracking-wide uppercase transition-colors ${
+                  transparent
+                    ? "text-white/90 hover:text-white"
+                    : "text-ink-muted hover:text-green-brand"
+                }`}
+              >
+                {link.label}
+              </Link>
+            </li>
+          ))}
         </ul>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Link
+            href="/#hero-search"
+            className={`hidden h-10 w-10 items-center justify-center text-lg md:flex ${
+              transparent ? "text-white" : "text-ink"
+            }`}
+            aria-label="Search"
+          >
+            🔍
+          </Link>
           <Link
             href="/list-your-business"
-            className="hidden rounded-full bg-orange-brand px-5 py-2 text-sm font-bold text-white transition-colors hover:bg-green-brand md:inline-block"
+            className={`hidden rounded-xl px-5 py-2 text-xs font-bold tracking-wide uppercase transition-colors md:inline-block ${
+              transparent
+                ? "border border-white/60 text-white hover:bg-white/10"
+                : "bg-green-brand text-white hover:bg-green-mid"
+            }`}
           >
-            List Your Business
+            List business
           </Link>
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-2xl text-green-brand md:hidden"
+            className={`flex h-10 w-10 items-center justify-center text-2xl lg:hidden ${
+              transparent ? "text-white" : "text-ink"
+            }`}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
           >
@@ -97,42 +132,40 @@ export default function Navbar() {
       </nav>
 
       <div
-        className={`fixed inset-0 z-[110] md:hidden ${menuOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+        className={`fixed inset-0 z-[110] lg:hidden ${menuOpen ? "pointer-events-auto" : "pointer-events-none"}`}
         aria-hidden={!menuOpen}
       >
         <button
           type="button"
-          className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${
+          className={`absolute inset-0 bg-black/50 transition-opacity ${
             menuOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={closeMenu}
           aria-label="Close menu"
         />
         <div
-          className={`absolute top-0 right-0 flex h-full w-[min(320px,85vw)] flex-col bg-green-brand px-6 py-8 text-white shadow-xl transition-transform duration-300 ease-out ${
+          className={`absolute top-0 right-0 flex h-full w-[min(320px,88vw)] flex-col bg-white px-6 py-8 shadow-xl transition-transform duration-300 ${
             menuOpen ? "translate-x-0" : "translate-x-full"
           }`}
         >
           <div className="mb-8 flex items-center justify-between">
-            <span className="font-[family-name:var(--font-playfair)] text-xl font-semibold">
-              Menu
-            </span>
-            <button
-              type="button"
-              onClick={closeMenu}
-              className="text-2xl leading-none"
-              aria-label="Close menu"
-            >
+            <span className="font-heading text-lg font-bold text-ink">Menu</span>
+            <button type="button" onClick={closeMenu} className="text-2xl text-ink" aria-label="Close">
               ✕
             </button>
           </div>
-          <ul className="flex flex-col gap-5">
+          <ul className="flex flex-col gap-1">
+            <li>
+              <Link href="/" onClick={closeMenu} className="block py-3 font-semibold text-ink">
+                Home
+              </Link>
+            </li>
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link
                   href={link.href}
                   onClick={closeMenu}
-                  className="text-lg font-medium text-white/90 hover:text-orange-light"
+                  className="block py-3 font-semibold text-ink-muted hover:text-green-brand"
                 >
                   {link.label}
                 </Link>
@@ -142,9 +175,9 @@ export default function Navbar() {
           <Link
             href="/list-your-business"
             onClick={closeMenu}
-            className="btn-orange mt-8 block py-3 text-center text-base font-bold"
+            className="mt-8 rounded-xl bg-green-brand py-3 text-center text-sm font-bold tracking-wide text-white uppercase"
           >
-            List Your Business
+            List your business
           </Link>
         </div>
       </div>
