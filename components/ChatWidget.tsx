@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
 
-function BotAvatar({ size = 32 }: { size?: number }) {
+function BotAvatar({ size = 28 }: { size?: number }) {
   return (
     <span
       className="flex shrink-0 items-center justify-center overflow-hidden rounded-full"
@@ -147,7 +147,7 @@ export default function ChatWidget() {
           <header className="flex shrink-0 items-start justify-between gap-2 bg-green-brand px-4 py-3 text-white">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-white shadow-sm">
-                <ChatAssistantAvatar size={40} variant="avatar" />
+                <ChatAssistantAvatar size={34} variant="avatar" />
               </span>
               <div>
                 <p className="font-semibold leading-tight">Sauraha Assistant</p>
@@ -290,7 +290,7 @@ export default function ChatWidget() {
       <button
         type="button"
         onClick={() => (open ? handleClose() : handleOpen())}
-        className={`chat-bubble-pulse fixed right-6 bottom-6 z-[1000] flex h-14 w-14 items-center justify-center overflow-hidden rounded-full shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105 ${
+        className={`chat-bubble-pulse fixed right-6 bottom-6 z-[1000] flex h-12 w-12 items-center justify-center overflow-hidden rounded-full shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105 ${
           open ? "bg-orange-brand" : "bg-transparent"
         }`}
         aria-label={open ? "Close Sauraha Assistant" : "Open Sauraha Assistant"}
@@ -298,7 +298,7 @@ export default function ChatWidget() {
         {open ? (
           <span className="text-lg font-semibold text-white">✕</span>
         ) : (
-          <ChatAssistantAvatar size={56} variant="bubble" />
+          <ChatAssistantAvatar size={48} variant="bubble" />
         )}
         {!open && unread && (
           <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-brand text-[10px] font-bold text-white">
