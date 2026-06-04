@@ -10,11 +10,12 @@ export default function HomePromoBanner() {
       >
         <div className="relative aspect-[21/9] min-h-[200px] md:aspect-[3/1]">
           <Image
-            src="https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=1400&q=80"
-            alt=""
+            src="/images/plan-your-journey-sauraha.png"
+            alt="Elephants and mahouts crossing a river near the jungle in Sauraha"
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 1400px"
+            quality={90}
             unoptimized
           />
           <div className="absolute inset-0 bg-black/45" aria-hidden />
