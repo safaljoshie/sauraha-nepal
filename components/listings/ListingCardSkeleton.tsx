@@ -1,7 +1,7 @@
 export default function ListingCardSkeleton() {
   return (
     <div className="animate-pulse overflow-hidden rounded-2xl border border-border-brand bg-white">
-      <div className="h-[210px] bg-gray-200" />
+      <div className="aspect-square w-full bg-gray-200" />
       <div className="space-y-3 p-5">
         <div className="h-3 w-24 rounded bg-gray-200" />
         <div className="h-5 w-3/4 rounded bg-gray-200" />

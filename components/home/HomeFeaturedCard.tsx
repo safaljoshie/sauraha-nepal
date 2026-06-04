@@ -39,7 +39,7 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
       />
 
       <div className="pointer-events-none relative z-[1]">
-        <div className="relative h-[200px] overflow-hidden">
+        <div className="relative aspect-square w-full overflow-hidden">
           <ListingImage
             src={image}
             alt={listing.business_name}

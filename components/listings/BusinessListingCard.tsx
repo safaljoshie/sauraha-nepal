@@ -46,7 +46,7 @@ export default function BusinessListingCard({
       />
 
       <div className="pointer-events-none relative z-[1]">
-        <div className="relative h-[210px] overflow-hidden">
+        <div className="relative aspect-square w-full overflow-hidden">
           <ListingImage
             src={image}
             alt={listing.business_name}
