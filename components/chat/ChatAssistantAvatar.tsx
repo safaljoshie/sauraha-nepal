@@ -33,7 +33,7 @@ export default function ChatAssistantAvatar({
         width={size}
         height={size}
         unoptimized
-        className="h-[95%] w-[95%] object-cover object-[center_42%]"
+        className="h-[90%] w-[90%] object-cover object-[center_42%]"
         sizes={`${size}px`}
         priority={isBubble}
       />
