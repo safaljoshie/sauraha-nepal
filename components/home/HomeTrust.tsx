@@ -66,15 +66,15 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
         </div>
 
         <div className="mt-14 grid grid-cols-3 gap-2 md:grid-cols-6 md:gap-3">
-          {TRAVELLER_PHOTOS.map((src, i) => (
-            <div key={src} className="relative aspect-square overflow-hidden rounded-xl">
+          {TRAVELLER_PHOTOS.map((photo) => (
+            <div key={photo.src} className="relative aspect-square overflow-hidden rounded-xl">
               <Image
-                src={src}
-                alt={`Traveller photo ${i + 1} from Sauraha`}
+                src={photo.src}
+                alt={photo.alt}
                 fill
                 className="object-cover"
                 sizes="120px"
-                unoptimized={src.startsWith("http")}
+                unoptimized={photo.src.startsWith("http")}
               />
             </div>
           ))}

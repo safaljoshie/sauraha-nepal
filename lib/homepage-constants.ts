@@ -108,14 +108,11 @@ export const TESTIMONIALS = [
   },
 ] as const
 
-export const TRAVELLER_PHOTOS = [
-  "https://images.unsplash.com/photo-1564760055775-d63b17a55c44?w=400&q=80",
-  "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=400&q=80",
-  "/images/canoe-ride-sauraha.png",
-  "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=80",
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80",
-  "https://images.unsplash.com/photo-1497206365907-f5e630693df0?w=400&q=80",
-] as const
+/** Gallery below testimonials — same images as Things to do. */
+export const TRAVELLER_PHOTOS = HOME_EXPERIENCES.map((exp) => ({
+  src: exp.image,
+  alt: `${exp.name} in Sauraha and Chitwan`,
+}))
 
 export const WHY_VISIT_HIGHLIGHTS = [
   "One-horned rhinoceros in the wild",
