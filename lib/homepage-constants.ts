@@ -55,13 +55,13 @@ export const EAT_SHOWCASE = [
   {
     title: "Local Nepali Food",
     description: "Dal bhat, Tharu specialities, and family-run kitchens.",
-    image: "https://images.unsplash.com/photo-1585937421612-70a008592f82?w=800&q=80",
+    image: "/images/local-nepali-food-sauraha.png",
     href: "/listings?category=eat",
   },
   {
     title: "International Cuisine",
     description: "Comfort food and global flavours for every traveller.",
-    image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80",
+    image: "/images/international-cuisine-sauraha.png",
     href: "/listings?category=eat",
   },
   {
@@ -73,7 +73,7 @@ export const EAT_SHOWCASE = [
   {
     title: "Riverside Dining",
     description: "Sunset meals overlooking the Rapti and Chitwan forests.",
-    image: "https://images.unsplash.com/photo-1559339352-11d035aa65de?w=800&q=80",
+    image: "/images/riverside-dining-sauraha.png",
     href: "/listings?category=eat",
   },
 ] as const
@@ -102,7 +102,9 @@ export const TRAVELLER_PHOTOS = HOME_EXPERIENCES.map((exp) => ({
   alt:
     exp.name === "Bird Watching"
       ? "Chinese pond heron in a green marsh — birdwatching in Sauraha and Chitwan"
-      : `${exp.name} in Sauraha and Chitwan`,
+      : exp.name === "Elephant Breeding Centre"
+        ? "Baby elephant at the breeding centre in Sauraha and Chitwan"
+        : `${exp.name} in Sauraha and Chitwan`,
 }))
 
 export const WHY_VISIT_HIGHLIGHTS = [
@@ -125,7 +127,7 @@ export const PLACES_TO_GO = [
   {
     name: "Sauraha Village",
     tagline: "Riverside stays, restaurants & local life",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800&q=80",
+    image: "/images/sauraha-village.png",
     href: "/listings?category=stay",
   },
   {
@@ -137,19 +139,19 @@ export const PLACES_TO_GO = [
   {
     name: "Tharu Communities",
     tagline: "Culture, dance & village experiences",
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    image: "/images/tharu-communities-sauraha.png",
     href: "/listings?category=activities",
   },
   {
     name: "Community Forest",
     tagline: "Walking trails & bird watching",
-    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+    image: "/images/community-forest-sauraha.png",
     href: "/blog/park-permits-to-visit-sauraha-community-forest-vs-national-forest-2026-guide",
   },
   {
     name: "Elephant Breeding Centre",
     tagline: "Conservation & ethical wildlife learning",
-    image: "https://images.unsplash.com/photo-1557050543-4d1f39a78991?w=800&q=80",
+    image: "/images/elephant-breeding-centre-places.png",
     href: "/listings?category=activities",
   },
 ] as const
