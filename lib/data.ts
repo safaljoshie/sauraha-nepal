@@ -280,6 +280,7 @@ export const businessCategories = [
   "Canoe/Boat",
   "Birdwatching",
   "Cultural Show",
+  "Animal Sanctuary",
   "Taxi/Jeep",
   "Bus Service",
   "Cycle Rental",

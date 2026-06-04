@@ -48,7 +48,13 @@ export const CATEGORY_GROUPS: {
     id: "activities",
     label: "Activities",
     tabLabel: "🐘 Activities",
-    matchers: ["Safari", "Canoe/Boat", "Birdwatching", "Cultural Show"],
+    matchers: [
+      "Safari",
+      "Canoe/Boat",
+      "Birdwatching",
+      "Cultural Show",
+      "Animal Sanctuary",
+    ],
   },
   {
     id: "transport",
