@@ -22,7 +22,7 @@ const fieldClass =
   "w-full rounded-[10px] border border-border-brand bg-cream px-3 py-2 text-sm text-text-brand outline-none focus:border-green-mid focus:bg-white"
 
 const emptyForm: HeroForm = {
-  type: "image",
+  type: "video",
   url: "",
   poster_url: "",
   alt_text: "",
@@ -43,7 +43,7 @@ export default function AdminHeroMediaManager() {
   const effectiveMedia = useMemo(
     () =>
       media
-        .filter((item) => item.is_active)
+        .filter((item) => item.is_active && item.type === "video")
         .sort((a, b) => a.priority - b.priority || a.created_at.localeCompare(b.created_at))[0] ?? null,
     [media],
   )
@@ -83,7 +83,7 @@ export default function AdminHeroMediaManager() {
   }, [loadMedia])
 
   function openCreate() {
-    setForm({ ...emptyForm })
+    setForm({ ...emptyForm, type: "video" })
     setError("")
   }
 
@@ -123,6 +123,7 @@ export default function AdminHeroMediaManager() {
     try {
       const payload = {
         ...form,
+        type: "video" as const,
         url: form.url.trim(),
         poster_url: form.poster_url.trim(),
         alt_text: form.alt_text.trim(),
@@ -259,30 +260,9 @@ export default function AdminHeroMediaManager() {
       let publicUrl: string | undefined
       let uploadError: string | undefined
 
-      if (type === "video") {
-        const result = await uploadHeroFileDirect(file, "video")
-        if ("error" in result) uploadError = result.error
-        else publicUrl = result.url
-      } else if (file.size <= 4 * 1024 * 1024) {
-        const body = new FormData()
-        body.set("file", file)
-        body.set("type", type)
-        const res = await fetch("/api/admin/site/hero/upload", {
-          method: "POST",
-          body,
-        })
-        if (res.status === 401) {
-          router.push("/admin")
-          return
-        }
-        const data = (await res.json()) as { url?: string; error?: string }
-        if (!res.ok || !data.url) uploadError = data.error ?? "Failed to upload media."
-        else publicUrl = data.url
-      } else {
-        const result = await uploadHeroFileDirect(file, "image")
-        if ("error" in result) uploadError = result.error
-        else publicUrl = result.url
-      }
+      const result = await uploadHeroFileDirect(file, "video")
+      if ("error" in result) uploadError = result.error
+      else publicUrl = result.url
 
       if (!publicUrl) {
         setError(uploadError ?? "Failed to upload media.")
@@ -306,10 +286,10 @@ export default function AdminHeroMediaManager() {
         <div>
           <p className="text-xs font-bold tracking-widest text-orange-brand uppercase">Admin</p>
           <h1 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand md:text-3xl">
-            Homepage Hero Media
+            Homepage Hero Video
           </h1>
           <p className="mt-1 text-sm text-text-light">
-            Effective media = active item with the lowest priority number.
+            Only video is shown on the homepage. Delete old image rows if you no longer need them.
           </p>
         </div>
         <div className="flex gap-2">
@@ -324,14 +304,14 @@ export default function AdminHeroMediaManager() {
             onClick={openCreate}
             className="rounded-full bg-green-brand px-5 py-2 text-sm font-semibold text-white hover:bg-green-mid"
           >
-            Add Media
+            Add Video
           </button>
         </div>
       </header>
 
       {effectiveMedia && (
         <p className="mb-4 rounded-[10px] border border-green-mid/30 bg-green-mid/10 px-4 py-3 text-sm text-green-brand">
-          Effective media: <strong>{effectiveMedia.type}</strong> (priority {effectiveMedia.priority})
+          Live homepage video (priority {effectiveMedia.priority})
         </p>
       )}
       {error && (
@@ -378,7 +358,14 @@ export default function AdminHeroMediaManager() {
                         <span className="text-xs text-text-light">{item.url}</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 font-semibold text-text-brand">{item.type}</td>
+                    <td className="px-4 py-3 font-semibold text-text-brand">
+                      {item.type}
+                      {item.type === "image" && (
+                        <span className="ml-2 rounded-full bg-orange-brand/15 px-2 py-0.5 text-xs font-bold text-orange-brand">
+                          Not on site
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-text-mid">{item.priority}</td>
                     <td className="px-4 py-3">
                       <span
@@ -424,7 +411,7 @@ export default function AdminHeroMediaManager() {
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-border-brand bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-start justify-between">
               <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
-                {form.id ? "Edit Hero Media" : "Add Hero Media"}
+                {form.id ? "Edit Hero Video" : "Add Hero Video"}
               </h2>
               <button
                 type="button"
@@ -437,23 +424,7 @@ export default function AdminHeroMediaManager() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Type" required>
-                <select
-                  value={form.type}
-                  onChange={(e) =>
-                    setForm((prev) =>
-                      prev
-                        ? { ...prev, type: e.target.value === "video" ? "video" : "image" }
-                        : prev,
-                    )
-                  }
-                  className={fieldClass}
-                >
-                  <option value="image">Image</option>
-                  <option value="video">Video</option>
-                </select>
-              </Field>
-              <Field label="Priority" required>
+              <Field label="Priority" required className="md:col-span-2">
                 <input
                   type="number"
                   min={0}
@@ -467,18 +438,8 @@ export default function AdminHeroMediaManager() {
                 />
               </Field>
 
-              <Field label="Upload" className="md:col-span-2">
+              <Field label="Upload video" className="md:col-span-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <label className="cursor-pointer rounded-full bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-200">
-                    {uploading ? "Uploading..." : "Upload Image"}
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                      onChange={(e) => handleUpload(e, "image")}
-                      className="hidden"
-                      disabled={uploading}
-                    />
-                  </label>
                   <label className="cursor-pointer rounded-full bg-purple-100 px-3 py-1.5 text-xs font-semibold text-purple-700 hover:bg-purple-200">
                     {uploading ? "Uploading..." : "Upload Video"}
                     <input
@@ -489,9 +450,7 @@ export default function AdminHeroMediaManager() {
                       disabled={uploading}
                     />
                   </label>
-                  <span className="text-xs text-text-light">
-                    MP4 or WEBM. Image 10MB max, video 50MB max (uploads go direct to storage).
-                  </span>
+                  <span className="text-xs text-text-light">MP4 or WEBM, up to 50 MB.</span>
                 </div>
               </Field>
 
@@ -511,15 +470,7 @@ export default function AdminHeroMediaManager() {
                 />
               </Field>
 
-              <Field label="Alt Text (image)" className="md:col-span-2">
-                <input
-                  value={form.alt_text}
-                  onChange={(e) => setForm((prev) => (prev ? { ...prev, alt_text: e.target.value } : prev))}
-                  className={fieldClass}
-                />
-              </Field>
-
-              <Field label="Active">
+              <Field label="Active" className="md:col-span-2">
                 <label className="flex h-[42px] items-center gap-2 text-sm text-text-mid">
                   <input
                     type="checkbox"

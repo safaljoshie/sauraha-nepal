@@ -1,4 +1,3 @@
-import Image from "next/image"
 import Link from "next/link"
 import HomeDestinationSearch from "@/components/home/HomeDestinationSearch"
 import type { HeroMedia } from "@/lib/site-content"
@@ -10,35 +9,25 @@ type HomeHeroProps = {
 }
 
 export default function HomeHero({ primaryHeroMedia, listings }: HomeHeroProps) {
+  const heroVideo = primaryHeroMedia?.type === "video" ? primaryHeroMedia : null
+
   return (
     <section
       aria-label="Discover Sauraha"
       className="relative flex min-h-[100dvh] flex-col justify-end overflow-hidden bg-ink"
     >
-      {primaryHeroMedia?.type === "video" ? (
+      {heroVideo ? (
         <video
           className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
           autoPlay
           muted
           loop
           playsInline
-          poster={primaryHeroMedia.poster_url ?? "/images/home-hero.png"}
+          poster={heroVideo.poster_url ?? undefined}
         >
-          <source src={primaryHeroMedia.url} type="video/mp4" />
+          <source src={heroVideo.url} type="video/mp4" />
         </video>
-      ) : (
-        <Image
-          src={primaryHeroMedia?.url ?? "/images/home-hero.png"}
-          alt={
-            primaryHeroMedia?.alt_text ||
-            "Wildlife and jungle landscapes in Sauraha and Chitwan National Park"
-          }
-          fill
-          priority
-          className="pointer-events-none object-cover object-center"
-          sizes="100vw"
-        />
-      )}
+      ) : null}
       <div
         className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/35 to-black/15"
         aria-hidden
