@@ -360,4 +360,24 @@ body {
   .w-md-editor-preview .wmde-markdown hr {
     @apply my-8 border-border-brand;
   }
+
+  /* Leaflet map — green pins + popup polish */
+  .map-pin-icon {
+    background: transparent;
+    border: none;
+  }
+
+  .map-pin-icon svg {
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(26, 92, 42, 0.35));
+  }
+
+  .map-listing-popup .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .map-listing-popup .leaflet-popup-content {
+    margin: 12px 14px;
+  }
 }

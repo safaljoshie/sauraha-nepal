@@ -4,6 +4,8 @@ import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet"
 import L from "leaflet"
+import { googleMapsOpenUrl } from "@/lib/google-maps"
+import { createGreenMapPinIcon } from "@/lib/map-pin"
 import type { MapListingMarker } from "@/lib/map-markers"
 import { getCategoryDisplay } from "@/lib/listings-catalog"
 import "leaflet/dist/leaflet.css"
@@ -11,15 +13,10 @@ import "leaflet/dist/leaflet.css"
 const SAURAHA_CENTER: [number, number] = [27.5833, 84.5]
 const DEFAULT_ZOOM = 14
 
-function fixLeafletIcons() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  delete (L.Icon.Default.prototype as any)._getIconUrl
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "/leaflet/marker-icon-2x.png",
-    iconUrl: "/leaflet/marker-icon.png",
-    shadowUrl: "/leaflet/marker-shadow.png",
-  })
-}
+const CARTO_TILES =
+  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+const CARTO_ATTRIBUTION =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
 
 function FitBounds({ listings }: { listings: MapListingMarker[] }) {
   const map = useMap()
@@ -46,23 +43,10 @@ export default function Map({ listings }: { listings: MapListingMarker[] }) {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    fixLeafletIcons()
     setReady(true)
   }, [])
 
-  const markerIcon = useMemo(
-    () =>
-      L.icon({
-        iconUrl: "/leaflet/marker-icon.png",
-        iconRetinaUrl: "/leaflet/marker-icon-2x.png",
-        shadowUrl: "/leaflet/marker-shadow.png",
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-      }),
-    [],
-  )
+  const markerIcon = useMemo(() => createGreenMapPinIcon(), [])
 
   if (!ready) {
     return (
@@ -73,17 +57,14 @@ export default function Map({ listings }: { listings: MapListingMarker[] }) {
   }
 
   return (
-    <div className="h-[min(70vh,520px)] min-h-96 overflow-hidden rounded-2xl border border-border-brand">
+    <div className="map-shell h-[min(70vh,520px)] min-h-96 overflow-hidden rounded-2xl border border-border-brand shadow-[0_8px_32px_rgba(26,92,42,0.08)]">
       <MapContainer
         center={SAURAHA_CENTER}
         zoom={DEFAULT_ZOOM}
         scrollWheelZoom
         className="h-full w-full"
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        <TileLayer attribution={CARTO_ATTRIBUTION} url={CARTO_TILES} />
         <FitBounds listings={listings} />
         {listings.map((listing) => (
           <Marker
@@ -91,16 +72,30 @@ export default function Map({ listings }: { listings: MapListingMarker[] }) {
             position={[listing.lat, listing.lng]}
             icon={markerIcon}
           >
-            <Popup>
-              <div className="min-w-[140px] text-sm">
-                <p className="font-semibold text-green-brand">{listing.business_name}</p>
-                <p className="text-text-mid">{getCategoryDisplay(listing.category)}</p>
-                <Link
-                  href={`/listings/${listing.id}`}
-                  className="mt-2 inline-block font-semibold text-orange-brand hover:underline"
-                >
-                  View details →
-                </Link>
+            <Popup className="map-listing-popup" closeButton>
+              <div className="min-w-[168px] text-sm">
+                <p className="font-[family-name:var(--font-playfair)] text-base font-bold text-green-brand">
+                  {listing.business_name}
+                </p>
+                <p className="mt-0.5 text-xs font-semibold tracking-wide text-green-mid uppercase">
+                  {getCategoryDisplay(listing.category)}
+                </p>
+                <div className="mt-3 flex flex-col gap-2">
+                  <Link
+                    href={`/listings/${listing.id}`}
+                    className="inline-flex items-center justify-center rounded-lg bg-green-brand px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-green-mid"
+                  >
+                    View listing
+                  </Link>
+                  <a
+                    href={googleMapsOpenUrl(listing.lat, listing.lng, listing.mapsLink)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center rounded-lg border border-green-brand/25 bg-white px-3 py-2 text-xs font-semibold text-green-brand transition-colors hover:bg-cream"
+                  >
+                    Open in Google Maps
+                  </a>
+                </div>
               </div>
             </Popup>
           </Marker>

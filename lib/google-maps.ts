@@ -130,3 +130,14 @@ export function getGoogleMapsEmbedUrl(link: string): string | null {
 
   return null
 }
+
+/** URL to open a listing location in Google Maps (prefers saved link). */
+export function googleMapsOpenUrl(
+  lat: number,
+  lng: number,
+  mapsLink?: string | null,
+): string {
+  const saved = mapsLink?.trim()
+  if (saved) return saved
+  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+}

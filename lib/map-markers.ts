@@ -8,6 +8,7 @@ export type MapListingMarker = {
   category: string
   lat: number
   lng: number
+  mapsLink: string | null
 }
 
 export function listingsToMapMarkers(
@@ -37,6 +38,7 @@ export function listingsToMapMarkers(
       category: listing.category,
       lat: coords.lat,
       lng: coords.lng,
+      mapsLink: link,
     })
   }
 
