@@ -13,16 +13,13 @@ const items = [
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
-  const onHome = pathname === "/"
-
-  if (!onHome) return null
 
   return (
     <nav
-      className="fixed right-0 bottom-0 left-0 z-[95] border-t border-border-brand bg-white/96 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
+      className="fixed right-0 bottom-0 left-0 z-[95] border-t border-border-brand bg-white/96 px-1 pb-[max(0.3rem,env(safe-area-inset-bottom))] backdrop-blur-md md:hidden"
       aria-label="Mobile navigation"
     >
-      <ul className="flex justify-around">
+      <ul className="flex h-12 items-center justify-around">
         {items.map((item) => {
           const active =
             item.href === "/"
@@ -34,11 +31,11 @@ export default function MobileBottomNav() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[0.65rem] font-semibold transition-colors ${
+                className={`flex flex-col items-center gap-0 rounded-lg px-2 py-0 text-[0.55rem] font-semibold transition-colors ${
                   active ? "text-green-brand" : "text-text-light"
                 }`}
               >
-                <span className="text-lg" aria-hidden>
+                <span className="text-base leading-none" aria-hidden>
                   {item.icon}
                 </span>
                 {item.label}

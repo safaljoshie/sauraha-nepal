@@ -13,8 +13,6 @@ import HomePromoBanner from "@/components/home/HomePromoBanner"
 import HomeTravelGuides from "@/components/home/HomeTravelGuides"
 import HomeTrust from "@/components/home/HomeTrust"
 import HomeWhereToStay from "@/components/home/HomeWhereToStay"
-import MobileBottomNav from "@/components/home/MobileBottomNav"
-import StickySearchFab from "@/components/home/StickySearchFab"
 import { fetchPublishedBlogPosts } from "@/lib/blog-db"
 import { buildHomepageData } from "@/lib/homepage-data"
 import { fetchHomepageStats } from "@/lib/homepage-stats"
@@ -89,7 +87,7 @@ export default async function HomePage() {
         featuredListings={data.featured}
         blogCount={blogPosts.length}
       />
-      <main className="bg-surface pb-[calc(5rem+env(safe-area-inset-bottom,0px))] md:pb-0">
+      <main className="bg-surface">
         <HomeHero
           primaryHeroMedia={primaryHeroMedia}
           listings={data.listings}
@@ -108,8 +106,6 @@ export default async function HomePage() {
         <HomeListBusiness />
         <HomeNewsletter />
       </main>
-      <StickySearchFab />
-      <MobileBottomNav />
     </>
   )
 }

@@ -4,6 +4,26 @@ import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
+import { MOBILE_HOME_NAV_TOP } from "@/lib/mobile-home-nav"
+
+function SearchIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5 md:h-6 md:w-6"
+      aria-hidden
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3-3" />
+    </svg>
+  )
+}
 
 function BotAvatar({ size = 28 }: { size?: number }) {
   return (
@@ -53,7 +73,8 @@ function toApiHistory(messages: ChatUiMessage[]): AnthropicHistoryMessage[] {
 
 export default function ChatWidget() {
   const pathname = usePathname()
-  const onHomeMobile = pathname === "/"
+  const onHome = pathname === "/"
+  const aboveMobileNav = pathname !== "/admin" && !pathname.startsWith("/admin/")
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatUiMessage[]>([])
   const [input, setInput] = useState("")
@@ -143,7 +164,9 @@ export default function ChatWidget() {
     <>
       {open && (
         <div
-          className="chat-window-enter fixed z-[1000] flex flex-col overflow-hidden border border-border-brand bg-white shadow-[0_8px_40px_rgba(0,0,0,0.2)] max-md:inset-x-0 max-md:bottom-0 max-md:h-[60vh] max-md:rounded-t-2xl md:right-6 md:bottom-[90px] md:h-[500px] md:w-[360px] md:rounded-2xl"
+          className={`chat-window-enter fixed z-[1000] flex flex-col overflow-hidden border border-border-brand bg-white shadow-[0_8px_40px_rgba(0,0,0,0.2)] max-md:inset-x-0 max-md:h-[60vh] max-md:rounded-t-2xl md:right-6 md:bottom-[90px] md:h-[500px] md:w-[360px] md:rounded-2xl ${
+            aboveMobileNav ? MOBILE_HOME_NAV_TOP : "max-md:bottom-0"
+          }`}
           role="dialog"
           aria-label="Dhurbe chat"
         >
@@ -288,26 +311,39 @@ export default function ChatWidget() {
         </div>
       )}
 
-      <button
-        type="button"
-        onClick={() => (open ? handleClose() : handleOpen())}
-        className={`chat-bubble-pulse fixed right-4 z-[1000] flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-brand shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105 md:right-6 ${
-          onHomeMobile ? "bottom-20 md:bottom-6" : "bottom-6"
+      <div
+        className={`site-floating-actions ${
+          aboveMobileNav ? "site-floating-actions--above-nav" : ""
         }`}
-        title={open ? "Close Dhurbe" : "Chat with Dhurbe"}
-        aria-label={open ? "Close Dhurbe" : "Open Dhurbe"}
       >
-        {open ? (
-          <span className="text-lg font-semibold text-white">✕</span>
-        ) : (
-          <ChatAssistantAvatar size={48} variant="bubble" />
-        )}
-        {!open && unread && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-brand text-[10px] font-bold text-white">
-            1
-          </span>
-        )}
-      </button>
+        {onHome ? (
+          <a
+            href="#hero-search"
+            className="site-search-fab"
+            aria-label="Search destinations"
+          >
+            <SearchIcon />
+          </a>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => (open ? handleClose() : handleOpen())}
+          className="chat-bubble-pulse site-chat-fab relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-brand p-0 shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105 md:h-12 md:w-12"
+          title={open ? "Close Dhurbe" : "Chat with Dhurbe"}
+          aria-label={open ? "Close Dhurbe" : "Open Dhurbe"}
+        >
+          {open ? (
+            <span className="text-lg font-semibold text-white">✕</span>
+          ) : (
+            <ChatAssistantAvatar variant="launcher" />
+          )}
+          {!open && unread ? (
+            <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-orange-brand text-[10px] font-bold text-white">
+              1
+            </span>
+          ) : null}
+        </button>
+      </div>
     </>
   )
 }

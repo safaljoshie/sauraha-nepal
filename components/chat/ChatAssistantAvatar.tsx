@@ -5,8 +5,8 @@ const CHAT_AVATAR_SRC = "/images/chat-assistant-elephant.png"
 type ChatAssistantAvatarProps = {
   size?: number
   className?: string
-  /** Launcher: orange circle. Messages/header: cream ring. */
-  variant?: "bubble" | "avatar"
+  /** launcher: image only inside parent circle. bubble: standalone orange circle. avatar: messages/header. */
+  variant?: "launcher" | "bubble" | "avatar"
 }
 
 /** Dhurbe avatar — elephant with headphones (desktop + mobile). */
@@ -15,6 +15,25 @@ export default function ChatAssistantAvatar({
   className = "",
   variant = "avatar",
 }: ChatAssistantAvatarProps) {
+  if (variant === "launcher") {
+    return (
+      <span
+        className={`relative block h-full w-full overflow-hidden rounded-full ${className}`}
+        aria-hidden
+      >
+        <Image
+          src={CHAT_AVATAR_SRC}
+          alt=""
+          fill
+          unoptimized
+          className="object-cover object-[center_38%] scale-[0.86]"
+          sizes="48px"
+          priority
+        />
+      </span>
+    )
+  }
+
   const isBubble = variant === "bubble"
 
   return (
