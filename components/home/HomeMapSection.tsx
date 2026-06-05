@@ -6,6 +6,7 @@ import { useMemo, useState } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import { buildMapFilterGroups, listingsForMapFilter } from "@/lib/homepage-data"
+import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import type { CategoryGroupId } from "@/lib/listings-catalog"
 import { listingsToMapMarkers } from "@/lib/map-markers"
 
@@ -23,9 +24,11 @@ type MapFilterId = CategoryGroupId | "medical" | "all"
 export default function HomeMapSection({
   listings,
   catalog,
+  mapCoordinates,
 }: {
   listings: BusinessListing[]
   catalog: CategoryCatalog
+  mapCoordinates: ListingCoordinateMap
 }) {
   const [filter, setFilter] = useState<MapFilterId>("all")
   const mapFilters = useMemo(() => buildMapFilterGroups(catalog), [catalog])
@@ -35,7 +38,10 @@ export default function HomeMapSection({
     [listings, filter, catalog],
   )
 
-  const { onMap, withoutCoords } = useMemo(() => listingsToMapMarkers(filtered), [filtered])
+  const { onMap, withoutCoords } = useMemo(
+    () => listingsToMapMarkers(filtered, mapCoordinates),
+    [filtered, mapCoordinates],
+  )
 
   return (
     <section id="map" className="home-section scroll-mt-24">

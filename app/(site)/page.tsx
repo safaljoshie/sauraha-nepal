@@ -20,6 +20,7 @@ import { buildHomepageData } from "@/lib/homepage-data"
 import { fetchHomepageStats } from "@/lib/homepage-stats"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
+import { buildListingCoordinateMap } from "@/lib/map-coordinates"
 import { fetchActiveHeroMedia } from "@/lib/site-content"
 
 export const revalidate = 60
@@ -54,6 +55,7 @@ export default async function HomePage() {
     fetchPublishedBlogPosts(),
     fetchCategoryCatalog(),
   ])
+  const mapCoordinates = await buildListingCoordinateMap(listings)
 
   const data = buildHomepageData(listings, catalog)
   const primaryHeroMedia = heroMedia[0] ?? null
@@ -84,7 +86,11 @@ export default async function HomePage() {
         <HomePlanTrip />
         <HomeWhereToStay stayListings={data.stayListings} />
         <HomeEatDrink />
-        <HomeMapSection listings={data.listings} catalog={catalog} />
+        <HomeMapSection
+          listings={data.listings}
+          catalog={catalog}
+          mapCoordinates={mapCoordinates}
+        />
         <HomeTravelGuides posts={blogPosts.slice(0, 4)} useFallback={useBlogFallback} />
         <HomeTrust businessCount={businessCount} guidesCount={guidesCount} />
         <HomeListBusiness />

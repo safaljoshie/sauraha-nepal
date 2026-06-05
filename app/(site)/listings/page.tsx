@@ -3,6 +3,7 @@ import ListingsExplorer from "@/components/listings/ListingsExplorer"
 import PageHeader from "@/components/PageHeader"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { parseCategoryParam } from "@/lib/listings-catalog"
+import { buildListingCoordinateMap } from "@/lib/map-coordinates"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { pageMetadata } from "@/lib/seo"
 
@@ -25,6 +26,7 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
     fetchApprovedListings(),
     fetchCategoryCatalog(),
   ])
+  const mapCoordinates = await buildListingCoordinateMap(listings)
   const initialSearch = (params.search ?? params.q ?? "").trim()
   const initialCategory = parseCategoryParam(params.category, catalog)
 
@@ -42,6 +44,7 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
       <ListingsExplorer
         listings={listings}
         catalog={catalog}
+        mapCoordinates={mapCoordinates}
         initialSearch={initialSearch}
         initialCategory={initialCategory}
       />

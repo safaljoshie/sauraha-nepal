@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { BusinessListing } from "@/lib/business-listing"
+import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import {
   countByCategoryGroup,
   filterListings,
@@ -21,6 +22,7 @@ type ViewMode = "grid" | "map"
 type ListingsExplorerProps = {
   listings: BusinessListing[]
   catalog: CategoryCatalog
+  mapCoordinates: ListingCoordinateMap
   initialSearch?: string
   initialCategory?: CategoryGroupId
 }
@@ -28,6 +30,7 @@ type ListingsExplorerProps = {
 export default function ListingsExplorer({
   listings,
   catalog,
+  mapCoordinates,
   initialSearch = "",
   initialCategory = "all",
 }: ListingsExplorerProps) {
@@ -209,7 +212,7 @@ export default function ListingsExplorer({
           />
         ) : viewMode === "map" ? (
           <div className="mb-16">
-            <ListingsMapView listings={filtered} />
+            <ListingsMapView listings={filtered} mapCoordinates={mapCoordinates} />
           </div>
         ) : (
           <ListingsGridErrorBoundary>

@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 import { useMemo } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
+import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import { listingsToMapMarkers } from "@/lib/map-markers"
 
 const MapComponent = dynamic(() => import("@/components/Map"), {
@@ -14,8 +15,17 @@ const MapComponent = dynamic(() => import("@/components/Map"), {
   ),
 })
 
-export default function ListingsMapView({ listings }: { listings: BusinessListing[] }) {
-  const { onMap, withoutCoords } = useMemo(() => listingsToMapMarkers(listings), [listings])
+export default function ListingsMapView({
+  listings,
+  mapCoordinates,
+}: {
+  listings: BusinessListing[]
+  mapCoordinates: ListingCoordinateMap
+}) {
+  const { onMap, withoutCoords } = useMemo(
+    () => listingsToMapMarkers(listings, mapCoordinates),
+    [listings, mapCoordinates],
+  )
 
   return (
     <div>

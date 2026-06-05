@@ -1,4 +1,5 @@
 import type { BusinessListing } from "@/lib/business-listing"
+import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import { parseCoordinates } from "@/lib/google-maps"
 
 export type MapListingMarker = {
@@ -9,7 +10,10 @@ export type MapListingMarker = {
   lng: number
 }
 
-export function listingsToMapMarkers(listings: BusinessListing[]) {
+export function listingsToMapMarkers(
+  listings: BusinessListing[],
+  coordinateMap?: ListingCoordinateMap,
+) {
   const onMap: MapListingMarker[] = []
   let withoutCoords = 0
 
@@ -19,11 +23,14 @@ export function listingsToMapMarkers(listings: BusinessListing[]) {
       withoutCoords += 1
       continue
     }
-    const coords = parseCoordinates(link)
+
+    const cached = coordinateMap?.[listing.id]
+    const coords = cached ?? parseCoordinates(link)
     if (!coords) {
       withoutCoords += 1
       continue
     }
+
     onMap.push({
       id: listing.id,
       business_name: listing.business_name,
