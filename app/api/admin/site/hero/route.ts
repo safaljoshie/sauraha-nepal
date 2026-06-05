@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import type { HeroMedia } from "@/lib/site-content"
@@ -27,6 +28,11 @@ function normalizePriority(value: unknown) {
 
 function isValidMediaType(type: string | undefined): type is "video" {
   return type === "video"
+}
+
+function revalidateHomeHero() {
+  revalidatePath("/")
+  revalidatePath("/", "layout")
 }
 
 export async function GET() {
@@ -94,6 +100,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create hero media." }, { status: 500 })
     }
 
+    revalidateHomeHero()
     return NextResponse.json({ success: true, media: data as HeroMedia })
   } catch {
     return NextResponse.json({ error: "Database is not configured." }, { status: 500 })
@@ -148,6 +155,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Failed to update hero media." }, { status: 500 })
     }
 
+    revalidateHomeHero()
     return NextResponse.json({ success: true, media: data as HeroMedia })
   } catch {
     return NextResponse.json({ error: "Database is not configured." }, { status: 500 })
@@ -179,6 +187,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Failed to delete hero media." }, { status: 500 })
     }
 
+    revalidateHomeHero()
     return NextResponse.json({ success: true })
   } catch {
     return NextResponse.json({ error: "Database is not configured." }, { status: 500 })

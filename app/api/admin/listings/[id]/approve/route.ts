@@ -51,10 +51,7 @@ export async function POST(_request: Request, context: RouteContext) {
 
     const resendKey = process.env.RESEND_API_KEY
     if (!resendKey) {
-      return NextResponse.json(
-        { error: "Email service is not configured." },
-        { status: 500 },
-      )
+      return NextResponse.json({ success: true, listing: record, emailSkipped: true })
     }
 
     const email = buildApprovalEmail(record)
@@ -68,11 +65,8 @@ export async function POST(_request: Request, context: RouteContext) {
     })
 
     if (emailError) {
-      console.error("Resend error:", emailError)
-      return NextResponse.json(
-        { error: "Listing approved but email could not be sent." },
-        { status: 500 },
-      )
+      console.error("Resend approval email error:", emailError)
+      return NextResponse.json({ success: true, listing: record, emailSkipped: true })
     }
 
     return NextResponse.json({ success: true, listing: record })

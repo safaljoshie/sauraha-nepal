@@ -23,24 +23,16 @@ function countUniqueCategories(rows: { category: string | null }[]) {
 
 /** Reliable homepage hero counts via service role (server-only). */
 export async function fetchHomepageStats(): Promise<HomepageStats> {
-  console.log("[HomepageStats] fetchHomepageStats start")
-
   try {
     const supabase = getSupabaseAdmin()
-    console.log("[HomepageStats] Supabase admin client created")
 
     const { count: rawCount, error: countError } = await supabase
       .from("business_listings")
       .select("*", { count: "exact", head: true })
       .eq("status", "approved")
 
-    console.log("[HomepageStats] COUNT approved businesses", {
-      count: rawCount,
-      error: countError?.message ?? null,
-    })
-
     if (countError) {
-      console.error("[HomepageStats] count query failed, using fallback", countError)
+      console.error("[HomepageStats] count query failed:", countError)
       return FALLBACK_STATS
     }
 
@@ -51,13 +43,8 @@ export async function fetchHomepageStats(): Promise<HomepageStats> {
       .select("category")
       .eq("status", "approved")
 
-    console.log("[HomepageStats] category rows", {
-      rowCount: categoryRows?.length ?? 0,
-      error: categoryError?.message ?? null,
-    })
-
     if (categoryError) {
-      console.error("[HomepageStats] category query failed", categoryError)
+      console.error("[HomepageStats] category query failed:", categoryError)
       return {
         businessCount: businessCount || FALLBACK_STATS.businessCount,
         categoryCount: FALLBACK_STATS.categoryCount,
@@ -73,18 +60,12 @@ export async function fetchHomepageStats(): Promise<HomepageStats> {
         .select("id")
         .eq("status", "approved")
 
-      console.log("[HomepageStats] backup id rows when count=0", {
-        length: idRows?.length ?? 0,
-        error: idError?.message ?? null,
-      })
-
       if (!idError && idRows && idRows.length > 0) {
         businessCount = idRows.length
       }
     }
 
     if (businessCount === 0 && categoryCount === 0) {
-      console.warn("[HomepageStats] admin zero counts — trying anon client")
       const anon = getSupabasePublic()
       const { count: anonCount, error: anonCountError } = await anon
         .from("business_listings")
@@ -96,13 +77,6 @@ export async function fetchHomepageStats(): Promise<HomepageStats> {
         .select("category")
         .eq("status", "approved")
 
-      console.log("[HomepageStats] anon backup", {
-        count: anonCount,
-        countError: anonCountError?.message ?? null,
-        rows: anonCats?.length ?? 0,
-        catError: anonCatError?.message ?? null,
-      })
-
       if (!anonCountError && (anonCount ?? 0) > 0) {
         businessCount = anonCount ?? 0
         categoryCount = countUniqueCategories(anonCats ?? [])
@@ -111,7 +85,6 @@ export async function fetchHomepageStats(): Promise<HomepageStats> {
 
     let fromFallback = false
     if (businessCount === 0) {
-      console.warn("[HomepageStats] businessCount still 0 — using fallback")
       businessCount = FALLBACK_STATS.businessCount
       fromFallback = true
     }
@@ -120,15 +93,13 @@ export async function fetchHomepageStats(): Promise<HomepageStats> {
       fromFallback = true
     }
 
-    const result = {
+    return {
       businessCount,
       categoryCount,
       fromFallback,
     }
-    console.log("[HomepageStats] final", result)
-    return result
   } catch (error) {
-    console.error("[HomepageStats] fetch failed, using fallback", error)
+    console.error("[HomepageStats] fetch failed:", error)
     return FALLBACK_STATS
   }
 }

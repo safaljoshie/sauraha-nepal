@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useSearchParams } from "next/navigation"
+import { Suspense, useEffect, useState, type FormEvent } from "react"
 import { formatWhatsAppDisplay, whatsappUrl } from "@/lib/whatsapp"
 
 const listingPlans = [
@@ -50,7 +51,16 @@ async function submitContact(payload: ContactPayload) {
   }
 }
 
-export default function ContactForm() {
+function ContactFormSkeleton() {
+  return (
+    <div
+      className="h-[520px] animate-pulse rounded-2xl border border-border-brand bg-white p-10 shadow-[0_8px_32px_rgba(26,92,42,0.08)]"
+      aria-hidden
+    />
+  )
+}
+
+function ContactFormContent() {
   const [tab, setTab] = useState<"general" | "listing">("general")
 
   return (
@@ -82,6 +92,14 @@ export default function ContactForm() {
 
       {tab === "general" ? <GeneralForm /> : <ListingForm />}
     </div>
+  )
+}
+
+export default function ContactForm() {
+  return (
+    <Suspense fallback={<ContactFormSkeleton />}>
+      <ContactFormContent />
+    </Suspense>
   )
 }
 
@@ -139,13 +157,43 @@ function FormFeedback({
   return null
 }
 
+const SUBJECT_OPTIONS = [
+  "General Question",
+  "Travel Advice",
+  "Partnership",
+  "Newsletter",
+  "Other",
+] as const
+
 function GeneralForm() {
+  const searchParams = useSearchParams()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
-  const [subject, setSubject] = useState("General Question")
+  const [subject, setSubject] = useState<string>("General Question")
   const [message, setMessage] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
+
+  useEffect(() => {
+    const emailParam = searchParams.get("email")?.trim()
+    const subjectParam = searchParams.get("subject")?.trim()
+
+    if (emailParam) setEmail(emailParam)
+
+    if (subjectParam === "Newsletter") {
+      setSubject("Newsletter")
+      setMessage((current) =>
+        current.trim()
+          ? current
+          : "I'd like to subscribe to the newsletter for travel tips and new listings.",
+      )
+    } else if (
+      subjectParam &&
+      SUBJECT_OPTIONS.includes(subjectParam as (typeof SUBJECT_OPTIONS)[number])
+    ) {
+      setSubject(subjectParam)
+    }
+  }, [searchParams])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -205,10 +253,9 @@ function GeneralForm() {
           onChange={(e) => setSubject(e.target.value)}
           disabled={isLoading}
         >
-          <option>General Question</option>
-          <option>Travel Advice</option>
-          <option>Partnership</option>
-          <option>Other</option>
+          {SUBJECT_OPTIONS.map((option) => (
+            <option key={option}>{option}</option>
+          ))}
         </select>
       </FormField>
       <FormField label="Message">
