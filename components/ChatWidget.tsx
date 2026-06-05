@@ -17,7 +17,7 @@ function BotAvatar({ size = 28 }: { size?: number }) {
 }
 
 const WELCOME =
-  "Hi! 👋 I'm your Sauraha travel assistant. I can help you discover the best of Sauraha and Chitwan National Park. What would you like to know? 🐘"
+  "Hi! 👋 I'm Dhurbe, your AI travel guide for Sauraha and Chitwan National Park. What would you like to know? 🐘"
 
 const QUICK_REPLIES = [
   "🏨 Best hotels",
@@ -145,16 +145,16 @@ export default function ChatWidget() {
         <div
           className="chat-window-enter fixed z-[1000] flex flex-col overflow-hidden border border-border-brand bg-white shadow-[0_8px_40px_rgba(0,0,0,0.2)] max-md:inset-x-0 max-md:bottom-0 max-md:h-[60vh] max-md:rounded-t-2xl md:right-6 md:bottom-[90px] md:h-[500px] md:w-[360px] md:rounded-2xl"
           role="dialog"
-          aria-label="Sauraha Assistant chat"
+          aria-label="Dhurbe chat"
         >
           <header className="flex shrink-0 items-start justify-between gap-2 bg-green-brand px-4 py-3 text-white">
             <div className="flex items-center gap-3">
               <ChatAssistantAvatar size={40} variant="avatar" className="shadow-sm" />
               <div>
-                <p className="font-semibold leading-tight">Sauraha Assistant</p>
+                <p className="font-semibold leading-tight">Dhurbe</p>
                 <p className="flex items-center gap-1.5 text-xs text-white/85">
                   <span className="inline-block h-2 w-2 rounded-full bg-green-light" aria-hidden />
-                  Your AI travel guide
+                  Your Sauraha travel guide
                 </p>
               </div>
             </div>
@@ -234,7 +234,7 @@ export default function ChatWidget() {
                     <span className="chat-typing-dot inline-block h-2 w-2 rounded-full bg-green-mid" />
                     <span className="chat-typing-dot inline-block h-2 w-2 rounded-full bg-green-mid" />
                   </div>
-                  <p className="mt-2 text-xs text-text-light">Sauraha Assistant is typing...</p>
+                  <p className="mt-2 text-xs text-text-light">Dhurbe is typing...</p>
                 </div>
               </div>
             )}
@@ -256,7 +256,7 @@ export default function ChatWidget() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value.slice(0, MAX_MESSAGE_LENGTH))}
-                placeholder="Ask me anything about Sauraha..."
+                placeholder="Ask Dhurbe about Sauraha..."
                 disabled={loading}
                 maxLength={MAX_MESSAGE_LENGTH}
                 className="min-w-0 flex-1 rounded-full border border-border-brand bg-cream px-4 py-2.5 text-sm text-text-brand outline-none focus:border-green-mid disabled:opacity-60"
@@ -294,7 +294,8 @@ export default function ChatWidget() {
         className={`chat-bubble-pulse fixed right-4 z-[1000] flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-orange-brand shadow-[0_4px_20px_rgba(232,98,26,0.45)] transition-transform hover:scale-105 md:right-6 ${
           onHomeMobile ? "bottom-20 md:bottom-6" : "bottom-6"
         }`}
-        aria-label={open ? "Close Sauraha Assistant" : "Open Sauraha Assistant"}
+        title={open ? "Close Dhurbe" : "Chat with Dhurbe"}
+        aria-label={open ? "Close Dhurbe" : "Open Dhurbe"}
       >
         {open ? (
           <span className="text-lg font-semibold text-white">✕</span>

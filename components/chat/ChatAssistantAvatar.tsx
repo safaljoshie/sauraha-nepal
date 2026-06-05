@@ -9,7 +9,7 @@ type ChatAssistantAvatarProps = {
   variant?: "bubble" | "avatar"
 }
 
-/** Elephant with headphones — fills circular frame (desktop + mobile). */
+/** Dhurbe avatar — elephant with headphones (desktop + mobile). */
 export default function ChatAssistantAvatar({
   size = 40,
   className = "",

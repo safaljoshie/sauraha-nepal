@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     return NextResponse.json(
-      { error: "Chat assistant is not configured." },
+      { error: "Dhurbe is not configured." },
       { status: 500 },
     )
   }
