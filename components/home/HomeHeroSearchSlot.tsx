@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic"
 import type { CategoryCatalog } from "@/lib/category-catalog"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { HeroSearchListing } from "@/lib/listings-catalog"
 
 const HomeDestinationSearch = dynamic(
   () => import("@/components/home/HomeDestinationSearch"),
@@ -18,15 +18,18 @@ const HomeDestinationSearch = dynamic(
 )
 
 type HomeHeroSearchSlotProps = {
-  listings: BusinessListing[]
+  searchListings: HeroSearchListing[]
   searchCategories: CategoryCatalog
 }
 
 export default function HomeHeroSearchSlot({
-  listings,
+  searchListings,
   searchCategories,
 }: HomeHeroSearchSlotProps) {
   return (
-    <HomeDestinationSearch listings={listings} searchCategories={searchCategories} />
+    <HomeDestinationSearch
+      searchListings={searchListings}
+      searchCategories={searchCategories}
+    />
   )
 }

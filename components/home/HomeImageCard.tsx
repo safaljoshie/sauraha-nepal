@@ -31,7 +31,6 @@ export default function HomeImageCard({
           className="nsw-card-image"
           sizes={sizes}
           quality={90}
-          unoptimized={!image.startsWith("http")}
         />
         <div className="nsw-destination-overlay" aria-hidden />
         <div className="absolute right-0 bottom-0 left-0 p-5 text-white md:p-6">

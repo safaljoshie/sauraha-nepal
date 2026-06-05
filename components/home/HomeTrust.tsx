@@ -75,7 +75,6 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
                 className="object-cover"
                 sizes="(max-width: 768px) 33vw, (max-width: 1400px) 16vw, 240px"
                 quality={90}
-                unoptimized={!photo.src.startsWith("http")}
               />
             </div>
           ))}

@@ -13,10 +13,10 @@ import HomePromoBanner from "@/components/home/HomePromoBanner"
 import HomeTravelGuides from "@/components/home/HomeTravelGuides"
 import HomeTrust from "@/components/home/HomeTrust"
 import HomeWhereToStay from "@/components/home/HomeWhereToStay"
-import { fetchPublishedBlogPosts } from "@/lib/blog-db"
+import { fetchPublishedBlogPostsPreview } from "@/lib/blog-db"
 import { buildHomepageData } from "@/lib/homepage-data"
-import { fetchHomepageStats } from "@/lib/homepage-stats"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
+import { toHeroSearchListings } from "@/lib/listings-catalog"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { fetchActiveHeroMedia } from "@/lib/site-content"
 
@@ -51,38 +51,20 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [listings, stats, heroMedia, blogPosts, catalog] = await Promise.all([
+  const [listings, heroMedia, blogPosts, catalog] = await Promise.all([
     fetchApprovedListings(),
-    fetchHomepageStats(),
     fetchActiveHeroMedia(),
-    fetchPublishedBlogPosts(),
+    fetchPublishedBlogPostsPreview(4),
     fetchCategoryCatalog(),
   ])
   const data = buildHomepageData(listings, catalog)
   const primaryHeroMedia = heroMedia[0] ?? null
-  const heroPoster =
-    primaryHeroMedia?.poster_url?.trim() || "/images/sauraha-hero.jpg"
   const useBlogFallback = blogPosts.length === 0
-
-  let businessCount = stats.businessCount
-  if (businessCount === 0 && listings.length > 0) businessCount = listings.length
-  if (businessCount === 0) businessCount = 4
-
-  const guidesCount = blogPosts.length > 0 ? blogPosts.length : 6
+  const businessCount = listings.length
+  const guidesCount = blogPosts.length
 
   return (
     <>
-      {primaryHeroMedia?.type === "video" ? (
-        <>
-          <link rel="preload" href={heroPoster} as="image" />
-          <link
-            rel="preload"
-            href={primaryHeroMedia.url}
-            as="video"
-            type="video/mp4"
-          />
-        </>
-      ) : null}
       <HomeJsonLd
         featuredListings={data.featured}
         blogCount={blogPosts.length}
@@ -90,7 +72,7 @@ export default async function HomePage() {
       <main className="bg-surface">
         <HomeHero
           primaryHeroMedia={primaryHeroMedia}
-          listings={data.listings}
+          searchListings={toHeroSearchListings(data.listings)}
           searchCategories={catalog}
         />
         <HomeIntro />
@@ -101,7 +83,7 @@ export default async function HomePage() {
         <HomeWhereToStay stayListings={data.stayListings} />
         <HomeEatDrink />
         <HomeMapSectionLoader listings={data.listings} catalog={catalog} />
-        <HomeTravelGuides posts={blogPosts.slice(0, 4)} useFallback={useBlogFallback} />
+        <HomeTravelGuides posts={blogPosts} useFallback={useBlogFallback} />
         <HomeTrust businessCount={businessCount} guidesCount={guidesCount} />
         <HomeListBusiness />
         <HomeNewsletter />

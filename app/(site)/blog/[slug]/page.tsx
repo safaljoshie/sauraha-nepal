@@ -6,9 +6,8 @@ import BlogMarkdown from "@/components/blog/BlogMarkdown"
 import BlogShareBar from "@/components/blog/BlogShareBar"
 import {
   fetchPublishedBlogPostBySlug,
-  fetchPublishedBlogPosts,
+  fetchRelatedBlogPosts,
   formatBlogDate,
-  getRelatedPublishedPosts,
 } from "@/lib/blog-db"
 import { getBlogSlugRedirect } from "@/lib/blog-slug-redirects"
 import { SITE_URL } from "@/lib/blog-posts"
@@ -60,8 +59,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   const post = await fetchPublishedBlogPostBySlug(slug)
   if (!post) notFound()
 
-  const allPosts = await fetchPublishedBlogPosts()
-  const related = getRelatedPublishedPosts(allPosts, slug)
+  const related = await fetchRelatedBlogPosts(slug)
   const articleUrl = `${SITE_URL}/blog/${post.slug}`
   const cover = post.cover_image ?? "/images/sauraha-hero.jpg"
 
@@ -127,7 +125,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
               {related.map((item) => (
                 <Link
-                  key={item.id}
+                  key={item.slug}
                   href={`/blog/${item.slug}`}
                   className="rounded-2xl border border-border-brand bg-white p-5 transition-shadow hover:shadow-md"
                 >

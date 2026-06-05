@@ -7,7 +7,7 @@ import { buildListingCoordinateMap } from "@/lib/map-coordinates"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { pageMetadata } from "@/lib/seo"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 60
 
 export const metadata: Metadata = pageMetadata({
   title: "All Listings",

@@ -60,7 +60,7 @@ export default function HomeHeroVideo({ url, posterUrl }: HomeHeroVideoProps) {
         muted
         loop
         playsInline
-        preload="auto"
+        preload="metadata"
         poster={displayPoster}
       >
         <source src={url} type="video/mp4" />

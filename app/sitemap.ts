@@ -3,8 +3,7 @@ import { fetchPublishedBlogPosts } from "@/lib/blog-db"
 import { SITE_URL } from "@/lib/blog-posts"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 
-/** Always generate on request so crawlers get fresh XML (avoids stale/failed static cache). */
-export const dynamic = "force-dynamic"
+export const revalidate = 3600
 
 function absoluteUrl(path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`

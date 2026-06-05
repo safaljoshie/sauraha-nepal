@@ -3,22 +3,22 @@
 import Link from "next/link"
 import HeroSearch from "@/components/home/HeroSearch"
 import { buildSearchCategoryChips, type CategoryCatalog } from "@/lib/category-catalog"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { HeroSearchListing } from "@/lib/listings-catalog"
 
 type HomeDestinationSearchProps = {
-  listings: BusinessListing[]
+  searchListings: HeroSearchListing[]
   searchCategories: CategoryCatalog
 }
 
 export default function HomeDestinationSearch({
-  listings,
+  searchListings,
   searchCategories,
 }: HomeDestinationSearchProps) {
   const chips = buildSearchCategoryChips(searchCategories)
 
   return (
     <div id="hero-search" className="w-full scroll-mt-28">
-      <HeroSearch listings={listings} variant="hero" />
+      <HeroSearch listings={searchListings} variant="hero" />
       <div
         className="mt-3 flex flex-wrap gap-2"
         role="navigation"

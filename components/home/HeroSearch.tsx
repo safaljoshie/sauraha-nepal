@@ -3,11 +3,10 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
-import type { BusinessListing } from "@/lib/business-listing"
-import { getCategoryDisplay, searchListings } from "@/lib/listings-catalog"
+import { getCategoryDisplay, searchListings, type HeroSearchListing } from "@/lib/listings-catalog"
 
 type HeroSearchProps = {
-  listings: BusinessListing[]
+  listings: HeroSearchListing[]
   variant?: "hero" | "default"
 }
 

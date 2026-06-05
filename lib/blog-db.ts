@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
 
 export const BLOG_TAGS = ["Guide", "Transport", "Info", "Tips", "Wildlife", "News"] as const
@@ -21,6 +22,11 @@ export type BlogPostRow = {
   published_at: string | null
 }
 
+export type BlogPostPreview = Pick<
+  BlogPostRow,
+  "slug" | "title" | "excerpt" | "cover_image" | "tag" | "read_time" | "published_at"
+>
+
 export type BlogPostPayload = {
   title: string
   slug: string
@@ -34,6 +40,9 @@ export type BlogPostPayload = {
   meta_title?: string | null
   meta_description?: string | null
 }
+
+const BLOG_PREVIEW_COLUMNS =
+  "slug, title, excerpt, cover_image, tag, read_time, published_at"
 
 async function fetchPublishedWithClient(
   client: ReturnType<typeof getSupabasePublic>,
@@ -59,8 +68,29 @@ async function fetchPublishedWithClient(
   return (data ?? []) as BlogPostRow[]
 }
 
+async function fetchPublishedPreviewWithClient(
+  client: ReturnType<typeof getSupabasePublic>,
+  limit: number,
+  excludeSlug?: string,
+): Promise<BlogPostPreview[]> {
+  let query = client
+    .from("blog_posts")
+    .select(BLOG_PREVIEW_COLUMNS)
+    .eq("status", "published")
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .limit(limit)
+
+  if (excludeSlug) {
+    query = query.neq("slug", excludeSlug)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return (data ?? []) as BlogPostPreview[]
+}
+
 /** Server pages: prefer service role so published posts show even if anon RLS is missing. */
-export async function fetchPublishedBlogPosts(): Promise<BlogPostRow[]> {
+export const fetchPublishedBlogPosts = cache(async (): Promise<BlogPostRow[]> => {
   try {
     const rows = await fetchPublishedWithClient(getSupabaseAdmin())
     if (Array.isArray(rows)) return rows
@@ -83,25 +113,71 @@ export async function fetchPublishedBlogPosts(): Promise<BlogPostRow[]> {
   }
 
   return []
-}
+})
 
-export async function fetchPublishedBlogPostBySlug(slug: string): Promise<BlogPostRow | null> {
-  try {
-    const row = await fetchPublishedWithClient(getSupabaseAdmin(), slug)
-    if (row && !Array.isArray(row)) return row
-  } catch (adminError) {
-    console.error("Blog post by slug (admin):", adminError)
-  }
+export const fetchPublishedBlogPostsPreview = cache(
+  async (limit = 4): Promise<BlogPostPreview[]> => {
+    try {
+      return await fetchPublishedPreviewWithClient(getSupabaseAdmin(), limit)
+    } catch (adminError) {
+      console.error("Published blog preview (admin):", adminError)
+    }
 
-  try {
-    const row = await fetchPublishedWithClient(getSupabasePublic(), slug)
-    if (row && !Array.isArray(row)) return row
-  } catch (publicError) {
-    console.error("Blog post by slug (public):", publicError)
-  }
+    try {
+      return await fetchPublishedPreviewWithClient(getSupabasePublic(), limit)
+    } catch (publicError) {
+      console.error("Published blog preview (public):", publicError)
+    }
 
-  return null
-}
+    return []
+  },
+)
+
+export const fetchPublishedBlogPostBySlug = cache(
+  async (slug: string): Promise<BlogPostRow | null> => {
+    try {
+      const row = await fetchPublishedWithClient(getSupabaseAdmin(), slug)
+      if (row && !Array.isArray(row)) return row
+    } catch (adminError) {
+      console.error("Blog post by slug (admin):", adminError)
+    }
+
+    try {
+      const row = await fetchPublishedWithClient(getSupabasePublic(), slug)
+      if (row && !Array.isArray(row)) return row
+    } catch (publicError) {
+      console.error("Blog post by slug (public):", publicError)
+    }
+
+    return null
+  },
+)
+
+export const fetchRelatedBlogPosts = cache(
+  async (currentSlug: string, limit = 2): Promise<BlogPostPreview[]> => {
+    try {
+      return await fetchPublishedPreviewWithClient(
+        getSupabaseAdmin(),
+        limit,
+        currentSlug,
+      )
+    } catch (adminError) {
+      console.error("Related blog posts (admin):", adminError)
+    }
+
+    try {
+      return await fetchPublishedPreviewWithClient(
+        getSupabasePublic(),
+        limit,
+        currentSlug,
+      )
+    } catch (publicError) {
+      console.error("Related blog posts (public):", publicError)
+    }
+
+    return []
+  },
+)
 
 export async function fetchAllBlogPostsAdmin(): Promise<BlogPostRow[]> {
   const supabase = getSupabaseAdmin()

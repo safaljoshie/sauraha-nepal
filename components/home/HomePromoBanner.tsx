@@ -17,7 +17,6 @@ export default function HomePromoBanner() {
             className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
             sizes="(max-width: 768px) 100vw, 1400px"
             quality={90}
-            unoptimized
           />
           <div className="absolute inset-0 bg-black/45" aria-hidden />
           <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-14">

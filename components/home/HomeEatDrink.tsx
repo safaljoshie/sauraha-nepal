@@ -25,7 +25,6 @@ export default function HomeEatDrink() {
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 sizes="300px"
-                unoptimized
               />
               <div className="nsw-destination-overlay" aria-hidden />
               <div className="absolute right-0 bottom-0 left-0 p-5 text-white">

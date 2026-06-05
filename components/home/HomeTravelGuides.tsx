@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { HOMEPAGE_BLOG_FALLBACK } from "@/lib/homepage-blog-fallback"
-import type { BlogPostRow } from "@/lib/blog-db"
+import type { BlogPostPreview } from "@/lib/blog-db"
 
 type GuideCard = {
   href: string
@@ -11,7 +11,7 @@ type GuideCard = {
   readTime: string
 }
 
-function toGuideCards(posts: BlogPostRow[]): GuideCard[] {
+function toGuideCards(posts: BlogPostPreview[]): GuideCard[] {
   return posts.map((post) => ({
     href: `/blog/${post.slug}`,
     title: post.title,
@@ -25,7 +25,7 @@ export default function HomeTravelGuides({
   posts,
   useFallback,
 }: {
-  posts: BlogPostRow[]
+  posts: BlogPostPreview[]
   useFallback: boolean
 }) {
   const guides: GuideCard[] = useFallback

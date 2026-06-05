@@ -95,7 +95,22 @@ export function matchesPlanFilter(listing: BusinessListing, plan: PlanFilterId) 
   return listing.plan === plan
 }
 
-export function matchesSearch(listing: BusinessListing, query: string) {
+export type HeroSearchListing = Pick<
+  BusinessListing,
+  "id" | "business_name" | "category" | "address" | "description"
+>
+
+export function toHeroSearchListings(listings: BusinessListing[]): HeroSearchListing[] {
+  return listings.map(({ id, business_name, category, address, description }) => ({
+    id,
+    business_name,
+    category,
+    address,
+    description,
+  }))
+}
+
+export function matchesSearch(listing: HeroSearchListing, query: string) {
   if (!query.trim()) return true
   const q = query.trim().toLowerCase()
   return (
@@ -105,7 +120,7 @@ export function matchesSearch(listing: BusinessListing, query: string) {
   )
 }
 
-export function searchListings(listings: BusinessListing[], query: string, limit = 6) {
+export function searchListings(listings: HeroSearchListing[], query: string, limit = 6) {
   if (!query.trim()) return []
   return listings.filter((l) => matchesSearch(l, query)).slice(0, limit)
 }

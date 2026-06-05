@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
 import {
   SITE_SETTING_KEYS,
@@ -52,7 +53,7 @@ function rowsToAdminMap(rows: { key: string; value: string | null }[]): SiteSett
   return map
 }
 
-export async function fetchSiteSettings(): Promise<SiteSettingsMap> {
+export const fetchSiteSettings = cache(async (): Promise<SiteSettingsMap> => {
   try {
     const supabase = getSupabasePublic()
     const { data, error } = await supabase.from("site_settings").select("key, value")
@@ -70,7 +71,7 @@ export async function fetchSiteSettings(): Promise<SiteSettingsMap> {
   } catch {
     return DEFAULT_SETTINGS
   }
-}
+})
 
 /** Server-only: read settings for admin UI (service role). */
 export async function fetchSiteSettingsAdmin(): Promise<SiteSettingsMap> {

@@ -40,7 +40,7 @@ export const fetchApprovedListings = cache(async (): Promise<BusinessListing[]> 
   return sortListingsForDisplay(data as BusinessListing[])
 })
 
-export async function fetchApprovedListingById(
+export const fetchApprovedListingById = cache(async function fetchApprovedListingById(
   id: string,
 ): Promise<BusinessListing | null> {
   let data: unknown = null
@@ -78,4 +78,4 @@ export async function fetchApprovedListingById(
 
   if (error || !data) return null
   return data as BusinessListing
-}
+})

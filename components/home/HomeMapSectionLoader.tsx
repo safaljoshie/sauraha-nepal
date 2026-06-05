@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import DeferredMount from "@/components/DeferredMount"
 import HomeMapSection from "@/components/home/HomeMapSection"
 import type { BusinessListing } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
@@ -45,8 +46,10 @@ export default function HomeMapSectionLoader({
   catalog: CategoryCatalog
 }) {
   return (
-    <Suspense fallback={<HomeMapSectionSkeleton />}>
-      <HomeMapSectionContent listings={listings} catalog={catalog} />
-    </Suspense>
+    <DeferredMount fallback={<HomeMapSectionSkeleton />}>
+      <Suspense fallback={<HomeMapSectionSkeleton />}>
+        <HomeMapSectionContent listings={listings} catalog={catalog} />
+      </Suspense>
+    </DeferredMount>
   )
 }

@@ -3,15 +3,15 @@ import HomeHeroSearchSlot from "@/components/home/HomeHeroSearchSlot"
 import HomeHeroVideo from "@/components/home/HomeHeroVideo"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { HeroMedia } from "@/lib/site-content"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { HeroSearchListing } from "@/lib/listings-catalog"
 
 type HomeHeroProps = {
   primaryHeroMedia: HeroMedia | null
-  listings: BusinessListing[]
+  searchListings: HeroSearchListing[]
   searchCategories: CategoryCatalog
 }
 
-export default function HomeHero({ primaryHeroMedia, listings, searchCategories }: HomeHeroProps) {
+export default function HomeHero({ primaryHeroMedia, searchListings, searchCategories }: HomeHeroProps) {
   const heroVideo = primaryHeroMedia?.type === "video" ? primaryHeroMedia : null
 
   return (
@@ -59,7 +59,10 @@ export default function HomeHero({ primaryHeroMedia, listings, searchCategories 
         </div>
 
         <div className="mt-10 max-w-2xl">
-          <HomeHeroSearchSlot listings={listings} searchCategories={searchCategories} />
+          <HomeHeroSearchSlot
+            searchListings={searchListings}
+            searchCategories={searchCategories}
+          />
         </div>
       </div>
     </section>

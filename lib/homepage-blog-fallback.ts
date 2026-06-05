@@ -1,14 +1,6 @@
 /** Placeholder travel tip cards when no published Supabase posts exist. */
 export const HOMEPAGE_BLOG_FALLBACK = [
   {
-    slug: "best-time-to-visit-sauraha",
-    title: "Best time to visit Sauraha & Chitwan",
-    tag: "Guide",
-    readTime: "5 min read",
-    image: "/images/sauraha-hero.jpg",
-    href: "/blog/best-time-to-visit-sauraha",
-  },
-  {
     slug: "how-to-get-to-sauraha-from-kathmandu-and-pokhara-2026-travel-guide",
     title: "How to get to Sauraha from Kathmandu",
     tag: "Transport",
