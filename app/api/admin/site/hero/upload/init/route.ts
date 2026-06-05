@@ -34,10 +34,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
   }
 
-  if (payload.type !== "video") {
-    return NextResponse.json({ error: "Only video uploads are allowed." }, { status: 400 })
+  const uploadType = payload.type === "image" ? "image" : payload.type === "video" ? "video" : null
+  if (!uploadType) {
+    return NextResponse.json({ error: "Upload type must be video or image (poster)." }, { status: 400 })
   }
-  const type: HeroMediaUploadType = "video"
+  const type: HeroMediaUploadType = uploadType
   const filename = typeof payload.filename === "string" ? payload.filename.trim() : ""
   const size = typeof payload.size === "number" ? payload.size : Number(payload.size)
 

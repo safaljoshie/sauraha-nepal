@@ -44,10 +44,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Please choose a file to upload." }, { status: 400 })
   }
 
-  if (formData.get("type") !== "video") {
-    return NextResponse.json({ error: "Only video uploads are allowed." }, { status: 400 })
+  const mediaType = formData.get("type")
+  const type =
+    mediaType === "video" ? ("video" as const) : mediaType === "image" ? ("image" as const) : null
+  if (!type) {
+    return NextResponse.json({ error: "Upload type must be video or image (poster)." }, { status: 400 })
   }
-  const type = "video" as const
 
   const allowed = isAllowedHeroFile(type, file)
   if (!allowed.ok) {

@@ -200,12 +200,15 @@ export default function AdminHeroMediaManager() {
     }
   }
 
-  async function uploadHeroFileDirect(file: File): Promise<{ url: string } | { error: string }> {
+  async function uploadHeroFileDirect(
+    file: File,
+    uploadType: "video" | "image",
+  ): Promise<{ url: string } | { error: string }> {
     const initRes = await fetch("/api/admin/site/hero/upload/init", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        type: "video",
+        type: uploadType,
         filename: file.name,
         size: file.size,
         mimeType: file.type,
@@ -231,7 +234,10 @@ export default function AdminHeroMediaManager() {
     const { error: uploadError } = await supabase.storage
       .from(initData.bucket)
       .uploadToSignedUrl(initData.path, initData.token, file, {
-        contentType: initData.contentType ?? file.type ?? "video/mp4",
+        contentType:
+          initData.contentType ??
+          file.type ??
+          (uploadType === "video" ? "video/mp4" : "image/jpeg"),
         upsert: false,
       })
 
@@ -258,7 +264,7 @@ export default function AdminHeroMediaManager() {
       let publicUrl: string | undefined
       let uploadError: string | undefined
 
-      const result = await uploadHeroFileDirect(file)
+      const result = await uploadHeroFileDirect(file, "video")
       if ("error" in result) uploadError = result.error
       else publicUrl = result.url
 
@@ -269,10 +275,35 @@ export default function AdminHeroMediaManager() {
       }
 
       setForm((prev) => (prev ? { ...prev, type: "video", url: publicUrl! } : prev))
-      showToast("success", "Upload complete. Click Save Media to publish.")
+      showToast("success", "Video uploaded. Click Save Media to publish.")
     } catch {
       setError("Failed to upload media.")
       showToast("error", "Failed to upload media.")
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  async function handlePosterUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (!file || !form) return
+
+    setUploading(true)
+    setError("")
+    try {
+      const result = await uploadHeroFileDirect(file, "image")
+      if ("error" in result) {
+        setError(result.error)
+        showToast("error", result.error)
+        return
+      }
+
+      setForm((prev) => (prev ? { ...prev, poster_url: result.url } : prev))
+      showToast("success", "Poster uploaded. Click Save Media to publish.")
+    } catch {
+      setError("Failed to upload poster.")
+      showToast("error", "Failed to upload poster.")
     } finally {
       setUploading(false)
     }
@@ -287,7 +318,7 @@ export default function AdminHeroMediaManager() {
             Homepage Hero Video
           </h1>
           <p className="mt-1 text-sm text-text-light">
-            Homepage hero is video only. Delete any legacy image rows below.
+            Video only on the homepage. Upload a poster image so visitors see a frame instantly while the video loads (aim for under 10 MB MP4).
           </p>
         </div>
         <div className="flex gap-2">
@@ -462,11 +493,27 @@ export default function AdminHeroMediaManager() {
                 />
               </Field>
 
-              <Field label="Poster URL (video only)" className="md:col-span-2">
+              <Field label="Poster image" className="md:col-span-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <label className="cursor-pointer rounded-full bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-200">
+                    {uploading ? "Uploading..." : "Upload Poster"}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                      onChange={handlePosterUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                  <span className="text-xs text-text-light">
+                    JPEG, PNG, or WEBP — shows instantly before the video plays.
+                  </span>
+                </div>
                 <input
                   value={form.poster_url}
                   onChange={(e) => setForm((prev) => (prev ? { ...prev, poster_url: e.target.value } : prev))}
-                  className={fieldClass}
+                  className={`${fieldClass} mt-2`}
+                  placeholder="Poster URL (optional if uploaded above)"
                 />
               </Field>
 

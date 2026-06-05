@@ -62,7 +62,8 @@ export default async function HomePage() {
   ])
   const data = buildHomepageData(listings, catalog)
   const primaryHeroMedia = heroMedia[0] ?? null
-  const heroPoster = primaryHeroMedia?.poster_url?.trim() || null
+  const heroPoster =
+    primaryHeroMedia?.poster_url?.trim() || "/images/sauraha-hero.jpg"
   const useBlogFallback = blogPosts.length === 0
 
   let businessCount = stats.businessCount
@@ -75,7 +76,7 @@ export default async function HomePage() {
     <>
       {primaryHeroMedia?.type === "video" ? (
         <>
-          {heroPoster ? <link rel="preload" href={heroPoster} as="image" /> : null}
+          <link rel="preload" href={heroPoster} as="image" />
           <link
             rel="preload"
             href={primaryHeroMedia.url}
