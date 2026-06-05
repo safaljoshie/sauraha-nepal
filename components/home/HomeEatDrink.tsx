@@ -5,7 +5,7 @@ import { EAT_SHOWCASE } from "@/lib/homepage-constants"
 export default function HomeEatDrink() {
   return (
     <section id="eat-drink" className="home-section home-section-muted scroll-mt-24">
-      <div className="mx-auto max-w-[1400px]">
+      <div className="site-container">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-12">
           <h2 className="nsw-section-title">Eat &amp; drink</h2>
           <Link href="/listings?category=eat" className="nsw-view-all shrink-0">

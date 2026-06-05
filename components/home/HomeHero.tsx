@@ -27,7 +27,7 @@ export default function HomeHero({ primaryHeroMedia, listings, searchCategories 
         aria-hidden
       />
 
-      <div className="relative z-20 mx-auto w-full max-w-[1400px] px-6 pt-[88px] pb-12 md:px-10 md:pb-16">
+      <div className="site-container relative z-20 w-full pt-[88px] pb-12 md:pb-16">
         <p className="sr-only">
           <span>Discover Sauraha &amp; Chitwan National Park</span>
         </p>

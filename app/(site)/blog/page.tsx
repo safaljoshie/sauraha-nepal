@@ -17,8 +17,8 @@ export default async function BlogIndexPage() {
   const posts = await fetchPublishedBlogPosts()
 
   return (
-    <main className="mt-[68px] bg-cream px-6 py-16">
-      <div className="mx-auto max-w-6xl">
+    <main className="mt-[68px] bg-cream py-16">
+      <div className="site-container">
         <p className="section-label">Travel Tips</p>
         <h1 className="section-title">Sauraha & Chitwan Guides</h1>
         <p className="mt-4 max-w-2xl text-lg text-text-mid">

@@ -3,9 +3,9 @@ import Link from "next/link"
 export default function HomeIntro() {
   return (
     <section id="why-visit" className="home-section scroll-mt-24">
-      <div className="mx-auto max-w-3xl">
+      <div className="site-container">
         <h2 className="nsw-section-title">Sauraha, Nepal</h2>
-        <div className="mt-6 space-y-5 text-[1.125rem] leading-[1.8] text-ink-muted">
+        <div className="mt-6 max-w-3xl space-y-5 text-[1.125rem] leading-[1.8] text-ink-muted">
           <p>
             Welcome to Sauraha — the gateway to Chitwan National Park. Let us
             inspire your next journey through Nepal&apos;s wildlife capital, from

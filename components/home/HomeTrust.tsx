@@ -23,7 +23,7 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
 
   return (
     <section className="home-section">
-      <div className="mx-auto max-w-[1400px]">
+      <div className="site-container">
         <div className="grid grid-cols-1 gap-px bg-black/10 sm:grid-cols-3">
           <div className="rounded-xl bg-surface-muted px-6 py-10 text-center">
             <p className="font-heading text-4xl font-bold text-ink">{businessCount}+</p>

@@ -9,7 +9,7 @@ export default function HomeExperiences({
 }) {
   return (
     <section id="experiences" className="home-section scroll-mt-24">
-      <div className="mx-auto max-w-[1400px]">
+      <div className="site-container">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-12">
           <h2 className="nsw-section-title">Things to do</h2>
           <Link href="/listings?category=activities" className="nsw-view-all shrink-0">

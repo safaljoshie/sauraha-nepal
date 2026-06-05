@@ -7,7 +7,7 @@ import { buildListingCoordinateMap } from "@/lib/map-coordinates"
 function HomeMapSectionSkeleton() {
   return (
     <section id="map" className="home-section scroll-mt-24" aria-busy="true" aria-label="Loading map">
-      <div className="mx-auto max-w-[1400px]">
+      <div className="site-container">
         <div className="mb-10 h-8 w-48 animate-pulse rounded-2xl bg-gray-200 md:mb-12" />
         <div className="mb-6 flex flex-wrap gap-2">
           {Array.from({ length: 5 }).map((_, i) => (

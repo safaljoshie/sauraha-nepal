@@ -32,7 +32,7 @@ export default function HomePlanTrip() {
 
   return (
     <section id="plan-trip" className="home-section home-section-muted scroll-mt-24">
-      <div className="mx-auto max-w-[1400px]">
+      <div className="site-container">
         <h2 className="nsw-section-title">Choose your path</h2>
         <p className="mt-4 max-w-xl text-ink-muted">
           Plan dates, book stays, reserve activities, and find travel information —

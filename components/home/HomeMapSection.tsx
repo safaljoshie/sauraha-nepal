@@ -45,7 +45,7 @@ export default function HomeMapSection({
 
   return (
     <section id="map" className="home-section scroll-mt-24">
-      <div className="mx-auto max-w-[1400px]">
+      <div className="site-container">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-12">
           <div>
             <h2 className="nsw-section-title">Find on the map</h2>

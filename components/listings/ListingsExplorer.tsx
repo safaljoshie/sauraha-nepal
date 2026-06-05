@@ -105,8 +105,8 @@ export default function ListingsExplorer({
 
   return (
     <>
-      <div className="sticky top-[68px] z-[90] border-b border-border-brand bg-white px-4 py-5 md:px-8">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4">
+      <div className="sticky top-[68px] z-[90] border-b border-border-brand bg-white py-5">
+        <div className="site-container flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <input
               type="search"
@@ -140,7 +140,7 @@ export default function ListingsExplorer({
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 pt-8 md:px-8">
+      <div className="site-container pt-8">
         <div className="flex flex-wrap gap-2.5">
           {catalog.builtGroups.map((tab) => {
             const count = countByCategoryGroup(listings, tab.id, catalog)

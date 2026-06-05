@@ -57,8 +57,8 @@ export default async function Footer({ catalog }: { catalog: CategoryCatalog }) 
   const showInstagram = hasSocialUrl(instagramUrl)
 
   return (
-    <footer className="bg-text-brand px-8 py-14 text-white/75 max-md:pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))]">
-      <div className="mx-auto max-w-6xl">
+    <footer className="bg-text-brand py-14 text-white/75 max-md:pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))]">
+      <div className="site-container">
         <div className="mb-10 grid gap-8 md:grid-cols-[2fr_1fr_1fr_1fr_1fr]">
           <div>
             <h4 className="font-[family-name:var(--font-playfair)] text-xl text-white">

@@ -4,9 +4,10 @@ import Link from "next/link"
 export default function HomePromoBanner() {
   return (
     <section className="home-section py-0">
+      <div className="site-container">
       <Link
         href="/blog/how-to-get-to-sauraha-from-kathmandu-and-pokhara-2026-travel-guide"
-        className="group relative mx-auto block max-w-[1400px] overflow-hidden rounded-2xl"
+        className="group relative block overflow-hidden rounded-2xl"
       >
         <div className="relative aspect-[21/9] min-h-[200px] md:aspect-[3/1]">
           <Image
@@ -32,6 +33,7 @@ export default function HomePromoBanner() {
           </div>
         </div>
       </Link>
+      </div>
     </section>
   )
 }

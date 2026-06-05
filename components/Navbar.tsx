@@ -64,12 +64,13 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
   return (
     <>
       <nav
-        className={`fixed top-0 right-0 left-0 z-[100] flex items-center justify-between px-5 py-3 transition-colors duration-300 md:px-10 ${
+        className={`fixed top-0 right-0 left-0 z-[100] transition-colors duration-300 ${
           transparent
             ? "border-transparent bg-transparent text-white"
             : "border-b border-black/8 bg-white text-ink shadow-sm"
         }`}
       >
+        <div className="site-container flex items-center justify-between py-3">
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/one.png"
@@ -136,6 +137,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
           >
             {menuOpen ? "✕" : "☰"}
           </button>
+        </div>
         </div>
       </nav>
 

@@ -12,6 +12,7 @@ const BENEFITS = [
 export default function HomeListBusiness() {
   return (
     <section className="home-section py-12 md:py-16">
+      <div className="site-container">
       <div className="relative overflow-hidden rounded-2xl">
         <div className="absolute inset-0" aria-hidden>
           <Image
@@ -23,7 +24,7 @@ export default function HomeListBusiness() {
           />
           <div className="absolute inset-0 bg-green-brand/88" />
         </div>
-        <div className="relative z-10 mx-auto grid w-full max-w-[1400px] gap-8 px-6 py-10 sm:gap-10 sm:py-12 md:grid-cols-2 md:gap-10 md:px-10 md:py-16 lg:py-20">
+        <div className="relative z-10 grid w-full gap-8 px-6 py-10 sm:gap-10 sm:py-12 md:grid-cols-2 md:gap-10 md:px-10 md:py-16 lg:py-20">
           <div className="text-white">
             <p className="text-xs font-bold tracking-[0.2em] text-white/70 uppercase">
               For local businesses
@@ -52,6 +53,7 @@ export default function HomeListBusiness() {
             ))}
           </ul>
         </div>
+      </div>
       </div>
     </section>
   )

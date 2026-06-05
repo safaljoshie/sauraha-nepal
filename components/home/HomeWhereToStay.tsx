@@ -10,7 +10,7 @@ export default function HomeWhereToStay({
 }) {
   return (
     <section id="where-to-stay" className="home-section scroll-mt-24">
-      <div className="mx-auto max-w-[1400px]">
+      <div className="site-container">
         <HomeSectionHeader
           title="Where to stay"
           subtitle="Hotels, resorts and guesthouses in Sauraha and around Chitwan."
