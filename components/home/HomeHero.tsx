@@ -1,4 +1,3 @@
-import Image from "next/image"
 import Link from "next/link"
 import HomeHeroSearchSlot from "@/components/home/HomeHeroSearchSlot"
 import HomeHeroVideo from "@/components/home/HomeHeroVideo"
@@ -22,17 +21,7 @@ export default function HomeHero({ primaryHeroMedia, listings, searchCategories 
     >
       {heroVideo ? (
         <HomeHeroVideo url={heroVideo.url} posterUrl={heroVideo.poster_url} />
-      ) : (
-        <Image
-          src="/images/home-hero.png"
-          alt=""
-          aria-hidden
-          fill
-          priority
-          sizes="100vw"
-          className="pointer-events-none absolute inset-0 z-0 object-cover"
-        />
-      )}
+      ) : null}
       <div
         className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/35 to-black/15"
         aria-hidden

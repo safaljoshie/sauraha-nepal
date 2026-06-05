@@ -34,7 +34,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
   }
 
-  const type: HeroMediaUploadType = payload.type === "video" ? "video" : "image"
+  if (payload.type !== "video") {
+    return NextResponse.json({ error: "Only video uploads are allowed." }, { status: 400 })
+  }
+  const type: HeroMediaUploadType = "video"
   const filename = typeof payload.filename === "string" ? payload.filename.trim() : ""
   const size = typeof payload.size === "number" ? payload.size : Number(payload.size)
 

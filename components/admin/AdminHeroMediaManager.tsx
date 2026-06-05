@@ -10,7 +10,7 @@ import { getSupabasePublic } from "@/lib/supabase"
 type Toast = { id: string; type: "success" | "error"; message: string }
 type HeroForm = {
   id?: string
-  type: "image" | "video"
+  type: "video"
   url: string
   poster_url: string
   alt_text: string
@@ -88,9 +88,10 @@ export default function AdminHeroMediaManager() {
   }
 
   function openEdit(item: HeroMedia) {
+    if (item.type !== "video") return
     setForm({
       id: item.id,
-      type: item.type,
+      type: "video",
       url: item.url,
       poster_url: item.poster_url ?? "",
       alt_text: item.alt_text ?? "",
@@ -199,15 +200,12 @@ export default function AdminHeroMediaManager() {
     }
   }
 
-  async function uploadHeroFileDirect(
-    file: File,
-    type: "image" | "video",
-  ): Promise<{ url: string } | { error: string }> {
+  async function uploadHeroFileDirect(file: File): Promise<{ url: string } | { error: string }> {
     const initRes = await fetch("/api/admin/site/hero/upload/init", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        type,
+        type: "video",
         filename: file.name,
         size: file.size,
         mimeType: file.type,
@@ -249,7 +247,7 @@ export default function AdminHeroMediaManager() {
     return { url: initData.url }
   }
 
-  async function handleUpload(e: ChangeEvent<HTMLInputElement>, type: "image" | "video") {
+  async function handleUpload(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     e.target.value = ""
     if (!file || !form) return
@@ -260,7 +258,7 @@ export default function AdminHeroMediaManager() {
       let publicUrl: string | undefined
       let uploadError: string | undefined
 
-      const result = await uploadHeroFileDirect(file, "video")
+      const result = await uploadHeroFileDirect(file)
       if ("error" in result) uploadError = result.error
       else publicUrl = result.url
 
@@ -270,7 +268,7 @@ export default function AdminHeroMediaManager() {
         return
       }
 
-      setForm((prev) => (prev ? { ...prev, type, url: publicUrl! } : prev))
+      setForm((prev) => (prev ? { ...prev, type: "video", url: publicUrl! } : prev))
       showToast("success", "Upload complete. Click Save Media to publish.")
     } catch {
       setError("Failed to upload media.")
@@ -289,7 +287,7 @@ export default function AdminHeroMediaManager() {
             Homepage Hero Video
           </h1>
           <p className="mt-1 text-sm text-text-light">
-            Only video is shown on the homepage. Delete old image rows if you no longer need them.
+            Homepage hero is video only. Delete any legacy image rows below.
           </p>
         </div>
         <div className="flex gap-2">
@@ -382,13 +380,15 @@ export default function AdminHeroMediaManager() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => openEdit(item)}
-                          className="rounded-lg bg-blue-100 px-2.5 py-1 text-sm text-blue-700 hover:bg-blue-200"
-                        >
-                          Edit
-                        </button>
+                        {item.type === "video" ? (
+                          <button
+                            type="button"
+                            onClick={() => openEdit(item)}
+                            className="rounded-lg bg-blue-100 px-2.5 py-1 text-sm text-blue-700 hover:bg-blue-200"
+                          >
+                            Edit
+                          </button>
+                        ) : null}
                         <button
                           type="button"
                           onClick={() => handleDelete(item)}
@@ -445,7 +445,7 @@ export default function AdminHeroMediaManager() {
                     <input
                       type="file"
                       accept="video/mp4,video/webm,.mp4,.webm"
-                      onChange={(e) => handleUpload(e, "video")}
+                      onChange={handleUpload}
                       className="hidden"
                       disabled={uploading}
                     />

@@ -3,8 +3,6 @@
 import Image from "next/image"
 import { useState } from "react"
 
-const FALLBACK_POSTER = "/images/home-hero.png"
-
 type HomeHeroVideoProps = {
   url: string
   posterUrl: string | null
@@ -12,31 +10,33 @@ type HomeHeroVideoProps = {
 
 export default function HomeHeroVideo({ url, posterUrl }: HomeHeroVideoProps) {
   const [videoReady, setVideoReady] = useState(false)
-  const poster = posterUrl ?? FALLBACK_POSTER
+  const poster = posterUrl?.trim() || null
 
   return (
     <>
-      <Image
-        src={poster}
-        alt=""
-        aria-hidden
-        fill
-        priority
-        sizes="100vw"
-        className={`pointer-events-none absolute inset-0 z-0 object-cover transition-opacity duration-700 ${
-          videoReady ? "opacity-0" : "opacity-100"
-        }`}
-      />
+      {poster ? (
+        <Image
+          src={poster}
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          className={`pointer-events-none absolute inset-0 z-0 object-cover transition-opacity duration-700 ${
+            videoReady ? "opacity-0" : "opacity-100"
+          }`}
+        />
+      ) : null}
       <video
         className={`pointer-events-none absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-700 ${
-          videoReady ? "opacity-100" : "opacity-0"
+          videoReady || !poster ? "opacity-100" : "opacity-0"
         }`}
         autoPlay
         muted
         loop
         playsInline
         preload="metadata"
-        poster={poster}
+        poster={poster ?? undefined}
         onCanPlay={() => setVideoReady(true)}
       >
         <source src={url} type="video/mp4" />

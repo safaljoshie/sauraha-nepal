@@ -25,8 +25,8 @@ function normalizePriority(value: unknown) {
   return Math.max(0, n)
 }
 
-function isValidMediaType(type: string | undefined): type is "image" | "video" {
-  return type === "image" || type === "video"
+function isValidMediaType(type: string | undefined): type is "video" {
+  return type === "video"
 }
 
 export async function GET() {
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
   const type = payload.type?.trim().toLowerCase()
   const url = payload.url?.trim() ?? ""
   if (!isValidMediaType(type)) {
-    return NextResponse.json({ error: "Media type must be image or video." }, { status: 400 })
+    return NextResponse.json({ error: "Media type must be video." }, { status: 400 })
   }
   if (!/^https?:\/\//i.test(url)) {
     return NextResponse.json({ error: "URL must be a valid HTTP/HTTPS URL." }, { status: 400 })
@@ -119,7 +119,7 @@ export async function PUT(request: Request) {
   const type = payload.type?.trim().toLowerCase()
   const url = payload.url?.trim() ?? ""
   if (!isValidMediaType(type)) {
-    return NextResponse.json({ error: "Media type must be image or video." }, { status: 400 })
+    return NextResponse.json({ error: "Media type must be video." }, { status: 400 })
   }
   if (!/^https?:\/\//i.test(url)) {
     return NextResponse.json({ error: "URL must be a valid HTTP/HTTPS URL." }, { status: 400 })

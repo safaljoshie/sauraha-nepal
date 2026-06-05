@@ -24,26 +24,32 @@ import { fetchActiveHeroMedia } from "@/lib/site-content"
 
 export const revalidate = 60
 
-export const metadata: Metadata = {
-  title: "Discover Sauraha & Chitwan National Park | Sauraha Nepal",
-  description:
-    "Find the best Sauraha hotels, Chitwan safari experiences, restaurants, and travel guides. Plan your trip to Nepal's wildlife capital.",
-  keywords: [
-    "Sauraha hotels",
-    "Chitwan safari",
-    "things to do in Sauraha",
-    "Chitwan travel guide",
-    "Sauraha restaurants",
-  ],
-  openGraph: {
-    title: "Discover Sauraha & Chitwan National Park",
+export async function generateMetadata(): Promise<Metadata> {
+  const heroMedia = await fetchActiveHeroMedia()
+  const primaryVideo = heroMedia[0] ?? null
+  const ogImage = primaryVideo?.poster_url?.trim() || "/images/sauraha-hero.jpg"
+
+  return {
+    title: "Discover Sauraha & Chitwan National Park | Sauraha Nepal",
     description:
-      "Hotels, jungle safaris, restaurants, guides and travel information in Nepal's wildlife capital.",
-    url: "https://www.saurahanepal.com",
-    siteName: "Sauraha Nepal",
-    type: "website",
-    images: ["/images/home-hero.png"],
-  },
+      "Find the best Sauraha hotels, Chitwan safari experiences, restaurants, and travel guides. Plan your trip to Nepal's wildlife capital.",
+    keywords: [
+      "Sauraha hotels",
+      "Chitwan safari",
+      "things to do in Sauraha",
+      "Chitwan travel guide",
+      "Sauraha restaurants",
+    ],
+    openGraph: {
+      title: "Discover Sauraha & Chitwan National Park",
+      description:
+        "Hotels, jungle safaris, restaurants, guides and travel information in Nepal's wildlife capital.",
+      url: "https://www.saurahanepal.com",
+      siteName: "Sauraha Nepal",
+      type: "website",
+      images: [ogImage],
+    },
+  }
 }
 
 export default async function HomePage() {
@@ -56,10 +62,7 @@ export default async function HomePage() {
   ])
   const data = buildHomepageData(listings, catalog)
   const primaryHeroMedia = heroMedia[0] ?? null
-  const heroPoster =
-    primaryHeroMedia?.type === "video"
-      ? (primaryHeroMedia.poster_url ?? "/images/home-hero.png")
-      : null
+  const heroPoster = primaryHeroMedia?.poster_url?.trim() || null
   const useBlogFallback = blogPosts.length === 0
 
   let businessCount = stats.businessCount
@@ -72,7 +75,7 @@ export default async function HomePage() {
     <>
       {primaryHeroMedia?.type === "video" ? (
         <>
-          <link rel="preload" href={heroPoster!} as="image" />
+          {heroPoster ? <link rel="preload" href={heroPoster} as="image" /> : null}
           <link
             rel="preload"
             href={primaryHeroMedia.url}
@@ -80,9 +83,7 @@ export default async function HomePage() {
             type="video/mp4"
           />
         </>
-      ) : (
-        <link rel="preload" href="/images/home-hero.png" as="image" />
-      )}
+      ) : null}
       <HomeJsonLd
         featuredListings={data.featured}
         blogCount={blogPosts.length}
