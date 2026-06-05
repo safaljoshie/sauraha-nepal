@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
 
 /** URL filter ids: virtual `all` / `info` plus dynamic group slugs from the database. */
@@ -257,14 +258,14 @@ async function loadFromSupabase(includeInactive: boolean) {
   return null
 }
 
-export async function fetchCategoryCatalog(options?: {
+export const fetchCategoryCatalog = cache(async (options?: {
   includeInactive?: boolean
-}): Promise<CategoryCatalog> {
+}): Promise<CategoryCatalog> => {
   const includeInactive = options?.includeInactive ?? false
   const loaded = await loadFromSupabase(includeInactive)
   if (!loaded) return DEFAULT_CATEGORY_CATALOG
   return assembleCategoryCatalog(loaded.groups, loaded.categories, { includeInactive })
-}
+})
 
 export function isValidCategoryName(
   name: string,

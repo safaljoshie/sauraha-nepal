@@ -1,5 +1,7 @@
+import Image from "next/image"
 import Link from "next/link"
-import HomeDestinationSearch from "@/components/home/HomeDestinationSearch"
+import HomeHeroSearchSlot from "@/components/home/HomeHeroSearchSlot"
+import HomeHeroVideo from "@/components/home/HomeHeroVideo"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { HeroMedia } from "@/lib/site-content"
 import type { BusinessListing } from "@/lib/business-listing"
@@ -19,17 +21,18 @@ export default function HomeHero({ primaryHeroMedia, listings, searchCategories 
       className="relative flex min-h-[100dvh] flex-col justify-end overflow-hidden bg-ink"
     >
       {heroVideo ? (
-        <video
-          className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster={heroVideo.poster_url ?? undefined}
-        >
-          <source src={heroVideo.url} type="video/mp4" />
-        </video>
-      ) : null}
+        <HomeHeroVideo url={heroVideo.url} posterUrl={heroVideo.poster_url} />
+      ) : (
+        <Image
+          src="/images/home-hero.png"
+          alt=""
+          aria-hidden
+          fill
+          priority
+          sizes="100vw"
+          className="pointer-events-none absolute inset-0 z-0 object-cover"
+        />
+      )}
       <div
         className="absolute inset-0 z-10 bg-gradient-to-t from-black/80 via-black/35 to-black/15"
         aria-hidden
@@ -67,7 +70,7 @@ export default function HomeHero({ primaryHeroMedia, listings, searchCategories 
         </div>
 
         <div className="mt-10 max-w-2xl">
-          <HomeDestinationSearch listings={listings} searchCategories={searchCategories} />
+          <HomeHeroSearchSlot listings={listings} searchCategories={searchCategories} />
         </div>
       </div>
     </section>

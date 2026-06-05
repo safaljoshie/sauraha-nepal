@@ -5,7 +5,7 @@ import HomeHero from "@/components/home/HomeHero"
 import HomeIntro from "@/components/home/HomeIntro"
 import HomeJsonLd from "@/components/home/HomeJsonLd"
 import HomeListBusiness from "@/components/home/HomeListBusiness"
-import HomeMapSection from "@/components/home/HomeMapSection"
+import HomeMapSectionLoader from "@/components/home/HomeMapSectionLoader"
 import HomeNewsletter from "@/components/home/HomeNewsletter"
 import HomePlacesToGo from "@/components/home/HomePlacesToGo"
 import HomePlanTrip from "@/components/home/HomePlanTrip"
@@ -20,7 +20,6 @@ import { buildHomepageData } from "@/lib/homepage-data"
 import { fetchHomepageStats } from "@/lib/homepage-stats"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
-import { buildListingCoordinateMap } from "@/lib/map-coordinates"
 import { fetchActiveHeroMedia } from "@/lib/site-content"
 
 export const revalidate = 60
@@ -55,10 +54,12 @@ export default async function HomePage() {
     fetchPublishedBlogPosts(),
     fetchCategoryCatalog(),
   ])
-  const mapCoordinates = await buildListingCoordinateMap(listings)
-
   const data = buildHomepageData(listings, catalog)
   const primaryHeroMedia = heroMedia[0] ?? null
+  const heroPoster =
+    primaryHeroMedia?.type === "video"
+      ? (primaryHeroMedia.poster_url ?? "/images/home-hero.png")
+      : null
   const useBlogFallback = blogPosts.length === 0
 
   let businessCount = stats.businessCount
@@ -69,6 +70,19 @@ export default async function HomePage() {
 
   return (
     <>
+      {primaryHeroMedia?.type === "video" ? (
+        <>
+          <link rel="preload" href={heroPoster!} as="image" />
+          <link
+            rel="preload"
+            href={primaryHeroMedia.url}
+            as="video"
+            type="video/mp4"
+          />
+        </>
+      ) : (
+        <link rel="preload" href="/images/home-hero.png" as="image" />
+      )}
       <HomeJsonLd
         featuredListings={data.featured}
         blogCount={blogPosts.length}
@@ -86,11 +100,7 @@ export default async function HomePage() {
         <HomePlanTrip />
         <HomeWhereToStay stayListings={data.stayListings} />
         <HomeEatDrink />
-        <HomeMapSection
-          listings={data.listings}
-          catalog={catalog}
-          mapCoordinates={mapCoordinates}
-        />
+        <HomeMapSectionLoader listings={data.listings} catalog={catalog} />
         <HomeTravelGuides posts={blogPosts.slice(0, 4)} useFallback={useBlogFallback} />
         <HomeTrust businessCount={businessCount} guidesCount={guidesCount} />
         <HomeListBusiness />

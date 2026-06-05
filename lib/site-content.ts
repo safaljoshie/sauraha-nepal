@@ -1,3 +1,4 @@
+import { cache } from "react"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
 
@@ -55,12 +56,12 @@ export async function fetchContactPageContent(): Promise<ContactPageContent | nu
   }
 }
 
-export async function fetchActiveHeroMedia(): Promise<HeroMedia[]> {
+export const fetchActiveHeroMedia = cache(async (): Promise<HeroMedia[]> => {
   return fetchActiveHeroVideos()
-}
+})
 
 /** Active homepage hero videos only (images are ignored for now). */
-export async function fetchActiveHeroVideos(): Promise<HeroMedia[]> {
+const fetchActiveHeroVideos = cache(async (): Promise<HeroMedia[]> => {
   const query = (client: SupabaseClient) =>
     client
       .from("hero_media")
@@ -86,4 +87,4 @@ export async function fetchActiveHeroVideos(): Promise<HeroMedia[]> {
   } catch {
     return []
   }
-}
+})
