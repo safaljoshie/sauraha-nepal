@@ -141,3 +141,24 @@ export function googleMapsOpenUrl(
   if (saved) return saved
   return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
 }
+
+/** Best URL to open a listing in Google Maps (link, coords, or address search). */
+export function getListingMapsOpenUrl(options: {
+  mapsLink?: string | null
+  address?: string | null
+  coords?: MapCoordinates | null
+}): string | null {
+  const saved = options.mapsLink?.trim()
+  if (saved) return saved
+
+  if (options.coords) {
+    return `https://www.google.com/maps/search/?api=1&query=${options.coords.lat},${options.coords.lng}`
+  }
+
+  const address = options.address?.trim()
+  if (address) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${address}, Sauraha, Nepal`)}`
+  }
+
+  return null
+}

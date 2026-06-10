@@ -2,7 +2,7 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import ListingImage from "@/components/listings/ListingImage"
-import ListingMapSection from "@/components/listings/ListingMapSection"
+import ListingDetailMapSection from "@/components/listings/ListingDetailMapSection"
 import ListingShareButtons from "@/components/listings/ListingShareButtons"
 import OpeningHoursDisplay from "@/components/listings/OpeningHoursDisplay"
 import {
@@ -14,6 +14,7 @@ import {
   telUrl,
   whatsappUrl,
 } from "@/lib/listings-catalog"
+import { getMapCoordinates, parseCoordinates } from "@/lib/google-maps"
 import { fetchApprovedListingById } from "@/lib/listings-fetch"
 import { SITE_URL } from "@/lib/blog-posts"
 import { listingJsonLd, pageMetadata } from "@/lib/seo"
@@ -57,6 +58,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
   const jsonLd = listingJsonLd(listing)
+
+  const mapsLink = listing.google_maps_link?.trim() ?? ""
+  let coords = mapsLink ? parseCoordinates(mapsLink) : null
+  if (!coords && mapsLink) {
+    coords = await getMapCoordinates(mapsLink)
+  }
 
   return (
     <main className="pb-20">
@@ -145,6 +152,15 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
             </section>
           )}
+
+          <ListingDetailMapSection
+            listingId={listing.id}
+            businessName={listing.business_name}
+            category={listing.category}
+            address={listing.address}
+            googleMapsLink={listing.google_maps_link}
+            coords={coords}
+          />
         </div>
 
         <aside className="h-fit space-y-6 lg:sticky lg:top-24">
@@ -232,11 +248,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
           </section>
 
           <ListingShareButtons businessName={listing.business_name} url={listingUrl} />
-
-          <ListingMapSection
-            address={listing.address}
-            googleMapsLink={listing.google_maps_link}
-          />
 
           <p className="text-center text-xs text-text-light">
             Listed {formatListingDate(listing.created_at)}
