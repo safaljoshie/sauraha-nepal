@@ -11,7 +11,7 @@ const ICON_PROPS = {
   height: 24,
   fill: "none" as const,
   stroke: "currentColor",
-  strokeWidth: 1.8,
+  strokeWidth: 2.7,
   strokeLinecap: "round" as const,
   strokeLinejoin: "round" as const,
 }
@@ -139,7 +139,7 @@ export default function MobileBottomNav() {
                   height={20}
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth={2}
+                  strokeWidth={3}
                   strokeLinecap="round"
                   viewBox="0 0 24 24"
                   aria-hidden
