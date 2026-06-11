@@ -113,7 +113,7 @@ export default function MobileBottomNav() {
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return null
 
   return (
-    <nav className="mobile-bottom-nav md:hidden" aria-label="Mobile navigation">
+    <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
       <ul className="mobile-bottom-nav-list">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon

@@ -467,24 +467,30 @@ body {
 }
 
 .mobile-bottom-nav {
-  position: fixed;
-  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  left: 50%;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  width: 85vw;
-  max-width: 400px;
-  height: 64px;
-  padding: 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 50px;
-  background: rgba(255, 247, 242, 0.52);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  transform: translateX(-50%);
-  animation: mobile-bottom-nav-rise 0.4s ease-out;
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .mobile-bottom-nav {
+    position: fixed;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    width: 85vw;
+    max-width: 400px;
+    height: 64px;
+    padding: 0 16px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50px;
+    background: rgba(255, 247, 242, 0.52);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transform: translateX(-50%);
+    animation: mobile-bottom-nav-rise 0.4s ease-out;
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+  }
 }
 
 .mobile-bottom-nav-list {
