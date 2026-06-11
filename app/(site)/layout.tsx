@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import MobileBottomNav from "@/components/home/MobileBottomNav"
+import MobileBottomNav from "@/components/MobileBottomNav"
 import SiteFooter from "@/components/SiteFooter"
 import SiteNavbar from "@/components/SiteNavbar"
 
@@ -28,11 +28,13 @@ export default function SiteLayout({
       <Suspense fallback={<NavbarFallback />}>
         <SiteNavbar />
       </Suspense>
-      <div className="max-md:pb-[calc(3rem+env(safe-area-inset-bottom,0px))]">{children}</div>
+      <div className="pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-0">{children}</div>
       <Suspense fallback={<FooterFallback />}>
         <SiteFooter />
       </Suspense>
-      <MobileBottomNav />
+      <Suspense fallback={null}>
+        <MobileBottomNav />
+      </Suspense>
     </>
   )
 }

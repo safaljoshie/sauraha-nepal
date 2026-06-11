@@ -17,7 +17,7 @@ export const metadata: Metadata = pageMetadata({
 })
 
 type ListingsPageProps = {
-  searchParams: Promise<{ search?: string; category?: string; q?: string }>
+  searchParams: Promise<{ search?: string; category?: string; q?: string; view?: string }>
 }
 
 export default async function ListingsPage({ searchParams }: ListingsPageProps) {
@@ -27,8 +27,12 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
     fetchCategoryCatalog(),
   ])
   const mapCoordinates = await buildListingCoordinateMap(listings)
-  const initialSearch = (params.search ?? params.q ?? "").trim()
+  const searchParam = params.search?.trim() ?? ""
+  const initialSearch =
+    searchParam && searchParam !== "true" ? searchParam : (params.q ?? "").trim()
   const initialCategory = parseCategoryParam(params.category, catalog)
+  const initialViewMode = params.view === "map" ? "map" : "grid"
+  const focusSearchOnMount = searchParam === "true"
 
   return (
     <main>
@@ -47,6 +51,8 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
         mapCoordinates={mapCoordinates}
         initialSearch={initialSearch}
         initialCategory={initialCategory}
+        initialViewMode={initialViewMode}
+        focusSearchOnMount={focusSearchOnMount}
       />
     </main>
   )

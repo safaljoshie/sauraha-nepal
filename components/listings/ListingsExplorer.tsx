@@ -25,6 +25,8 @@ type ListingsExplorerProps = {
   mapCoordinates: ListingCoordinateMap
   initialSearch?: string
   initialCategory?: CategoryGroupId
+  initialViewMode?: ViewMode
+  focusSearchOnMount?: boolean
 }
 
 export default function ListingsExplorer({
@@ -33,6 +35,8 @@ export default function ListingsExplorer({
   mapCoordinates,
   initialSearch = "",
   initialCategory = "all",
+  initialViewMode = "grid",
+  focusSearchOnMount = false,
 }: ListingsExplorerProps) {
   const [searchInput, setSearchInput] = useState(initialSearch)
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
@@ -41,13 +45,19 @@ export default function ListingsExplorer({
   const [sort, setSort] = useState<SortOptionId>("plan")
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>("grid")
+  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode)
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearch(searchInput), 300)
     return () => window.clearTimeout(timer)
   }, [searchInput])
+
+  useEffect(() => {
+    if (!focusSearchOnMount) return
+    searchInputRef.current?.focus()
+  }, [focusSearchOnMount])
 
   const filtered = useMemo(
     () =>
@@ -109,8 +119,9 @@ export default function ListingsExplorer({
         <div className="site-container flex flex-col gap-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <input
+              ref={searchInputRef}
               type="search"
-              placeholder="🔍 Search listings..."
+              placeholder="Search listings..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className="min-w-0 flex-1 rounded-xl border-[1.5px] border-border-brand px-4 py-2.5 text-sm outline-none focus:border-green-mid sm:min-w-[200px]"
