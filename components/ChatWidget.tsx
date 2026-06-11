@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useChatUI } from "@/components/ChatUIProvider"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
 import { MOBILE_HOME_NAV_TOP } from "@/lib/mobile-home-nav"
@@ -75,12 +76,11 @@ export default function ChatWidget() {
   const pathname = usePathname()
   const onHome = pathname === "/"
   const aboveMobileNav = pathname !== "/admin" && !pathname.startsWith("/admin/")
-  const [open, setOpen] = useState(false)
+  const { open, unread, setUnread, openChat, closeChat } = useChatUI()
   const [messages, setMessages] = useState<ChatUiMessage[]>([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [unread, setUnread] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -96,10 +96,14 @@ export default function ChatWidget() {
       scrollToBottom()
       requestAnimationFrame(() => inputRef.current?.focus())
     }
-  }, [open, messages, loading, scrollToBottom])
+  }, [open, messages, loading, scrollToBottom, setUnread])
+
+  useEffect(() => {
+    if (open && !sessionId) setSessionId(crypto.randomUUID())
+  }, [open, sessionId])
 
   const handleClose = () => {
-    setOpen(false)
+    closeChat()
     setMessages([])
     setInput("")
     setError(null)
@@ -108,7 +112,7 @@ export default function ChatWidget() {
 
   const handleOpen = () => {
     if (!sessionId) setSessionId(crypto.randomUUID())
-    setOpen(true)
+    openChat()
   }
 
   const sendMessage = async (text: string) => {
@@ -312,7 +316,7 @@ export default function ChatWidget() {
       )}
 
       <div
-        className={`site-floating-actions ${
+        className={`site-floating-actions max-md:hidden ${
           aboveMobileNav ? "site-floating-actions--above-nav" : ""
         }`}
       >

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { GoogleAnalytics } from "@next/third-parties/google"
 import { Analytics } from "@vercel/analytics/next"
+import { ChatUIProvider } from "@/components/ChatUIProvider"
 import ChatWidgetLoader from "@/components/ChatWidgetLoader"
 import { Inter, Nunito, Playfair_Display, Poppins } from "next/font/google"
 import "./globals.css"
@@ -61,8 +62,10 @@ export default function RootLayout({
       className={`${playfair.variable} ${nunito.variable} ${poppins.variable} ${inter.variable}`}
     >
       <body className="font-[family-name:var(--font-inter)] antialiased">
-        {children}
-        <ChatWidgetLoader />
+        <ChatUIProvider>
+          {children}
+          <ChatWidgetLoader />
+        </ChatUIProvider>
         <Analytics />
         {process.env.NODE_ENV === "production" && gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>
