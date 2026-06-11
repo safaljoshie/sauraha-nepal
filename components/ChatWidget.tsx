@@ -75,7 +75,6 @@ function toApiHistory(messages: ChatUiMessage[]): AnthropicHistoryMessage[] {
 export default function ChatWidget() {
   const pathname = usePathname()
   const onHome = pathname === "/"
-  const aboveMobileNav = pathname !== "/admin" && !pathname.startsWith("/admin/")
   const { open, unread, setUnread, openChat, closeChat } = useChatUI()
   const [messages, setMessages] = useState<ChatUiMessage[]>([])
   const [input, setInput] = useState("")
@@ -168,9 +167,7 @@ export default function ChatWidget() {
     <>
       {open && (
         <div
-          className={`chat-window-enter fixed z-[1000] flex flex-col overflow-hidden border border-border-brand bg-white shadow-[0_8px_40px_rgba(0,0,0,0.2)] max-md:inset-x-0 max-md:h-[60vh] max-md:rounded-t-2xl md:right-6 md:bottom-[90px] md:h-[500px] md:w-[360px] md:rounded-2xl ${
-            aboveMobileNav ? MOBILE_HOME_NAV_TOP : "max-md:bottom-0"
-          }`}
+          className={`chat-window-enter fixed z-[1000] flex flex-col overflow-hidden border border-border-brand bg-white shadow-[0_8px_40px_rgba(0,0,0,0.2)] max-md:inset-x-0 max-md:h-[60vh] max-md:rounded-t-2xl md:right-6 md:bottom-[90px] md:h-[500px] md:w-[360px] md:rounded-2xl ${MOBILE_HOME_NAV_TOP}`}
           role="dialog"
           aria-label="Dhurbe chat"
         >
@@ -315,11 +312,7 @@ export default function ChatWidget() {
         </div>
       )}
 
-      <div
-        className={`site-floating-actions max-md:hidden ${
-          aboveMobileNav ? "site-floating-actions--above-nav" : ""
-        }`}
-      >
+      <div className="site-floating-actions">
         {onHome ? (
           <a
             href="#hero-search"
