@@ -43,12 +43,49 @@ export const HOME_EXPERIENCES = [
   },
 ] as const
 
+export const PLAN_TRIP_DHURBE = {
+  title: "Ask Dhurbe (Your AI Tour Guide)",
+  description:
+    "Help me build an itinerary for you. Get personalised tips on dates, stays, safaris, and getting around Sauraha.",
+  action: "chat" as const,
+} as const
+
 export const PLAN_TRIP_STEPS = [
-  { step: 1, title: "Choose travel dates", description: "October–March is peak wildlife season.", icon: "📅" },
-  { step: 2, title: "Find accommodation", description: "Hotels, resorts, and homestays in Sauraha.", icon: "🏨" },
-  { step: 3, title: "Book activities", description: "Safaris, canoe rides, and cultural experiences.", icon: "🐘" },
-  { step: 4, title: "Explore restaurants", description: "Local Tharu cuisine and riverside dining.", icon: "🍽️" },
-  { step: 5, title: "Get travel information", description: "Permits, transport, and insider guides.", icon: "📖" },
+  {
+    step: 1,
+    title: "Choose travel dates",
+    description: "October–March is peak wildlife season.",
+    icon: "📅",
+    href: "/blog",
+  },
+  {
+    step: 2,
+    title: "Find accommodation",
+    description: "Hotels, resorts, and homestays in Sauraha.",
+    icon: "🏨",
+    href: "/listings?category=stay",
+  },
+  {
+    step: 3,
+    title: "Book activities",
+    description: "Safaris, canoe rides, and cultural experiences.",
+    icon: "🐘",
+    href: "/listings?category=activities",
+  },
+  {
+    step: 4,
+    title: "Explore restaurants",
+    description: "Local Tharu cuisine and riverside dining.",
+    icon: "🍽️",
+    href: "/listings?category=eat",
+  },
+  {
+    step: 5,
+    title: "Get travel information",
+    description: "Permits, transport, and insider guides.",
+    icon: "📖",
+    href: "/blog",
+  },
 ] as const
 
 export const EAT_SHOWCASE = [
