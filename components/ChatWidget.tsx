@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useChatUI } from "@/components/ChatUIProvider"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
+import ChatMarkdown from "@/components/chat/ChatMarkdown"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
 import { MOBILE_HOME_NAV_TOP } from "@/lib/mobile-home-nav"
 
@@ -230,13 +231,17 @@ export default function ChatWidget() {
                   }`}
                 >
                   <div
-                    className={`rounded-2xl px-3 py-2 text-sm leading-relaxed whitespace-pre-wrap ${
+                    className={`rounded-2xl px-3 py-2 text-sm leading-relaxed ${
                       msg.role === "user"
-                        ? "rounded-tr-sm bg-green-brand text-white"
+                        ? "rounded-tr-sm bg-green-brand text-white whitespace-pre-wrap"
                         : "rounded-tl-sm bg-cream text-text-brand"
                     }`}
                   >
-                    {msg.content}
+                    {msg.role === "assistant" ? (
+                      <ChatMarkdown content={msg.content} />
+                    ) : (
+                      msg.content
+                    )}
                   </div>
                   <p
                     className={`mt-1 text-[0.65rem] text-text-light ${
