@@ -31,7 +31,7 @@ export default function HomeWhereToStay({
         ) : (
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {stayListings.map((listing) => (
-              <HomeFeaturedCard key={listing.id} listing={listing} />
+              <HomeFeaturedCard key={listing.id} listing={listing} showStatus={false} />
             ))}
           </div>
         )}

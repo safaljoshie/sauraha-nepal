@@ -12,7 +12,13 @@ import {
   whatsappUrl,
 } from "@/lib/listings-catalog"
 
-export default function HomeFeaturedCard({ listing }: { listing: BusinessListing }) {
+export default function HomeFeaturedCard({
+  listing,
+  showStatus = true,
+}: {
+  listing: BusinessListing
+  showStatus?: boolean
+}) {
   const image = getListingImage(listing)
   const detailHref = `/listings/${listing.id}`
   const isPremium = listing.plan === "premium"
@@ -75,7 +81,7 @@ export default function HomeFeaturedCard({ listing }: { listing: BusinessListing
           <h3 className="font-heading text-lg font-bold text-ink">
             {listing.business_name}
           </h3>
-          {listing.opening_hours?.trim() && (
+          {showStatus && listing.opening_hours?.trim() && (
             <div className="mt-1">
               <OpenNowBadge openingHours={listing.opening_hours} />
             </div>

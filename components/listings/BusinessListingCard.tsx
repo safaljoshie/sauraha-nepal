@@ -16,8 +16,10 @@ import {
 
 export default function BusinessListingCard({
   listing,
+  showStatus = true,
 }: {
   listing: BusinessListing
+  showStatus?: boolean
 }) {
   const image = getListingImage(listing)
   const detailHref = `/listings/${listing.id}`
@@ -82,7 +84,7 @@ export default function BusinessListingCard({
           <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-text-brand">
             {listing.business_name}
           </h3>
-          {listing.opening_hours?.trim() && (
+          {showStatus && listing.opening_hours?.trim() && (
             <div className="mt-1">
               <OpenNowBadge openingHours={listing.opening_hours} />
             </div>
