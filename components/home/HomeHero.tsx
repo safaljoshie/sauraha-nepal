@@ -1,4 +1,5 @@
 import Link from "next/link"
+import HeroMakeItineraryButton from "@/components/home/HeroMakeItineraryButton"
 import HomeHeroSearchSlot from "@/components/home/HomeHeroSearchSlot"
 import HomeHeroVideo from "@/components/home/HomeHeroVideo"
 import type { CategoryCatalog } from "@/lib/category-catalog"
@@ -50,6 +51,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
           >
             Explore places
           </Link>
+          <HeroMakeItineraryButton />
           <Link
             href="#plan-trip"
             className="inline-flex items-center rounded-xl border border-white/70 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
