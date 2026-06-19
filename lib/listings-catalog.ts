@@ -120,6 +120,24 @@ export function matchesSearch(listing: HeroSearchListing, query: string) {
   )
 }
 
+export function matchesAdminListingSearch(listing: BusinessListing, query: string) {
+  if (!query.trim()) return true
+  const q = query.trim().toLowerCase()
+  const fields = [
+    listing.business_name,
+    listing.category,
+    listing.description,
+    listing.owner_name,
+    listing.email,
+    listing.phone,
+    listing.whatsapp,
+    listing.address,
+    listing.status,
+    listing.plan,
+  ]
+  return fields.some((field) => field?.toLowerCase().includes(q))
+}
+
 export function searchListings(listings: HeroSearchListing[], query: string, limit = 6) {
   if (!query.trim()) return []
   return listings.filter((l) => matchesSearch(l, query)).slice(0, limit)

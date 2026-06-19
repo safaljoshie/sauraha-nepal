@@ -7,6 +7,7 @@ import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate, planLabel } from "@/lib/business-listing"
 import { DEFAULT_CATEGORY_CATALOG, getActiveCategoryNames } from "@/lib/category-catalog"
 import { mergePhotoLinks } from "@/lib/list-business-photos"
+import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
 import AdminTabNav, { type AdminTab } from "@/components/admin/AdminTabNav"
@@ -140,6 +141,8 @@ export default function AdminDashboard() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [uploadingPhotos, setUploadingPhotos] = useState(false)
   const [adminTab, setAdminTab] = useState<AdminTab>("listings")
+  const [searchInput, setSearchInput] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [categoryOptions, setCategoryOptions] = useState<string[]>(
     getActiveCategoryNames(DEFAULT_CATEGORY_CATALOG),
   )
@@ -192,6 +195,11 @@ export default function AdminDashboard() {
     loadCategoryOptions()
   }, [loadListings, loadCategoryOptions])
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(searchInput), 300)
+    return () => window.clearTimeout(timer)
+  }, [searchInput])
+
   const defaultCategory = categoryOptions[0] ?? ""
 
   const stats = useMemo(() => {
@@ -203,12 +211,16 @@ export default function AdminDashboard() {
   }, [listings])
 
   const filtered = useMemo(() => {
-    if (filter === "all") return listings
-    if (filter === "pending" || filter === "approved" || filter === "rejected") {
-      return listings.filter((l) => l.status === filter)
-    }
-    return listings.filter((l) => l.plan === filter)
-  }, [listings, filter])
+    const byTab =
+      filter === "all"
+        ? listings
+        : filter === "pending" || filter === "approved" || filter === "rejected"
+          ? listings.filter((l) => l.status === filter)
+          : listings.filter((l) => l.plan === filter)
+
+    if (!debouncedSearch.trim()) return byTab
+    return byTab.filter((listing) => matchesAdminListingSearch(listing, debouncedSearch))
+  }, [listings, filter, debouncedSearch])
 
   useEffect(() => {
     setSelectedIds((prev) => prev.filter((id) => filtered.some((listing) => listing.id === id)))
@@ -603,6 +615,17 @@ export default function AdminDashboard() {
         ))}
       </div>
 
+      <div className="mb-6">
+        <input
+          type="search"
+          placeholder="Search listings by name, owner, email, phone..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          className="w-full max-w-md rounded-xl border border-border-brand bg-white px-4 py-2.5 text-sm text-text-brand outline-none focus:border-green-mid"
+          aria-label="Search listings"
+        />
+      </div>
+
       {error && (
         <p
           role="alert"
@@ -677,7 +700,9 @@ export default function AdminDashboard() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="px-4 py-12 text-center text-text-light">
-                    No listings found.
+                    {debouncedSearch.trim()
+                      ? "No listings match your search."
+                      : "No listings found."}
                   </td>
                 </tr>
               ) : (
