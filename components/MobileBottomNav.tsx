@@ -58,7 +58,7 @@ const NAV_ITEMS = [
   { id: "search", href: "/listings?search=true", label: "Search", icon: IconSearch },
 ] as const
 
-type NavItemId = (typeof NAV_ITEMS)[number]["id"] | "dhurbe"
+type NavItemId = (typeof NAV_ITEMS)[number]["id"] | "dhurbe" | null
 
 function NavIconButton({
   active,
@@ -99,15 +99,15 @@ export default function MobileBottomNav() {
 
   const view = searchParams.get("view")
   const searchFlag = searchParams.get("search")
-  const onListings = pathname === "/listings" || pathname.startsWith("/listings/")
+  const onListingsIndex = pathname === "/listings"
 
   const activeId: NavItemId = (() => {
     if (open) return "dhurbe"
     if (pathname === "/") return "home"
-    if (onListings && view === "map") return "map"
-    if (onListings && searchFlag === "true") return "search"
-    if (pathname.startsWith("/listings")) return "explore"
-    return "home"
+    if (onListingsIndex && view === "map") return "map"
+    if (onListingsIndex && searchFlag === "true") return "search"
+    if (pathname === "/listings" || pathname.startsWith("/listings/")) return "explore"
+    return null
   })()
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return null

@@ -76,7 +76,7 @@ function toApiHistory(messages: ChatUiMessage[]): AnthropicHistoryMessage[] {
 export default function ChatWidget() {
   const pathname = usePathname()
   const onHome = pathname === "/"
-  const { open, unread, setUnread, openChat, closeChat } = useChatUI()
+  const { open, unread, setUnread, openChat, closeChat, registerChatReset } = useChatUI()
   const [messages, setMessages] = useState<ChatUiMessage[]>([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
@@ -102,12 +102,18 @@ export default function ChatWidget() {
     if (open && !sessionId) setSessionId(crypto.randomUUID())
   }, [open, sessionId])
 
-  const handleClose = () => {
-    closeChat()
+  const resetChat = useCallback(() => {
     setMessages([])
     setInput("")
     setError(null)
     setSessionId(null)
+  }, [])
+
+  useEffect(() => registerChatReset(resetChat), [registerChatReset, resetChat])
+
+  const handleClose = () => {
+    closeChat()
+    resetChat()
   }
 
   const handleOpen = () => {

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { BusinessListing } from "@/lib/business-listing"
 import type { ListingCoordinateMap } from "@/lib/map-coordinates"
@@ -43,10 +43,9 @@ export default function ListingsExplorer({
   const [category, setCategory] = useState<CategoryGroupId>(initialCategory)
   const [planFilter, setPlanFilter] = useState<PlanFilterId>("all")
   const [sort, setSort] = useState<SortOptionId>("plan")
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
-  const [loadingMore, setLoadingMore] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode)
-  const sentinelRef = useRef<HTMLDivElement>(null)
+  const gridTopRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -55,8 +54,18 @@ export default function ListingsExplorer({
   }, [searchInput])
 
   useEffect(() => {
+    setViewMode(initialViewMode)
+  }, [initialViewMode])
+
+  useEffect(() => {
+    setSearchInput(initialSearch)
+    setDebouncedSearch(initialSearch)
+  }, [initialSearch])
+
+  useEffect(() => {
     if (!focusSearchOnMount) return
-    searchInputRef.current?.focus()
+    const timer = window.setTimeout(() => searchInputRef.current?.focus(), 50)
+    return () => window.clearTimeout(timer)
   }, [focusSearchOnMount])
 
   const filtered = useMemo(
@@ -75,38 +84,33 @@ export default function ListingsExplorer({
   )
 
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE)
+    setCurrentPage(1)
   }, [debouncedSearch, category, planFilter, sort])
 
-  const visible = filtered.slice(0, visibleCount)
-  const hasMore = visibleCount < filtered.length
-
-  const loadMore = useCallback(() => {
-    if (!hasMore || loadingMore) return
-    setLoadingMore(true)
-    window.setTimeout(() => {
-      setVisibleCount((c) => Math.min(c + PAGE_SIZE, filtered.length))
-      setLoadingMore(false)
-    }, 400)
-  }, [filtered.length, hasMore, loadingMore])
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const safePage = Math.min(currentPage, totalPages)
 
   useEffect(() => {
-    const node = sentinelRef.current
-    if (!node) return
+    if (currentPage !== safePage) setCurrentPage(safePage)
+  }, [currentPage, safePage])
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) loadMore()
-      },
-      { rootMargin: "120px" },
-    )
+  const pageListings = useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE
+    return filtered.slice(start, start + PAGE_SIZE)
+  }, [filtered, safePage])
 
-    observer.observe(node)
-    return () => observer.disconnect()
-  }, [loadMore])
+  const rangeStart = filtered.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1
+  const rangeEnd = Math.min(safePage * PAGE_SIZE, filtered.length)
+
+  function goToPage(page: number) {
+    const next = Math.max(1, Math.min(page, totalPages))
+    setCurrentPage(next)
+    window.requestAnimationFrame(() => {
+      gridTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    })
+  }
 
   const totalApproved = listings.length
-  const showingCount = visible.length
 
   function clearSearch() {
     setSearchInput("")
@@ -177,12 +181,16 @@ export default function ListingsExplorer({
           })}
         </div>
 
-        <div className="mt-8 mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div ref={gridTopRef} className="mt-8 mb-6 flex scroll-mt-28 flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-text-light">
             {totalApproved === 0
               ? "No approved listings yet"
-              : `Showing ${viewMode === "map" ? filtered.length : showingCount} of ${filtered.length} listing${filtered.length === 1 ? "" : "s"}`}
-            {filtered.length !== totalApproved && ` (filtered from ${totalApproved})`}
+              : viewMode === "map"
+                ? `Showing ${filtered.length} listing${filtered.length === 1 ? "" : "s"}`
+                : filtered.length === 0
+                  ? "No listings match your filters"
+                  : `Showing ${rangeStart}–${rangeEnd} of ${filtered.length} listing${filtered.length === 1 ? "" : "s"}`}
+            {filtered.length !== totalApproved && filtered.length > 0 && ` (filtered from ${totalApproved})`}
           </p>
           {filtered.length > 0 && (
             <div className="flex rounded-full border border-border-brand bg-white p-1">
@@ -228,23 +236,101 @@ export default function ListingsExplorer({
         ) : (
           <ListingsGridErrorBoundary>
             <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {visible.map((listing) => (
+              {pageListings.map((listing) => (
                 <BusinessListingCard key={listing.id} listing={listing} />
               ))}
             </div>
 
-            <div ref={sentinelRef} className="flex min-h-[48px] items-center justify-center pb-16">
-              {loadingMore && (
-                <span className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-green-brand/30 border-t-green-brand" />
-              )}
-              {!hasMore && filtered.length > 0 && (
-                <p className="text-sm font-medium text-text-light">No more listings</p>
-              )}
-            </div>
+            <ListingsPagination
+              page={safePage}
+              totalPages={totalPages}
+              onPageChange={goToPage}
+            />
           </ListingsGridErrorBoundary>
         )}
       </div>
     </>
+  )
+}
+
+function getPaginationItems(current: number, total: number): (number | "ellipsis")[] {
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+
+  const items: (number | "ellipsis")[] = [1]
+  const start = Math.max(2, current - 1)
+  const end = Math.min(total - 1, current + 1)
+
+  if (start > 2) items.push("ellipsis")
+  for (let page = start; page <= end; page += 1) items.push(page)
+  if (end < total - 1) items.push("ellipsis")
+  items.push(total)
+
+  return items
+}
+
+function ListingsPagination({
+  page,
+  totalPages,
+  onPageChange,
+}: {
+  page: number
+  totalPages: number
+  onPageChange: (page: number) => void
+}) {
+  if (totalPages <= 1) {
+    return <div className="pb-16" />
+  }
+
+  const items = getPaginationItems(page, totalPages)
+
+  return (
+    <nav
+      className="flex flex-wrap items-center justify-center gap-2 pb-16"
+      aria-label="Listings pagination"
+    >
+      <button
+        type="button"
+        onClick={() => onPageChange(page - 1)}
+        disabled={page <= 1}
+        className="cursor-pointer rounded-full border border-border-brand bg-white px-4 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-brand hover:text-green-brand disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Previous
+      </button>
+
+      {items.map((item, index) =>
+        item === "ellipsis" ? (
+          <span key={`ellipsis-${index}`} className="px-1 text-sm text-text-light" aria-hidden>
+            …
+          </span>
+        ) : (
+          <button
+            key={item}
+            type="button"
+            onClick={() => onPageChange(item)}
+            aria-label={`Page ${item}`}
+            aria-current={item === page ? "page" : undefined}
+            className={`min-w-10 cursor-pointer rounded-full border px-3 py-2 text-sm font-semibold transition-colors ${
+              item === page
+                ? "border-green-brand bg-green-brand text-white"
+                : "border-border-brand bg-white text-text-mid hover:border-green-brand hover:text-green-brand"
+            }`}
+          >
+            {item}
+          </button>
+        ),
+      )}
+
+      <button
+        type="button"
+        onClick={() => onPageChange(page + 1)}
+        disabled={page >= totalPages}
+        className="cursor-pointer rounded-full border border-border-brand bg-white px-4 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-brand hover:text-green-brand disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Next
+      </button>
+    </nav>
   )
 }
 

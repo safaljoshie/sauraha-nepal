@@ -13,7 +13,7 @@ export type PlanFilterId = "all" | "basic" | "featured" | "premium"
 
 export type SortOptionId = "newest" | "az" | "plan"
 
-export const PAGE_SIZE = 9
+export const PAGE_SIZE = 15
 
 const PLAN_ORDER: Record<string, number> = {
   premium: 0,

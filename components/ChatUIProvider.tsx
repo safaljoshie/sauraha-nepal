@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react"
@@ -16,6 +17,7 @@ type ChatUIContextValue = {
   openChat: () => void
   closeChat: () => void
   toggleChat: () => void
+  registerChatReset: (fn: () => void) => () => void
 }
 
 const ChatUIContext = createContext<ChatUIContextValue | null>(null)
@@ -23,6 +25,14 @@ const ChatUIContext = createContext<ChatUIContextValue | null>(null)
 export function ChatUIProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
   const [unread, setUnread] = useState(false)
+  const chatResetRef = useRef<(() => void) | null>(null)
+
+  const registerChatReset = useCallback((fn: () => void) => {
+    chatResetRef.current = fn
+    return () => {
+      if (chatResetRef.current === fn) chatResetRef.current = null
+    }
+  }, [])
 
   const openChat = useCallback(() => {
     setOpen(true)
@@ -35,15 +45,18 @@ export function ChatUIProvider({ children }: { children: ReactNode }) {
 
   const toggleChat = useCallback(() => {
     setOpen((prev) => {
-      if (prev) return false
+      if (prev) {
+        chatResetRef.current?.()
+        return false
+      }
       setUnread(false)
       return true
     })
   }, [])
 
   const value = useMemo(
-    () => ({ open, unread, setUnread, openChat, closeChat, toggleChat }),
-    [open, unread, openChat, closeChat, toggleChat],
+    () => ({ open, unread, setUnread, openChat, closeChat, toggleChat, registerChatReset }),
+    [open, unread, openChat, closeChat, toggleChat, registerChatReset],
   )
 
   return <ChatUIContext.Provider value={value}>{children}</ChatUIContext.Provider>
