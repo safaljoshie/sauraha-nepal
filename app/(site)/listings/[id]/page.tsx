@@ -162,9 +162,17 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
         <aside className="h-fit space-y-6 lg:sticky lg:top-24">
           <section className="rounded-2xl border border-border-brand bg-white p-6 shadow-sm">
-            <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
-              Contact
-            </h2>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
+                Contact
+              </h2>
+              <Link
+                href="/claim-listing"
+                className="rounded-full border border-orange-brand/30 bg-orange-brand/10 px-3 py-1 text-xs font-semibold text-orange-brand transition-colors hover:bg-orange-brand/15"
+              >
+                Is this your business? Claim it
+              </Link>
+            </div>
             <ul className="mt-4 space-y-3 text-sm">
               {callHref && (
                 <li>

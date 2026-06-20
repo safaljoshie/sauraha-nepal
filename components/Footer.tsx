@@ -7,6 +7,7 @@ import { fetchSiteSettings } from "@/lib/site-settings"
 
 const businessLinks = [
   { href: "/list-your-business", label: "List Your Business" },
+  { href: "/claim-listing", label: "Claim Your Listing" },
   { href: "/contact", label: "Advertising" },
 ]
 
@@ -15,10 +16,7 @@ const companyLinks = [
   { href: "/contact", label: "Contact" },
 ]
 
-const legalLinks = [
-  { href: "/privacy-policy", label: "Privacy Policy" },
-  { href: "/terms-of-service", label: "Terms of Service" },
-]
+const legalLinks = [{ href: "/privacy-policy", label: "Privacy Policy" }]
 
 function hasSocialUrl(url: string) {
   return url.trim().length > 0
