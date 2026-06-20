@@ -27,3 +27,6 @@ create trigger trg_team_members_updated_at
 before update on team_members
 for each row
 execute function set_team_members_updated_at();
+
+-- Founder is always shown first via lib/team-members.ts (FOUNDER_TEAM_MEMBER).
+-- Photo: public/images/team/safal-joshi.png

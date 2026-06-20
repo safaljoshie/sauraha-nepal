@@ -12,6 +12,25 @@ export type TeamMember = {
   is_active: boolean
 }
 
+export const FOUNDER_TEAM_MEMBER: TeamMember = {
+  id: "founder-safal-joshi",
+  created_at: "2026-06-21T00:00:00.000Z",
+  updated_at: "2026-06-21T00:00:00.000Z",
+  name: "Safal Joshi",
+  role: "Founder",
+  image: "/images/team/safal-joshi.png",
+  bio: "Sauraha Nepal. Based in Australia",
+  display_order: -1,
+  is_active: true,
+}
+
+function withFounderFirst(members: TeamMember[]): TeamMember[] {
+  const rest = members.filter(
+    (member) => member.name.trim().toLowerCase() !== FOUNDER_TEAM_MEMBER.name.toLowerCase(),
+  )
+  return [FOUNDER_TEAM_MEMBER, ...rest]
+}
+
 export async function fetchActiveTeamMembers(): Promise<TeamMember[]> {
   try {
     const admin = getSupabaseAdmin()
@@ -21,7 +40,7 @@ export async function fetchActiveTeamMembers(): Promise<TeamMember[]> {
       .eq("is_active", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: true })
-    if (!error && data) return data as TeamMember[]
+    if (!error && data) return withFounderFirst(data as TeamMember[])
   } catch {
     // fall through to public fallback
   }
@@ -34,9 +53,9 @@ export async function fetchActiveTeamMembers(): Promise<TeamMember[]> {
       .eq("is_active", true)
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: true })
-    if (error || !data) return []
-    return data as TeamMember[]
+    if (error || !data) return [FOUNDER_TEAM_MEMBER]
+    return withFounderFirst(data as TeamMember[])
   } catch {
-    return []
+    return [FOUNDER_TEAM_MEMBER]
   }
 }
