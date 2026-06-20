@@ -3,6 +3,9 @@
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import CategoryIcon from "@/components/icons/CategoryIcon"
+import SiteIcon from "@/components/icons/SiteIcon"
+import { CATEGORY_ICON_OPTIONS } from "@/lib/category-icon-map"
 import type { BusinessCategoryRow, CategoryGroupRow } from "@/lib/category-catalog"
 
 type Toast = { id: string; type: "success" | "error"; message: string }
@@ -350,7 +353,12 @@ export default function AdminCategoriesManager() {
                       <td className="px-4 py-3 font-mono text-xs">{group.slug}</td>
                       <td className="px-4 py-3">{group.label}</td>
                       <td className="px-4 py-3">{group.tab_label}</td>
-                      <td className="px-4 py-3">{group.icon ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-2">
+                          <CategoryIcon slug={group.slug} storedIcon={group.icon} size={18} />
+                          <span className="font-mono text-xs text-text-light">{group.icon ?? "—"}</span>
+                        </span>
+                      </td>
                       <td className="px-4 py-3">{group.sort_order}</td>
                       <td className="px-4 py-3">
                         <span
@@ -523,16 +531,29 @@ export default function AdminCategoriesManager() {
               <input
                 value={groupForm.tab_label}
                 onChange={(e) => setGroupForm((f) => (f ? { ...f, tab_label: e.target.value } : f))}
-                placeholder="e.g. 🐘 Activities"
+                placeholder="e.g. Activities"
                 className={fieldClass}
               />
             </Field>
-            <Field label="Icon (emoji)">
-              <input
+            <Field label="Icon">
+              <select
                 value={groupForm.icon}
                 onChange={(e) => setGroupForm((f) => (f ? { ...f, icon: e.target.value } : f))}
                 className={fieldClass}
-              />
+              >
+                <option value="">Default for slug</option>
+                {CATEGORY_ICON_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              {groupForm.icon ? (
+                <span className="mt-2 inline-flex items-center gap-2 text-sm text-text-mid">
+                  <SiteIcon name={groupForm.icon} size={18} strokeWidth={2.25} />
+                  Preview
+                </span>
+              ) : null}
             </Field>
             <Field label="Sort order">
               <input

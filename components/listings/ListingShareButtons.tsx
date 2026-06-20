@@ -51,7 +51,7 @@ export default function ListingShareButtons({ businessName, url }: ListingShareB
           rel="noopener noreferrer"
           className="rounded-xl bg-orange-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-orange-light"
         >
-          Facebook
+          Social Media
         </a>
       </div>
     </section>

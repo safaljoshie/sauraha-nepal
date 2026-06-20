@@ -1,6 +1,7 @@
-import Image from "next/image"
 import Link from "next/link"
+import Image from "next/image"
 import type { Metadata } from "next"
+import SiteIcon from "@/components/icons/SiteIcon"
 import PageHeader from "@/components/PageHeader"
 import { missionCards } from "@/lib/data"
 import { fetchActiveTeamMembers } from "@/lib/team-members"
@@ -64,7 +65,9 @@ async function AboutPageContent() {
               key={card.title}
               className="rounded-2xl border-[1.5px] border-border-brand bg-white p-8 text-center"
             >
-              <div className="mb-4 text-4xl">{card.icon}</div>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-green-mid/10 text-green-brand">
+                <SiteIcon name={card.icon} size={28} strokeWidth={2.25} />
+              </div>
               <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-green-brand">
                 {card.title}
               </h3>

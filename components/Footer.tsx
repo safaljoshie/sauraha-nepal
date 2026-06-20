@@ -15,6 +15,11 @@ const companyLinks = [
   { href: "/contact", label: "Contact" },
 ]
 
+const legalLinks = [
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms-of-service", label: "Terms of Service" },
+]
+
 function hasSocialUrl(url: string) {
   return url.trim().length > 0
 }
@@ -59,7 +64,7 @@ export default async function Footer({ catalog }: { catalog: CategoryCatalog }) 
   return (
     <footer className="bg-text-brand py-14 text-white/75 max-md:pb-[calc(3.75rem+env(safe-area-inset-bottom,0px))]">
       <div className="site-container">
-        <div className="mb-10 grid gap-8 md:grid-cols-[2fr_1fr_1fr_1fr_1fr]">
+        <div className="mb-10 grid gap-8 md:grid-cols-[2fr_1fr_1fr_1fr_1fr_1fr]">
           <div>
             <h4 className="font-[family-name:var(--font-playfair)] text-xl text-white">
               Sauraha Nepal
@@ -112,6 +117,7 @@ export default async function Footer({ catalog }: { catalog: CategoryCatalog }) 
           <FooterColumn title="Explore" links={exploreLinks} />
           <FooterColumn title="Business" links={businessLinks} />
           <FooterColumn title="Company" links={companyLinks} />
+          <FooterColumn title="Legal" links={legalLinks} />
           <div>
             <h4 className="mb-4 text-sm font-bold tracking-widest text-white uppercase">
               Newsletter

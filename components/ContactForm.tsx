@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useState, type FormEvent } from "react"
+import SiteIcon from "@/components/icons/SiteIcon"
 import { formatWhatsAppDisplay, whatsappUrl } from "@/lib/whatsapp"
 
 const listingPlans = [
@@ -491,25 +492,25 @@ export function ContactSidebarContent({
       </p>
 
       <div className="space-y-6">
-        <InfoItem icon="📍" title="Location" text={address} />
+        <InfoItem icon="map-pin" title="Location" text={address} />
         {email && (
           <InfoItem
-            icon="📧"
+            icon="mail"
             title="Email"
             text={email}
             href={`mailto:${email}`}
           />
         )}
-        {phone && <InfoItem icon="📞" title="Phone" text={phone} href={`tel:${phone}`} />}
+        {phone && <InfoItem icon="phone" title="Phone" text={phone} href={`tel:${phone}`} />}
         {whatsapp && (
           <InfoItem
-            icon="💬"
+            icon="message-circle"
             title="WhatsApp"
             text={formatWhatsAppDisplay(whatsapp)}
             href={whatsappUrl(whatsapp)}
           />
         )}
-        <InfoItem icon="🕐" title="Response Time" text={responseTime} />
+        <InfoItem icon="clock" title="Response Time" text={responseTime} />
       </div>
 
       <div className="mt-10">
@@ -562,8 +563,8 @@ function InfoItem({
 }) {
   return (
     <div className="flex gap-4">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-mid/10 text-xl">
-        {icon}
+      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-mid/10 text-green-brand">
+        <SiteIcon name={icon} size={20} strokeWidth={2.25} />
       </div>
       <div>
         <h4 className="font-bold text-text-brand">{title}</h4>

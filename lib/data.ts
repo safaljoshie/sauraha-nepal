@@ -1,22 +1,22 @@
 export const categories = [
-  { icon: "🏨", name: "Stay", count: "38 listings", href: "/listings?category=stay" },
-  { icon: "🍽️", name: "Eat & Drink", count: "24 listings", href: "/listings?category=eat" },
-  { icon: "🐘", name: "Activities", count: "18 listings", href: "/listings?category=activities" },
-  { icon: "🚗", name: "Transport", count: "12 listings", href: "/listings?category=transport" },
-  { icon: "🛍️", name: "Shopping", count: "16 listings", href: "/listings?category=shopping" },
-  { icon: "🧭", name: "Tour Guides", count: "14 listings", href: "/listings?category=guides" },
-  { icon: "ℹ️", name: "Travel Info", count: "8 guides", href: "/listings?category=info" },
+  { icon: "hotel", name: "Stay", count: "38 listings", href: "/listings?category=stay" },
+  { icon: "utensils", name: "Eat & Drink", count: "24 listings", href: "/listings?category=eat" },
+  { icon: "binoculars", name: "Activities", count: "18 listings", href: "/listings?category=activities" },
+  { icon: "car", name: "Transport", count: "12 listings", href: "/listings?category=transport" },
+  { icon: "shopping-bag", name: "Shopping", count: "16 listings", href: "/listings?category=shopping" },
+  { icon: "compass", name: "Tour Guides", count: "14 listings", href: "/listings?category=guides" },
+  { icon: "info", name: "Travel Info", count: "8 guides", href: "/listings?category=info" },
 ] as const
 
 export const categoryTabs = [
   { label: "All", slug: "all" },
-  { label: "🏨 Stay", slug: "stay" },
-  { label: "🍽️ Eat & Drink", slug: "eat" },
-  { label: "🐘 Activities", slug: "activities" },
-  { label: "🚗 Transport", slug: "transport" },
-  { label: "🛍️ Shopping", slug: "shopping" },
-  { label: "🧭 Tour Guides", slug: "guides" },
-  { label: "ℹ️ Travel Info", slug: "info" },
+  { label: "Stay", slug: "stay" },
+  { label: "Eat & Drink", slug: "eat" },
+  { label: "Activities", slug: "activities" },
+  { label: "Transport", slug: "transport" },
+  { label: "Shopping", slug: "shopping" },
+  { label: "Tour Guides", slug: "guides" },
+  { label: "Travel Info", slug: "info" },
 ] as const
 
 export type Listing = {
@@ -159,25 +159,25 @@ export const blogPosts = [
 
 export const missionCards = [
   {
-    icon: "🌿",
+    icon: "tree-pine",
     title: "Sustainable Tourism",
     description:
       "We promote eco-friendly travel that protects Chitwan's wildlife and supports local communities.",
   },
   {
-    icon: "🤝",
+    icon: "heart",
     title: "Local First",
     description:
       "Every listing is a locally owned business. We help travellers connect directly with Sauraha's people.",
   },
   {
-    icon: "✅",
+    icon: "sparkles",
     title: "Verified Listings",
     description:
       "We personally review every business before listing to ensure quality and honest information.",
   },
   {
-    icon: "📍",
+    icon: "map-pin",
     title: "Local Knowledge",
     description: "Our guides and travel tips come from people who live and breathe Sauraha every day.",
   },
@@ -202,12 +202,12 @@ export const teamMembers = [
 ] as const
 
 export const listingBenefits = [
-  { icon: "🌍", title: "Global Reach", description: "Appear in front of international travellers planning Chitwan trips." },
-  { icon: "📱", title: "Mobile Friendly", description: "Your listing looks great on every phone and tablet." },
-  { icon: "⭐", title: "Reviews & Ratings", description: "Build trust with verified customer reviews." },
-  { icon: "📍", title: "Google Maps Pin", description: "Help guests find you with an accurate map location." },
-  { icon: "📸", title: "Photo Gallery", description: "Showcase your rooms, food, or safari experiences." },
-  { icon: "💬", title: "Direct WhatsApp", description: "Let customers message you instantly from your listing." },
+  { icon: "globe", title: "Global Reach", description: "Appear in front of international travellers planning Chitwan trips." },
+  { icon: "smartphone", title: "Mobile Friendly", description: "Your listing looks great on every phone and tablet." },
+  { icon: "star", title: "Reviews & Ratings", description: "Build trust with verified customer reviews." },
+  { icon: "map-pin", title: "Google Maps Pin", description: "Help guests find you with an accurate map location." },
+  { icon: "camera", title: "Photo Gallery", description: "Showcase your rooms, food, or safari experiences." },
+  { icon: "message-circle", title: "Direct WhatsApp", description: "Let customers message you instantly from your listing." },
 ] as const
 
 export const pricingPlans = [

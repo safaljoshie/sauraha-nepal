@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useChatUI } from "@/components/ChatUIProvider"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
 import ChatMarkdown from "@/components/chat/ChatMarkdown"
+import SiteIcon from "@/components/icons/SiteIcon"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
 import { MOBILE_HOME_NAV_TOP } from "@/lib/mobile-home-nav"
 
@@ -39,13 +40,13 @@ function BotAvatar({ size = 28 }: { size?: number }) {
 }
 
 const WELCOME =
-  "Hi! 👋 I'm Dhurbe, your AI travel guide for Sauraha and Chitwan National Park. What would you like to know? 🐘"
+  "Hi! I'm Dhurbe, your AI travel guide for Sauraha and Chitwan National Park. What would you like to know?"
 
 const QUICK_REPLIES = [
-  "🏨 Best hotels",
-  "🐘 Safari options",
-  "🚌 Getting here",
-  "🌤️ Best time to visit",
+  { label: "Best hotels", icon: "hotel" },
+  { label: "Safari options", icon: "binoculars" },
+  { label: "Getting here", icon: "bus" },
+  { label: "Best time to visit", icon: "sun" },
 ] as const
 
 const MAX_MESSAGE_LENGTH = 200
@@ -192,10 +193,10 @@ export default function ChatWidget() {
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-lg px-2 py-1 text-lg leading-none text-white/90 transition-colors hover:bg-white/15"
+              className="rounded-lg px-2 py-1 text-white/90 transition-colors hover:bg-white/15"
               aria-label="Close chat"
             >
-              ✕
+              <SiteIcon name="close" size={20} strokeWidth={2.5} className="text-white" />
             </button>
           </header>
 
@@ -211,15 +212,16 @@ export default function ChatWidget() {
 
             {showWelcome && (
               <div className="mb-4 flex flex-wrap gap-2 pl-10">
-                {QUICK_REPLIES.map((label) => (
+                {QUICK_REPLIES.map((item) => (
                   <button
-                    key={label}
+                    key={item.label}
                     type="button"
                     disabled={loading}
-                    onClick={() => void sendMessage(label)}
-                    className="rounded-full border border-green-brand/25 bg-white px-3 py-1.5 text-xs font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white disabled:opacity-50"
+                    onClick={() => void sendMessage(item.label)}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-green-brand/25 bg-white px-3 py-1.5 text-xs font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white disabled:opacity-50"
                   >
-                    {label}
+                    <SiteIcon name={item.icon} size={14} strokeWidth={2.25} />
+                    {item.label}
                   </button>
                 ))}
               </div>
@@ -341,7 +343,7 @@ export default function ChatWidget() {
           aria-label={open ? "Close Dhurbe" : "Open Dhurbe"}
         >
           {open ? (
-            <span className="text-lg font-semibold text-white">✕</span>
+            <SiteIcon name="close" size={22} strokeWidth={2.5} className="text-white" />
           ) : (
             <ChatAssistantAvatar variant="launcher" />
           )}

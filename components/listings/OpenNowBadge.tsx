@@ -6,15 +6,23 @@ export default function OpenNowBadge({ openingHours }: { openingHours: string })
 
   if (status === "open") {
     return (
-      <span className="text-xs font-medium text-green-brand" aria-label="Open now">
-        🟢 Open Now
+      <span
+        className="inline-flex items-center gap-1.5 text-xs font-medium text-green-brand"
+        aria-label="Open now"
+      >
+        <span className="inline-block h-2 w-2 rounded-full bg-green-brand" aria-hidden />
+        Open Now
       </span>
     )
   }
 
   return (
-    <span className="text-xs font-medium text-red-600" aria-label="Closed">
-      🔴 Closed
+    <span
+      className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600"
+      aria-label="Closed"
+    >
+      <span className="inline-block h-2 w-2 rounded-full bg-red-600" aria-hidden />
+      Closed
     </span>
   )
 }

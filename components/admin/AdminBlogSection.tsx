@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
+import SiteIcon from "@/components/icons/SiteIcon"
 import type { BlogPostRow } from "@/lib/blog-db"
 
 type Toast = { id: string; type: "success" | "error"; message: string }
@@ -179,7 +180,7 @@ export default function AdminBlogSection() {
                           title="Edit"
                           className="rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-700 hover:bg-blue-200"
                         >
-                          ✏️
+                          <SiteIcon name="pencil" size={16} strokeWidth={2.25} />
                         </Link>
                         <button
                           type="button"

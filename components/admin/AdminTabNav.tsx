@@ -1,9 +1,13 @@
+"use client"
+
+import SiteIcon from "@/components/icons/SiteIcon"
+
 export type AdminTab = "listings" | "blog" | "settings"
 
-const TABS: { id: AdminTab; label: string }[] = [
-  { id: "listings", label: "📋 Listings" },
-  { id: "blog", label: "✍️ Blog Posts" },
-  { id: "settings", label: "⚙️ Site Settings" },
+const TABS: { id: AdminTab; label: string; icon: string }[] = [
+  { id: "listings", label: "Listings", icon: "clipboard-list" },
+  { id: "blog", label: "Blog Posts", icon: "pen-line" },
+  { id: "settings", label: "Site Settings", icon: "settings" },
 ]
 
 export default function AdminTabNav({
@@ -20,12 +24,18 @@ export default function AdminTabNav({
           key={tab.id}
           type="button"
           onClick={() => onChange(tab.id)}
-          className={`cursor-pointer rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
+          className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-colors ${
             active === tab.id
               ? "bg-green-brand text-white"
               : "bg-white text-text-mid hover:bg-cream"
           }`}
         >
+          <SiteIcon
+            name={tab.icon}
+            size={16}
+            strokeWidth={2.25}
+            className={active === tab.id ? "text-white" : "text-green-brand"}
+          />
           {tab.label}
         </button>
       ))}

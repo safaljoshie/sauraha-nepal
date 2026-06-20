@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import ListingImage from "@/components/listings/ListingImage"
 import ListingDetailMapSection from "@/components/listings/ListingDetailMapSection"
+import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import ListingShareButtons from "@/components/listings/ListingShareButtons"
 import OpeningHoursDisplay from "@/components/listings/OpeningHoursDisplay"
 import {
@@ -86,11 +87,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             {listing.business_name}
           </h1>
           <div className="mt-4 flex flex-wrap gap-2">
-            {isPremium && (
-              <span className="rounded-full bg-orange-brand px-3 py-1 text-xs font-bold">
-                ⭐ Premium
-              </span>
-            )}
+            {isPremium && <PremiumBadge className="px-3 py-1 text-xs" />}
             {isFeatured && !isPremium && (
               <span className="rounded-full bg-green-mid px-3 py-1 text-xs font-bold">
                 Featured
@@ -102,7 +99,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </span>
             )}
           </div>
-          <p className="mt-3 text-white/80">📍 {listing.address ?? "Sauraha, Nepal"}</p>
+          <ListingAddress address={listing.address} className="text-white/80 [&_svg]:text-white/80" />
         </div>
       </section>
 
@@ -215,7 +212,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {listing.facebook && (
                 <li>
-                  <span className="font-semibold text-text-light">Facebook</span>
+                  <span className="font-semibold text-text-light">Social Media</span>
                   <br />
                   <a
                     href={listing.facebook}

@@ -1,6 +1,7 @@
 import type { BusinessListing } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import { DEFAULT_CATEGORY_CATALOG } from "@/lib/category-catalog"
+import { resolveCategoryIconName } from "@/lib/category-icon-map"
 import { HOME_EXPERIENCES } from "@/lib/homepage-constants"
 import {
   countByCategoryGroup,
@@ -69,7 +70,7 @@ export function buildHomepageData(
       const dbGroup = catalog.groups.find((row) => row.slug === g.id)
       const count = countByCategoryGroup(listings, g.id, catalog)
       return {
-        icon: dbGroup?.icon ?? "📍",
+        icon: resolveCategoryIconName(g.id as string, dbGroup?.icon),
         name: g.label,
         slug: g.id,
         count,

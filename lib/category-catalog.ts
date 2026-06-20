@@ -44,44 +44,44 @@ export type CategoryCatalog = {
 }
 
 const DEFAULT_GROUPS: Omit<CategoryGroupRow, "id" | "created_at" | "updated_at">[] = [
-  { slug: "stay", label: "Stay", tab_label: "🏨 Stay", icon: "🏨", sort_order: 10, is_active: true },
+  { slug: "stay", label: "Stay", tab_label: "Stay", icon: "hotel", sort_order: 10, is_active: true },
   {
     slug: "eat",
     label: "Eat & Drink",
-    tab_label: "🍽️ Eat & Drink",
-    icon: "🍽️",
+    tab_label: "Eat & Drink",
+    icon: "utensils",
     sort_order: 20,
     is_active: true,
   },
   {
     slug: "activities",
     label: "Activities",
-    tab_label: "🐘 Activities",
-    icon: "🐘",
+    tab_label: "Activities",
+    icon: "binoculars",
     sort_order: 30,
     is_active: true,
   },
   {
     slug: "transport",
     label: "Transport",
-    tab_label: "🚗 Transport",
-    icon: "🚗",
+    tab_label: "Transport",
+    icon: "car",
     sort_order: 40,
     is_active: true,
   },
   {
     slug: "shopping",
     label: "Shopping",
-    tab_label: "🛍️ Shopping",
-    icon: "🛍️",
+    tab_label: "Shopping",
+    icon: "shopping-bag",
     sort_order: 50,
     is_active: true,
   },
   {
     slug: "guides",
     label: "Tour Guides",
-    tab_label: "🧭 Tour Guides",
-    icon: "🧭",
+    tab_label: "Tour Guides",
+    icon: "compass",
     sort_order: 60,
     is_active: true,
   },
@@ -168,7 +168,7 @@ export function buildCategoryGroups(
         icon: g.icon,
         dbId: g.id,
       })),
-    { id: "info", label: "Travel Info", tabLabel: "ℹ️ Travel Info", matchers: [] },
+    { id: "info", label: "Travel Info", tabLabel: "Travel Info", matchers: [], icon: "info" },
   ]
 
   return built

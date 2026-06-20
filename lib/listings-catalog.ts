@@ -40,8 +40,8 @@ export function getCategoryGroupId(
 export function getCategoryDisplay(category: string, catalog?: CategoryCatalog) {
   const groups = resolveGroups(catalog)
   const group = groups.find((g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(category))
-  if (group) return group.tabLabel
-  return `ℹ️ ${category}`
+  if (group) return group.label
+  return category
 }
 
 export function sortListingsForDisplay(listings: BusinessListing[]) {

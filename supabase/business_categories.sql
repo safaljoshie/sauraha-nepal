@@ -77,12 +77,12 @@ create policy "Public read active business categories"
 -- Seed filter groups (idempotent)
 insert into category_groups (slug, label, tab_label, icon, sort_order, is_active)
 values
-  ('stay', 'Stay', '🏨 Stay', '🏨', 10, true),
-  ('eat', 'Eat & Drink', '🍽️ Eat & Drink', '🍽️', 20, true),
-  ('activities', 'Activities', '🐘 Activities', '🐘', 30, true),
-  ('transport', 'Transport', '🚗 Transport', '🚗', 40, true),
-  ('shopping', 'Shopping', '🛍️ Shopping', '🛍️', 50, true),
-  ('guides', 'Tour Guides', '🧭 Tour Guides', '🧭', 60, true)
+  ('stay', 'Stay', 'Stay', 'hotel', 10, true),
+  ('eat', 'Eat & Drink', 'Eat & Drink', 'utensils', 20, true),
+  ('activities', 'Activities', 'Activities', 'binoculars', 30, true),
+  ('transport', 'Transport', 'Transport', 'car', 40, true),
+  ('shopping', 'Shopping', 'Shopping', 'shopping-bag', 50, true),
+  ('guides', 'Tour Guides', 'Tour Guides', 'compass', 60, true)
 on conflict (slug) do update set
   label = excluded.label,
   tab_label = excluded.tab_label,

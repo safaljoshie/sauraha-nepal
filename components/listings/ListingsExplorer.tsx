@@ -14,6 +14,8 @@ import {
   type SortOptionId,
 } from "@/lib/listings-catalog"
 import BusinessListingCard from "./BusinessListingCard"
+import CategoryIcon from "@/components/icons/CategoryIcon"
+import SiteIcon from "@/components/icons/SiteIcon"
 import ListingsGridErrorBoundary from "./ListingsGridErrorBoundary"
 import ListingsMapView from "./ListingsMapView"
 
@@ -165,13 +167,21 @@ export default function ListingsExplorer({
                 key={tab.id}
                 type="button"
                 onClick={() => setCategory(tab.id)}
-                className={`cursor-pointer rounded-full border-[1.5px] px-4 py-2 text-sm font-semibold transition-colors ${
+                className={`cursor-pointer inline-flex items-center gap-1.5 rounded-full border-[1.5px] px-4 py-2 text-sm font-semibold transition-colors ${
                   active
                     ? "border-green-brand bg-green-brand text-white"
                     : "border-border-brand bg-white text-text-mid hover:border-green-brand hover:bg-green-brand hover:text-white"
                 }`}
               >
-                {tab.tabLabel}
+                {tab.id !== "all" && (
+                  <CategoryIcon
+                    slug={String(tab.id)}
+                    storedIcon={tab.icon}
+                    size={16}
+                    className={active ? "text-white" : "text-green-mid"}
+                  />
+                )}
+                {tab.label}
                 <span className={active ? "text-white/80" : "text-text-light"}>
                   {" "}
                   ({count})
@@ -197,24 +207,26 @@ export default function ListingsExplorer({
               <button
                 type="button"
                 onClick={() => setViewMode("grid")}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
                   viewMode === "grid"
                     ? "bg-green-brand text-white"
                     : "text-text-mid hover:text-green-brand"
                 }`}
               >
-                ⊞ Grid
+                <SiteIcon name="layout-grid" size={16} strokeWidth={2.25} />
+                Grid
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode("map")}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
                   viewMode === "map"
                     ? "bg-green-brand text-white"
                     : "text-text-mid hover:text-green-brand"
                 }`}
               >
-                🗺 Map
+                <SiteIcon name="map" size={16} strokeWidth={2.25} />
+                Map
               </button>
             </div>
           )}

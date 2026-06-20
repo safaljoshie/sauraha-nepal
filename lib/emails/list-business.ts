@@ -66,7 +66,7 @@ export function buildAdminNotificationEmail(data: ListBusinessRecord) {
       ${row("Phone", data.phone)}
       ${row("WhatsApp", data.whatsapp)}
       ${row("Website", data.website)}
-      ${row("Facebook", data.facebook)}
+      ${row("Social Media", data.facebook)}
       ${row("Address", data.address)}
       ${row("Google Maps", data.google_maps_link)}
       ${row("Price range", data.price_range)}
@@ -88,7 +88,7 @@ export function buildAdminNotificationEmail(data: ListBusinessRecord) {
     `Phone: ${data.phone}`,
     data.whatsapp ? `WhatsApp: ${data.whatsapp}` : null,
     data.website ? `Website: ${data.website}` : null,
-    data.facebook ? `Facebook: ${data.facebook}` : null,
+    data.facebook ? `Social Media: ${data.facebook}` : null,
     `Address: ${data.address}`,
     data.google_maps_link ? `Maps: ${data.google_maps_link}` : null,
     data.price_range ? `Price range: ${data.price_range}` : null,

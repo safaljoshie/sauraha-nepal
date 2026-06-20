@@ -481,7 +481,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
               disabled={isLoading}
             />
           </Field>
-          <Field label="Facebook (optional)">
+          <Field label="Social Media (optional)">
             <input
               type="text"
               className={inputClass}

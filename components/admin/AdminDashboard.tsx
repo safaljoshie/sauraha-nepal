@@ -11,6 +11,7 @@ import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
 import AdminTabNav, { type AdminTab } from "@/components/admin/AdminTabNav"
+import SiteIcon from "@/components/icons/SiteIcon"
 
 type FilterTab =
   | "all"
@@ -762,7 +763,7 @@ export default function AdminDashboard() {
                           onClick={() => setSelected(listing)}
                           className="cursor-pointer rounded-lg bg-gray-200 px-2 py-1 text-sm text-gray-800 hover:bg-gray-300"
                         >
-                          👁
+                          <SiteIcon name="eye" size={16} strokeWidth={2.25} />
                         </button>
                         <button
                           type="button"
@@ -771,7 +772,7 @@ export default function AdminDashboard() {
                           disabled={actionId === listing.id}
                           className="cursor-pointer rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-700 hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-40"
                         >
-                          ✏️
+                          <SiteIcon name="pencil" size={16} strokeWidth={2.25} />
                         </button>
                         <button
                           type="button"
@@ -847,7 +848,7 @@ export default function AdminDashboard() {
               <DetailRow label="Price range" value={selected.price_range} />
               <DetailRow label="Opening hours" value={selected.opening_hours} />
               <DetailRow label="Website" value={selected.website} />
-              <DetailRow label="Facebook" value={selected.facebook} />
+              <DetailRow label="Social Media" value={selected.facebook} />
               <DetailRow label="Google Maps" value={selected.google_maps_link} />
               <DetailRow label="Photo links" value={selected.photo_links} />
               <DetailRow
@@ -985,7 +986,7 @@ export default function AdminDashboard() {
                   className={fieldClass}
                 />
               </EditField>
-              <EditField label="Facebook">
+              <EditField label="Social Media">
                 <input
                   value={editForm.facebook}
                   onChange={(e) => setEditForm({ ...editForm, facebook: e.target.value })}

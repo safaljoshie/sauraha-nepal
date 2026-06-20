@@ -4,6 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import SiteIcon from "@/components/icons/SiteIcon"
 import { getStayListingsHref, type CategoryCatalog } from "@/lib/category-catalog"
 
 const baseNavLinks = [
@@ -109,12 +110,12 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
         <div className="flex items-center gap-2">
           <Link
             href="/#hero-search"
-            className={`hidden h-10 w-10 items-center justify-center text-lg md:flex ${
+            className={`hidden h-10 w-10 items-center justify-center md:flex ${
               transparent ? "text-white" : "text-ink"
             }`}
             aria-label="Search"
           >
-            🔍
+            <SiteIcon name="search" size={22} strokeWidth={2.25} />
           </Link>
           <Link
             href="/list-your-business"
@@ -135,7 +136,11 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
           >
-            {menuOpen ? "✕" : "☰"}
+            {menuOpen ? (
+              <SiteIcon name="close" size={24} strokeWidth={2.5} />
+            ) : (
+              <SiteIcon name="menu" size={24} strokeWidth={2.5} />
+            )}
           </button>
         </div>
         </div>
@@ -160,8 +165,8 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
         >
           <div className="mb-8 flex items-center justify-between">
             <span className="font-heading text-lg font-bold text-ink">Menu</span>
-            <button type="button" onClick={closeMenu} className="text-2xl text-ink" aria-label="Close">
-              ✕
+            <button type="button" onClick={closeMenu} className="text-ink" aria-label="Close">
+              <SiteIcon name="close" size={24} strokeWidth={2.5} />
             </button>
           </div>
           <ul className="flex flex-col gap-1">

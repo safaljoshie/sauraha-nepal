@@ -1,6 +1,7 @@
 import Link from "next/link"
 import ListingCardActions from "@/components/listings/ListingCardActions"
 import ListingImage from "@/components/listings/ListingImage"
+import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import OpenNowBadge from "@/components/listings/OpenNowBadge"
 import type { BusinessListing } from "@/lib/business-listing"
 import { isNewListing } from "@/lib/listing-badges"
@@ -54,8 +55,8 @@ export default function HomeFeaturedCard({
             sizes="(max-width: 768px) 100vw, 33vw"
           />
           {isPremium && (
-            <span className="absolute top-3 left-3 rounded-full bg-orange-brand px-2.5 py-1 text-[0.72rem] font-bold text-white">
-              ⭐ Premium
+            <span className="absolute top-3 left-3">
+              <PremiumBadge />
             </span>
           )}
           {isFeatured && !isPremium && (
@@ -89,7 +90,7 @@ export default function HomeFeaturedCard({
           <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-text-light">
             {truncateDescription(listing.description, 80)}
           </p>
-          <p className="mt-2 text-sm text-text-mid">📍 {listing.address ?? "Sauraha, Nepal"}</p>
+          <ListingAddress address={listing.address} />
           <div className="mt-3 flex items-center justify-between border-t border-border-brand pt-3">
             {listing.price_range ? (
               <span className="font-bold text-green-brand">{listing.price_range}</span>
