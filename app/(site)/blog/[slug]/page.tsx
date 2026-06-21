@@ -11,7 +11,7 @@ import {
 } from "@/lib/blog-db"
 import { getBlogSlugRedirect } from "@/lib/blog-slug-redirects"
 import { SITE_URL } from "@/lib/blog-posts"
-import { articleJsonLd, blogCoverAlt, buildBlogPostMetadata } from "@/lib/seo"
+import { articleJsonLd, blogCoverAlt, buildBlogPostMetadata, DEFAULT_OG_IMAGE } from "@/lib/seo"
 
 export const revalidate = 60
 
@@ -43,7 +43,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   const related = await fetchRelatedBlogPosts(slug)
   const articleUrl = `${SITE_URL}/blog/${post.slug}`
-  const cover = post.cover_image ?? "/images/sauraha-hero.jpg"
+  const cover = post.cover_image ?? DEFAULT_OG_IMAGE
   const coverAlt = blogCoverAlt(post.title)
   const jsonLd = articleJsonLd(post)
 

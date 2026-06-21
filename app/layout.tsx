@@ -5,7 +5,6 @@ import { ChatUIProvider } from "@/components/ChatUIProvider"
 import ChatWidgetLoader from "@/components/ChatWidgetLoader"
 import { Inter, Nunito, Playfair_Display, Poppins } from "next/font/google"
 import "./globals.css"
-import { DEFAULT_OG_IMAGE, SITE_KEYWORDS } from "@/lib/seo"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -42,20 +41,39 @@ export const metadata: Metadata = {
   },
   description:
     "Find verified hotels, restaurants, jungle safari operators and tour guides in Sauraha, Nepal — the gateway to Chitwan National Park. Compare prices, read real reviews, and plan your Chitwan trip.",
-  keywords: [...SITE_KEYWORDS],
+  keywords: [
+    "Sauraha Nepal",
+    "Chitwan National Park hotels",
+    "Sauraha hotels",
+    "jungle safari Chitwan",
+    "Sauraha restaurants",
+    "Chitwan jeep safari",
+    "things to do in Sauraha",
+    "Tharu cultural show",
+    "canoe ride Rapti River",
+    "Sauraha travel guide",
+    "Chitwan National Park entry fee",
+    "best time to visit Chitwan",
+    "how to get to Sauraha",
+    "elephant safari Nepal",
+    "one horned rhino Chitwan",
+    "Sauraha tour guides",
+    "Chitwan accommodation",
+    "Sauraha things to do",
+  ],
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://www.saurahanepal.com",
     siteName: "Sauraha Nepal",
-    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }],
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Sauraha Nepal — Your Complete Chitwan Travel Guide",
     description: "Hotels, restaurants, jungle safaris and tour guides in Sauraha, Nepal",
-    images: [DEFAULT_OG_IMAGE],
+    images: ["/og-image.jpg"],
   },
   ...(googleSiteVerification
     ? {

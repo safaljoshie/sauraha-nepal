@@ -5,7 +5,7 @@ import type { BlogPostRow } from "@/lib/blog-db"
 import { SITE_URL } from "@/lib/blog-posts"
 import { getCategoryDisplay, getCategoryGroupId, getListingImage } from "@/lib/listings-catalog"
 
-export const DEFAULT_OG_IMAGE = "/images/sauraha-hero.jpg"
+export const DEFAULT_OG_IMAGE = "/og-image.jpg"
 
 export const SITE_KEYWORDS = [
   "Sauraha Nepal",
