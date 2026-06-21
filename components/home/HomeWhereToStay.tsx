@@ -29,10 +29,17 @@ export default function HomeWhereToStay({
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            {stayListings.map((listing) => (
-              <HomeFeaturedCard key={listing.id} listing={listing} showStatus={false} />
-            ))}
+          <div className="home-where-to-stay-preview">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {stayListings.map((listing) => (
+                <HomeFeaturedCard
+                  key={listing.id}
+                  listing={listing}
+                  showStatus={false}
+                  compactDesktopImage
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

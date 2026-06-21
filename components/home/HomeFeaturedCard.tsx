@@ -17,9 +17,12 @@ import {
 export default function HomeFeaturedCard({
   listing,
   showStatus = true,
+  compactDesktopImage = false,
 }: {
   listing: BusinessListing
   showStatus?: boolean
+  /** Desktop image at 65% of square height (e.g. Where to stay preview). */
+  compactDesktopImage?: boolean
 }) {
   const image = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category)
@@ -48,13 +51,21 @@ export default function HomeFeaturedCard({
       />
 
       <div className="pointer-events-none relative z-[1]">
-        <div className="relative aspect-square w-full overflow-hidden">
+        <div
+          className={`relative w-full overflow-hidden ${
+            compactDesktopImage ? "aspect-square md:aspect-[20/13]" : "aspect-square"
+          }`}
+        >
           <ListingImage
             src={image}
             alt={imageAlt}
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, 33vw"
+            sizes={
+              compactDesktopImage
+                ? "(max-width: 768px) 100vw, 25vw"
+                : "(max-width: 768px) 100vw, 33vw"
+            }
           />
           {isPremium && (
             <span className="absolute top-3 left-3">

@@ -32,7 +32,8 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
         aria-hidden
       />
 
-      <div className="site-container relative z-20 w-full pt-[88px] pb-12 md:pb-16">
+      <div className="site-container relative z-20 w-full pt-[88px] pb-12 md:pb-8">
+        <div className="home-hero-content">
         <p className="sr-only">
           <span>Discover Sauraha &amp; Chitwan National Park</span>
         </p>
@@ -74,6 +75,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
             searchListings={searchListings}
             searchCategories={searchCategories}
           />
+        </div>
         </div>
       </div>
     </section>

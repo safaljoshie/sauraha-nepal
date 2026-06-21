@@ -69,6 +69,40 @@ body {
     font-family: var(--font-poppins), "Poppins", sans-serif;
   }
 
+  @media (min-width: 768px) {
+    .home-hero-content {
+      zoom: 0.8;
+    }
+  }
+
+  @supports not (zoom: 1) {
+    @media (min-width: 768px) {
+      .home-hero-content {
+        transform: scale(0.8);
+        transform-origin: bottom left;
+        width: 125%;
+        max-width: 125%;
+      }
+    }
+  }
+
+  @media (min-width: 768px) {
+    .home-where-to-stay-preview {
+      zoom: 0.8;
+    }
+  }
+
+  @supports not (zoom: 1) {
+    @media (min-width: 768px) {
+      .home-where-to-stay-preview {
+        transform: scale(0.8);
+        transform-origin: top left;
+        width: 125%;
+        max-width: 125%;
+      }
+    }
+  }
+
   .nsw-section-title {
     @apply text-[clamp(1.75rem,4vw,2.5rem)] font-bold tracking-[-0.02em] text-ink;
     font-family: var(--font-poppins), "Poppins", sans-serif;
