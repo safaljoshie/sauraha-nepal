@@ -1,5 +1,7 @@
 import Link from "next/link"
+import { Suspense } from "react"
 import HeroMakeItineraryButton from "@/components/home/HeroMakeItineraryButton"
+import HeroWeatherSlot from "@/components/home/HeroWeatherSlot"
 import HomeHeroSearchSlot from "@/components/home/HomeHeroSearchSlot"
 import HomeHeroVideo from "@/components/home/HomeHeroVideo"
 import type { CategoryCatalog } from "@/lib/category-catalog"
@@ -29,6 +31,12 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
       />
 
       <div className="site-container relative z-20 w-full pt-[88px] pb-12 md:pb-16">
+        <div className="pointer-events-none absolute top-0 left-1/2 z-30 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0">
+          <Suspense fallback={null}>
+            <HeroWeatherSlot />
+          </Suspense>
+        </div>
+
         <p className="sr-only">
           <span>Discover Sauraha &amp; Chitwan National Park</span>
         </p>
