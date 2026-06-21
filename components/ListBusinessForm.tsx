@@ -584,30 +584,30 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
       </FormSection>
 
       <FormSection title="5. Choose Your Plan">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-3">
           {pricingPlans.map((p) => (
             <button
               key={p.name}
               type="button"
               onClick={() => setPlan(p.name)}
               disabled={isLoading}
-              className={`cursor-pointer rounded-xl border-2 p-5 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
+              className={`cursor-pointer rounded-xl border-2 p-3 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
                 plan === p.name
                   ? "border-orange-brand bg-orange-brand/5"
                   : "border-border-brand hover:border-green-mid"
               }`}
             >
               {p.popular && (
-                <span className="mb-2 inline-block rounded-full bg-orange-brand px-2 py-0.5 text-[0.65rem] font-bold text-white uppercase">
+                <span className="mb-1 inline-block rounded-full bg-orange-brand px-2 py-0.5 text-[0.6rem] font-bold text-white uppercase">
                   Most Popular
                 </span>
               )}
-              <p className="font-[family-name:var(--font-playfair)] text-lg font-bold text-green-brand">
+              <p className="font-[family-name:var(--font-playfair)] text-base font-bold text-green-brand">
                 {p.name}
               </p>
-              <p className="text-2xl font-bold text-orange-brand">
+              <p className="text-lg font-bold text-orange-brand">
                 {p.price}
-                <span className="text-xs font-normal text-text-light"> / {p.period}</span>
+                <span className="text-[0.65rem] font-normal text-text-light"> / {p.period}</span>
               </p>
             </button>
           ))}

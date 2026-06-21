@@ -22,33 +22,39 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
   const testimonial = TESTIMONIALS[active]
 
   return (
-    <section className="home-section">
+    <section className="home-section !py-8 md:!py-24">
       <div className="site-container">
-        <div className="grid grid-cols-1 gap-px bg-black/10 sm:grid-cols-3">
-          <div className="rounded-xl bg-surface-muted px-6 py-10 text-center">
-            <p className="font-heading text-4xl font-bold text-ink">{businessCount}+</p>
-            <p className="mt-2 text-sm text-ink-muted">Businesses listed</p>
+        <div className="grid grid-cols-3 gap-px bg-black/10">
+          <div className="rounded-xl bg-surface-muted px-2 py-3 text-center md:px-6 md:py-10">
+            <p className="font-heading text-base font-bold text-ink md:text-4xl">{businessCount}+</p>
+            <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-muted md:mt-2 md:text-sm">
+              Businesses listed
+            </p>
           </div>
-          <div className="rounded-xl bg-surface-muted px-6 py-10 text-center">
-            <p className="font-heading text-4xl font-bold text-ink">{guidesCount}+</p>
-            <p className="mt-2 text-sm text-ink-muted">Guides published</p>
+          <div className="rounded-xl bg-surface-muted px-2 py-3 text-center md:px-6 md:py-10">
+            <p className="font-heading text-base font-bold text-ink md:text-4xl">{guidesCount}+</p>
+            <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-muted md:mt-2 md:text-sm">
+              Guides published
+            </p>
           </div>
-          <div className="rounded-xl bg-surface-muted px-6 py-10 text-center">
-            <p className="font-heading text-4xl font-bold text-ink">10k+</p>
-            <p className="mt-2 text-sm text-ink-muted">Visitors served</p>
+          <div className="rounded-xl bg-surface-muted px-2 py-3 text-center md:px-6 md:py-10">
+            <p className="font-heading text-base font-bold text-ink md:text-4xl">10k+</p>
+            <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-muted md:mt-2 md:text-sm">
+              Visitors served
+            </p>
           </div>
         </div>
 
-        <div className="mt-16 border-t border-black/8 pt-16 text-center">
-          <blockquote className="mx-auto max-w-2xl">
-            <p className="font-heading text-xl leading-relaxed text-ink md:text-2xl">
+        <div className="mt-8 border-t border-black/8 pt-8 text-center md:mt-16 md:pt-16">
+          <blockquote className="mx-auto max-w-2xl px-1">
+            <p className="font-heading text-sm leading-relaxed text-ink md:text-2xl">
               &ldquo;{testimonial.quote}&rdquo;
             </p>
-            <footer className="mt-6 text-ink-muted">
+            <footer className="mt-3 text-xs text-ink-muted md:mt-6 md:text-base">
               {testimonial.name}, {testimonial.from}
             </footer>
           </blockquote>
-          <div className="mt-6 flex justify-center gap-2" role="tablist" aria-label="Testimonials">
+          <div className="mt-4 flex justify-center gap-2 md:mt-6" role="tablist" aria-label="Testimonials">
             {TESTIMONIALS.map((_, i) => (
               <button
                 key={i}
@@ -57,7 +63,7 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
                 aria-selected={i === active}
                 aria-label={`Testimonial ${i + 1}`}
                 onClick={() => setActive(i)}
-                className={`h-2 w-8 transition-colors ${
+                className={`h-1.5 w-6 transition-colors md:h-2 md:w-8 ${
                   i === active ? "bg-green-brand" : "bg-black/15"
                 }`}
               />
@@ -65,9 +71,9 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
           </div>
         </div>
 
-        <div className="mt-14 grid grid-cols-3 gap-2 md:grid-cols-6 md:gap-3">
+        <div className="mt-8 grid grid-cols-3 gap-1.5 md:mt-14 md:grid-cols-6 md:gap-3">
           {TRAVELLER_PHOTOS.map((photo) => (
-            <div key={photo.src} className="relative aspect-square overflow-hidden rounded-xl">
+            <div key={photo.src} className="relative aspect-square overflow-hidden rounded-lg md:rounded-xl">
               <Image
                 src={photo.src}
                 alt={photo.alt}

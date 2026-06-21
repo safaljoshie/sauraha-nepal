@@ -71,29 +71,29 @@ export default async function ListYourBusinessPage() {
         <div className="mx-auto max-w-6xl">
           <p className="section-label text-center">Pricing</p>
           <h2 className="section-title text-center">Choose your plan</h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
             {pricingPlans.map((plan) => (
               <div
                 key={plan.name}
-                className={`rounded-2xl border-2 bg-white p-8 ${
+                className={`rounded-2xl border-2 bg-white p-4 ${
                   plan.popular ? "border-orange-brand shadow-lg" : "border-border-brand"
                 }`}
               >
                 {plan.popular && (
-                  <span className="mb-4 inline-block rounded-full bg-orange-brand px-3 py-1 text-xs font-bold text-white uppercase">
+                  <span className="mb-2 inline-block rounded-full bg-orange-brand px-2.5 py-0.5 text-[0.65rem] font-bold text-white uppercase">
                     Most Popular
                   </span>
                 )}
-                <h3 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand">
+                <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-green-brand">
                   {plan.name}
                 </h3>
-                <p className="mt-2 text-3xl font-bold text-orange-brand">
+                <p className="mt-1 text-xl font-bold text-orange-brand">
                   {plan.price}
-                  <span className="text-sm font-normal text-text-light"> / {plan.period}</span>
+                  <span className="text-xs font-normal text-text-light"> / {plan.period}</span>
                 </p>
-                <ul className="mt-6 space-y-2.5">
+                <ul className="mt-3 space-y-1">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex gap-2 text-sm text-text-mid">
+                    <li key={feature} className="flex gap-1.5 text-xs leading-snug text-text-mid">
                       <span className="text-green-mid">✓</span>
                       {feature}
                     </li>
@@ -105,18 +105,20 @@ export default async function ListYourBusinessPage() {
         </div>
       </section>
 
-      <section className="bg-white px-8 py-20">
+      <section className="bg-white px-8 py-8 md:py-10">
         <div className="mx-auto max-w-4xl">
-          <p className="section-label text-center">How It Works</p>
-          <h2 className="section-title text-center">Four simple steps</h2>
-          <div className="mt-12 grid gap-8 md:grid-cols-4">
+          <p className="section-label mb-1 text-center">How It Works</p>
+          <h2 className="mb-2 text-center font-[family-name:var(--font-playfair)] text-lg font-bold text-green-brand md:text-xl">
+            Four simple steps
+          </h2>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 md:grid-cols-4">
             {listingSteps.map((item) => (
               <div key={item.step} className="text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-brand text-xl font-bold text-white">
+                <div className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-green-brand text-xs font-bold text-white">
                   {item.step}
                 </div>
-                <h3 className="mb-2 font-semibold text-green-brand">{item.title}</h3>
-                <p className="text-sm text-text-light">{item.description}</p>
+                <h3 className="mb-0.5 text-sm font-semibold text-green-brand">{item.title}</h3>
+                <p className="text-xs leading-snug text-text-light">{item.description}</p>
               </div>
             ))}
           </div>

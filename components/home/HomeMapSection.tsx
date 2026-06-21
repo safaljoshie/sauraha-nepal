@@ -79,13 +79,13 @@ export default function HomeMapSection({
             </button>
           ))}
         </div>
-        <div className="overflow-hidden rounded-2xl border border-black/8">
-          <p className="mb-4 px-1 text-sm text-text-light">
-            {onMap.length} listing{onMap.length === 1 ? "" : "s"} shown on map
-            {withoutCoords > 0 &&
-              ` (${withoutCoords} need a Google Maps link with coordinates to appear)`}
-          </p>
-          <MapComponent listings={onMap} />
+        <p className="mb-2 text-sm text-text-light">
+          {onMap.length} listing{onMap.length === 1 ? "" : "s"} shown on map
+          {withoutCoords > 0 &&
+            ` (${withoutCoords} need a Google Maps link with coordinates to appear)`}
+        </p>
+        <div className="overflow-hidden rounded-2xl border border-black/8 shadow-[0_8px_32px_rgba(26,92,42,0.08)]">
+          <MapComponent listings={onMap} embedded />
         </div>
       </div>
     </section>

@@ -46,7 +46,7 @@ export function ChatUIProvider({ children }: { children: ReactNode }) {
   const toggleChat = useCallback(() => {
     setOpen((prev) => {
       if (prev) {
-        chatResetRef.current?.()
+        queueMicrotask(() => chatResetRef.current?.())
         return false
       }
       setUnread(false)

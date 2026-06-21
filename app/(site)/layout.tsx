@@ -32,9 +32,7 @@ export default function SiteLayout({
       <Suspense fallback={<FooterFallback />}>
         <SiteFooter />
       </Suspense>
-      <Suspense fallback={null}>
-        <MobileBottomNav />
-      </Suspense>
+      <MobileBottomNav />
     </>
   )
 }

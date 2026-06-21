@@ -20,17 +20,19 @@ export default function HomeSectionHeader({
   return (
     <div
       id={id}
-      className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-12"
+      className="mb-6 flex flex-wrap items-end justify-between gap-3 md:mb-12 md:gap-4"
     >
       <div className="max-w-2xl">
         <h2
-          className={`nsw-section-title ${dark ? "!text-white" : ""}`}
+          className={`font-heading text-xl font-bold tracking-tight md:text-[clamp(1.75rem,4vw,2.5rem)] ${
+            dark ? "text-white" : "text-ink"
+          }`}
         >
           {title}
         </h2>
         {subtitle && (
           <p
-            className={`mt-4 max-w-xl text-[1.05rem] leading-relaxed ${
+            className={`mt-2 max-w-xl text-sm leading-snug md:mt-4 md:text-[1.05rem] md:leading-relaxed ${
               dark ? "text-white/80" : "text-ink-muted"
             }`}
           >

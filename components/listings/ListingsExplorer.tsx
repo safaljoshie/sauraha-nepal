@@ -6,6 +6,13 @@ import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { BusinessListing } from "@/lib/business-listing"
 import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import {
+  LISTINGS_NAV_EVENT,
+  parseListingsNavMode,
+  pushListingsNav,
+  type ListingsNavDetail,
+  type ListingsNavMode,
+} from "@/lib/listings-mobile-nav"
+import {
   countByCategoryGroup,
   filterListings,
   PAGE_SIZE,
@@ -70,6 +77,46 @@ export default function ListingsExplorer({
     return () => window.clearTimeout(timer)
   }, [focusSearchOnMount])
 
+  useEffect(() => {
+    function applyNavMode(mode: ListingsNavMode) {
+      if (mode === "map") {
+        setViewMode("map")
+        searchInputRef.current?.blur()
+        window.requestAnimationFrame(() => {
+          document.getElementById("listings-map-view")?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          })
+        })
+        return
+      }
+
+      if (mode === "search") {
+        setViewMode("grid")
+        window.requestAnimationFrame(() => searchInputRef.current?.focus())
+        return
+      }
+
+      setViewMode("grid")
+      searchInputRef.current?.blur()
+    }
+
+    function onListingsNav(event: Event) {
+      applyNavMode((event as CustomEvent<ListingsNavDetail>).detail.mode)
+    }
+
+    function onPopState() {
+      applyNavMode(parseListingsNavMode(window.location.search))
+    }
+
+    window.addEventListener(LISTINGS_NAV_EVENT, onListingsNav)
+    window.addEventListener("popstate", onPopState)
+    return () => {
+      window.removeEventListener(LISTINGS_NAV_EVENT, onListingsNav)
+      window.removeEventListener("popstate", onPopState)
+    }
+  }, [])
+
   const filtered = useMemo(
     () =>
       filterListings(
@@ -117,6 +164,18 @@ export default function ListingsExplorer({
   function clearSearch() {
     setSearchInput("")
     setDebouncedSearch("")
+  }
+
+  function setListingsView(mode: ViewMode) {
+    setViewMode(mode)
+    if (typeof window === "undefined" || window.location.pathname !== "/listings") return
+
+    const nextMode = mode === "map" ? "map" : "explore"
+    if (parseListingsNavMode(window.location.search) !== nextMode) {
+      pushListingsNav(nextMode)
+    } else if (mode === "map") {
+      document.getElementById("listings-map-view")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
   }
 
   return (
@@ -206,7 +265,7 @@ export default function ListingsExplorer({
             <div className="flex rounded-full border border-border-brand bg-white p-1">
               <button
                 type="button"
-                onClick={() => setViewMode("grid")}
+                onClick={() => setListingsView("grid")}
                 className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
                   viewMode === "grid"
                     ? "bg-green-brand text-white"
@@ -218,7 +277,7 @@ export default function ListingsExplorer({
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode("map")}
+                onClick={() => setListingsView("map")}
                 className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
                   viewMode === "map"
                     ? "bg-green-brand text-white"
@@ -242,7 +301,7 @@ export default function ListingsExplorer({
             onClearSearch={clearSearch}
           />
         ) : viewMode === "map" ? (
-          <div className="mb-16">
+          <div id="listings-map-view" className="mb-16 scroll-mt-28">
             <ListingsMapView listings={filtered} mapCoordinates={mapCoordinates} />
           </div>
         ) : (

@@ -1,10 +1,16 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname, useSearchParams } from "next/navigation"
-import { type ReactNode } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useState, type ReactNode } from "react"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
 import { useChatUI } from "@/components/ChatUIProvider"
+import {
+  parseListingsNavMode,
+  pushListingsNav,
+  type ListingsNavMode,
+} from "@/lib/listings-mobile-nav"
+import { useClientSearchParams } from "@/lib/use-client-search-params"
 
 const ICON_PROPS = {
   width: 24,
@@ -51,42 +57,31 @@ function IconSearch() {
   )
 }
 
-const NAV_ITEMS = [
-  { id: "home", href: "/", label: "Home", icon: IconHome },
-  { id: "explore", href: "/listings", label: "Explore", icon: IconExplore },
-  { id: "map", href: "/listings?view=map", label: "Map", icon: IconMap },
-  { id: "search", href: "/listings?search=true", label: "Search", icon: IconSearch },
-] as const
+const LISTINGS_MODES = {
+  explore: "/listings",
+  map: "/listings?view=map",
+  search: "/listings?search=true",
+} as const satisfies Record<ListingsNavMode, string>
 
-type NavItemId = (typeof NAV_ITEMS)[number]["id"] | "dhurbe" | null
+type NavItemId = "home" | ListingsNavMode | "dhurbe" | null
 
 function NavIconButton({
   active,
   label,
-  href,
   onClick,
   children,
   className = "",
 }: {
   active: boolean
   label: string
-  href?: string
-  onClick?: () => void
+  onClick: () => void
   children: ReactNode
   className?: string
 }) {
   const itemClass = `mobile-bottom-nav-item${active ? " mobile-bottom-nav-item--active" : ""}${className ? ` ${className}` : ""}`
 
-  if (href) {
-    return (
-      <Link href={href} className={itemClass} aria-label={label} aria-current={active ? "page" : undefined}>
-        {children}
-      </Link>
-    )
-  }
-
   return (
-    <button type="button" className={itemClass} aria-label={label} onClick={onClick}>
+    <button type="button" className={itemClass} aria-label={label} onClick={onClick} aria-current={active ? "page" : undefined}>
       {children}
     </button>
   )
@@ -94,42 +89,108 @@ function NavIconButton({
 
 export default function MobileBottomNav() {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
-  const { open, unread, toggleChat } = useChatUI()
+  const router = useRouter()
+  const { search } = useClientSearchParams()
+  const { open, unread, closeChat, toggleChat } = useChatUI()
+  const [pendingId, setPendingId] = useState<NavItemId>(null)
 
-  const view = searchParams.get("view")
-  const searchFlag = searchParams.get("search")
   const onListingsIndex = pathname === "/listings"
+  const listingsMode = onListingsIndex ? parseListingsNavMode(search) : null
+
+  useEffect(() => {
+    router.prefetch("/")
+    router.prefetch(LISTINGS_MODES.explore)
+    router.prefetch(LISTINGS_MODES.map)
+    router.prefetch(LISTINGS_MODES.search)
+  }, [router])
 
   const activeId: NavItemId = (() => {
+    if (pendingId) return pendingId
     if (open) return "dhurbe"
     if (pathname === "/") return "home"
-    if (onListingsIndex && view === "map") return "map"
-    if (onListingsIndex && searchFlag === "true") return "search"
+    if (onListingsIndex && listingsMode) return listingsMode
     if (pathname === "/listings" || pathname.startsWith("/listings/")) return "explore"
     return null
   })()
+
+  function closeChatIfOpen() {
+    if (open) closeChat()
+  }
+
+  function clearPendingSoon() {
+    window.requestAnimationFrame(() => setPendingId(null))
+  }
+
+  function handleHome() {
+    setPendingId("home")
+    closeChatIfOpen()
+    if (pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" })
+      clearPendingSoon()
+      return
+    }
+    router.push("/")
+    clearPendingSoon()
+  }
+
+  function handleListingsMode(mode: ListingsNavMode) {
+    setPendingId(mode)
+    closeChatIfOpen()
+
+    if (onListingsIndex) {
+      pushListingsNav(mode)
+      clearPendingSoon()
+      return
+    }
+
+    router.push(LISTINGS_MODES[mode])
+    clearPendingSoon()
+  }
+
+  function handleToggleChat() {
+    setPendingId("dhurbe")
+    toggleChat()
+    clearPendingSoon()
+  }
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) return null
 
   return (
     <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
       <ul className="mobile-bottom-nav-list">
-        {NAV_ITEMS.map((item) => {
-          const Icon = item.icon
-          return (
-            <li key={item.id}>
-              <NavIconButton active={activeId === item.id} label={item.label} href={item.href}>
-                <Icon />
-              </NavIconButton>
-            </li>
-          )
-        })}
+        <li>
+          <NavIconButton active={activeId === "home"} label="Home" onClick={handleHome}>
+            <IconHome />
+          </NavIconButton>
+        </li>
+        <li>
+          <NavIconButton
+            active={activeId === "explore"}
+            label="Explore"
+            onClick={() => handleListingsMode("explore")}
+          >
+            <IconExplore />
+          </NavIconButton>
+        </li>
+        <li>
+          <NavIconButton active={activeId === "map"} label="Map" onClick={() => handleListingsMode("map")}>
+            <IconMap />
+          </NavIconButton>
+        </li>
+        <li>
+          <NavIconButton
+            active={activeId === "search"}
+            label="Search"
+            onClick={() => handleListingsMode("search")}
+          >
+            <IconSearch />
+          </NavIconButton>
+        </li>
         <li>
           <NavIconButton
             active={activeId === "dhurbe"}
             label={open ? "Close Dhurbe" : "Chat with Dhurbe"}
-            onClick={toggleChat}
+            onClick={handleToggleChat}
             className="mobile-bottom-nav-dhurbe"
           >
             <span className="mobile-bottom-nav-dhurbe-inner">

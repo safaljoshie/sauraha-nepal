@@ -52,7 +52,7 @@ body {
   }
 
   .home-section {
-    @apply bg-surface py-16 md:py-24;
+    @apply bg-surface py-10 md:py-24;
   }
 
   .home-section-muted {
@@ -391,6 +391,11 @@ body {
   .map-listing-popup .leaflet-popup-content {
     margin: 12px 14px;
   }
+
+  .map-shell .leaflet-control-zoom {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
 }
 
 /* Shared content width + horizontal inset (homepage, listings, nav, footer) */
@@ -484,12 +489,13 @@ body {
     padding: 0 16px;
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 50px;
-    background: rgba(255, 247, 242, 0.26);
+    background: rgba(255, 247, 242, 0.72);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateZ(0);
     animation: mobile-bottom-nav-rise 0.4s ease-out;
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+    touch-action: manipulation;
   }
 }
 
@@ -514,10 +520,12 @@ body {
   background: transparent;
   color: #6b7f6c;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
 }
 
 .mobile-bottom-nav-item:active {

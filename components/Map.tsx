@@ -39,7 +39,13 @@ function FitBounds({ listings }: { listings: MapListingMarker[] }) {
   return null
 }
 
-export default function Map({ listings }: { listings: MapListingMarker[] }) {
+export default function Map({
+  listings,
+  embedded = false,
+}: {
+  listings: MapListingMarker[]
+  embedded?: boolean
+}) {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -48,16 +54,22 @@ export default function Map({ listings }: { listings: MapListingMarker[] }) {
 
   const markerIcon = useMemo(() => createGreenMapPinIcon(), [])
 
+  const shellClass = embedded
+    ? "map-shell h-[min(70vh,520px)] min-h-96 w-full overflow-hidden"
+    : "map-shell h-[min(70vh,520px)] min-h-96 overflow-hidden rounded-2xl border border-border-brand shadow-[0_8px_32px_rgba(26,92,42,0.08)]"
+
   if (!ready) {
     return (
-      <div className="flex h-96 items-center justify-center rounded-xl bg-gray-100 text-gray-500">
+      <div
+        className={`flex h-96 items-center justify-center bg-gray-100 text-gray-500 ${embedded ? "" : "rounded-xl"}`}
+      >
         Loading map...
       </div>
     )
   }
 
   return (
-    <div className="map-shell h-[min(70vh,520px)] min-h-96 overflow-hidden rounded-2xl border border-border-brand shadow-[0_8px_32px_rgba(26,92,42,0.08)]">
+    <div className={shellClass}>
       <MapContainer
         center={SAURAHA_CENTER}
         zoom={DEFAULT_ZOOM}
