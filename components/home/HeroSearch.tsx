@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 import { getCategoryDisplay, searchListings, type HeroSearchListing } from "@/lib/listings-catalog"
+import { heroSearchButtonCompact, heroSearchInputCompact } from "@/lib/hero-cta-classes"
 
 type HeroSearchProps = {
   listings: HeroSearchListing[]
@@ -55,10 +56,10 @@ export default function HeroSearch({ listings, variant = "default" }: HeroSearch
     <div ref={containerRef} className="relative w-full">
       <form
         onSubmit={handleSubmit}
-        className={`flex overflow-hidden rounded-2xl bg-white ${
+        className={`flex items-stretch overflow-hidden bg-white ${
           isHero
-            ? "shadow-[0_4px_24px_rgba(0,0,0,0.2)]"
-            : "mx-auto max-w-[600px] shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+            ? "min-h-[44px] rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] md:rounded-2xl"
+            : "mx-auto max-w-[600px] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
         }`}
       >
         <input
@@ -70,12 +71,20 @@ export default function HeroSearch({ listings, variant = "default" }: HeroSearch
           }}
           onFocus={() => setOpen(true)}
           placeholder="Search hotels, restaurants, activities..."
-          className="flex-1 border-none bg-transparent px-5 py-4 text-base text-ink outline-none md:px-6"
+          className={
+            isHero
+              ? heroSearchInputCompact
+              : "flex-1 border-none bg-transparent px-5 py-4 text-base text-ink outline-none md:px-6"
+          }
           autoComplete="off"
         />
         <button
           type="submit"
-          className="cursor-pointer bg-green-brand px-6 font-bold tracking-wide text-white uppercase transition-colors hover:bg-green-mid md:px-8"
+          className={
+            isHero
+              ? heroSearchButtonCompact
+              : "cursor-pointer bg-green-brand px-6 font-bold tracking-wide text-white uppercase transition-colors hover:bg-green-mid md:px-8"
+          }
         >
           Search
         </button>

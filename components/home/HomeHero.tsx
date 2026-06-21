@@ -5,6 +5,7 @@ import HomeHeroSearchSlot from "@/components/home/HomeHeroSearchSlot"
 import HomeHeroVideo from "@/components/home/HomeHeroVideo"
 import HeroWeatherSlot from "@/components/home/HeroWeatherSlot"
 import { HeroWeatherSkeleton } from "@/components/home/HeroWeather"
+import { heroCtaCompact } from "@/lib/hero-cta-classes"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { HeroMedia } from "@/lib/site-content"
 import type { HeroSearchListing } from "@/lib/listings-catalog"
@@ -52,17 +53,17 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
           information at the gateway to Chitwan National Park.
         </p>
 
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-8 flex flex-nowrap items-stretch gap-2 md:flex-wrap md:gap-3">
           <Link
             href="#places"
-            className="inline-flex items-center rounded-xl bg-white px-6 py-3 text-sm font-bold tracking-wide text-ink uppercase transition-colors hover:bg-white/90"
+            className={`${heroCtaCompact} bg-white font-bold tracking-wide text-ink normal-case hover:bg-white/90 md:font-semibold md:uppercase`}
           >
             Explore places
           </Link>
           <HeroMakeItineraryButton />
           <Link
             href="#plan-trip"
-            className="inline-flex items-center rounded-xl border border-white/70 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+            className={`${heroCtaCompact} border border-white/70 font-bold text-white hover:bg-white/10 md:font-semibold`}
           >
             Plan your trip
           </Link>

@@ -10,7 +10,7 @@ const HomeDestinationSearch = dynamic(
     ssr: false,
     loading: () => (
       <div
-        className="h-[52px] w-full max-w-2xl animate-pulse rounded-xl bg-white/20"
+        className="h-11 w-full max-w-2xl animate-pulse rounded-xl bg-white/20 md:h-[52px] md:rounded-2xl"
         aria-hidden
       />
     ),
