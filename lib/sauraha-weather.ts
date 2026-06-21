@@ -29,29 +29,27 @@ const WEATHER_BY_CODE: Record<number, WeatherCodeInfo> = {
   65: { conditionLabel: "Heavy rain", iconName: "cloud-rain" },
   66: { conditionLabel: "Freezing rain", iconName: "cloud-rain" },
   67: { conditionLabel: "Freezing rain", iconName: "cloud-rain" },
-  71: { conditionLabel: "Light snow", iconName: "snowflake" },
-  73: { conditionLabel: "Snow", iconName: "snowflake" },
-  75: { conditionLabel: "Heavy snow", iconName: "snowflake" },
-  77: { conditionLabel: "Snow grains", iconName: "snowflake" },
+  71: { conditionLabel: "Light snow", iconName: "cloud-snow" },
+  73: { conditionLabel: "Snow", iconName: "cloud-snow" },
+  75: { conditionLabel: "Heavy snow", iconName: "cloud-snow" },
+  77: { conditionLabel: "Snow grains", iconName: "cloud-snow" },
   80: { conditionLabel: "Rain showers", iconName: "cloud-rain" },
   81: { conditionLabel: "Rain showers", iconName: "cloud-rain" },
   82: { conditionLabel: "Heavy showers", iconName: "cloud-rain" },
-  85: { conditionLabel: "Snow showers", iconName: "snowflake" },
-  86: { conditionLabel: "Heavy snow showers", iconName: "snowflake" },
+  85: { conditionLabel: "Snow showers", iconName: "cloud-snow" },
+  86: { conditionLabel: "Heavy snow showers", iconName: "cloud-snow" },
   95: { conditionLabel: "Thunderstorm", iconName: "cloud-lightning" },
-  96: { conditionLabel: "Thunderstorm with hail", iconName: "cloud-lightning" },
-  99: { conditionLabel: "Thunderstorm with hail", iconName: "cloud-lightning" },
+  96: { conditionLabel: "Thunderstorm", iconName: "cloud-lightning" },
+  99: { conditionLabel: "Thunderstorm", iconName: "cloud-lightning" },
 }
 
-function weatherFromCode(code: number): WeatherCodeInfo {
-  return WEATHER_BY_CODE[code] ?? { conditionLabel: "Unknown", iconName: "cloud" }
+const DEFAULT_WEATHER: WeatherCodeInfo = {
+  conditionLabel: "Unknown",
+  iconName: "cloud-sun",
 }
 
-type OpenMeteoResponse = {
-  current?: {
-    temperature_2m?: number
-    weather_code?: number
-  }
+function mapWeatherCode(code: number): WeatherCodeInfo {
+  return WEATHER_BY_CODE[code] ?? DEFAULT_WEATHER
 }
 
 export async function fetchSaurahaWeather(): Promise<SaurahaWeather | null> {
@@ -65,15 +63,15 @@ export async function fetchSaurahaWeather(): Promise<SaurahaWeather | null> {
     const res = await fetch(url.toString(), { next: { revalidate: 1800 } })
     if (!res.ok) return null
 
-    const data = (await res.json()) as OpenMeteoResponse
-    const temperature = data.current?.temperature_2m
-    const weatherCode = data.current?.weather_code
-
-    if (typeof temperature !== "number" || typeof weatherCode !== "number") {
-      return null
+    const data = (await res.json()) as {
+      current?: { temperature_2m?: number; weather_code?: number }
     }
 
-    const { conditionLabel, iconName } = weatherFromCode(weatherCode)
+    const temperature = data.current?.temperature_2m
+    const weatherCode = data.current?.weather_code
+    if (temperature == null || weatherCode == null) return null
+
+    const { conditionLabel, iconName } = mapWeatherCode(weatherCode)
 
     return {
       temperatureC: Math.round(temperature),

@@ -10,14 +10,24 @@ export default function HeroWeather({
 }: HeroWeatherProps) {
   return (
     <div
-      className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/35 px-4 py-2 text-sm font-medium text-white backdrop-blur-md"
-      aria-label={`Sauraha weather: ${temperatureC} degrees, ${conditionLabel.toLowerCase()}`}
+      className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-medium text-white shadow-[0_4px_24px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:px-4 sm:py-2"
+      aria-label={`Sauraha weather: ${temperatureC} degrees Celsius, ${conditionLabel}`}
     >
       <SiteIcon name={iconName} size={18} strokeWidth={2} className="shrink-0 text-orange-light" />
-      <span className="font-semibold tabular-nums">{temperatureC}°C</span>
-      <span className="hidden text-white/85 md:inline" aria-hidden>
-        · {conditionLabel}
+      <span className="whitespace-nowrap">
+        <span className="font-semibold">{temperatureC}°C</span>
+        <span className="hidden text-white/85 sm:inline"> · {conditionLabel}</span>
       </span>
+      <span className="hidden text-xs text-white/60 md:inline">Sauraha</span>
     </div>
+  )
+}
+
+export function HeroWeatherSkeleton() {
+  return (
+    <div
+      className="inline-flex h-[34px] w-[108px] animate-pulse items-center rounded-full border border-white/15 bg-white/10 px-4 backdrop-blur-xl sm:h-[40px] sm:w-[140px]"
+      aria-hidden
+    />
   )
 }
