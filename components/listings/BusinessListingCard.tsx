@@ -3,6 +3,7 @@ import ListingCardActions from "@/components/listings/ListingCardActions"
 import ListingImage from "@/components/listings/ListingImage"
 import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import OpenNowBadge from "@/components/listings/OpenNowBadge"
+import { listingImageAlt } from "@/lib/seo"
 import type { BusinessListing } from "@/lib/business-listing"
 import { isNewListing } from "@/lib/listing-badges"
 import {
@@ -23,6 +24,7 @@ export default function BusinessListingCard({
   showStatus?: boolean
 }) {
   const image = getListingImage(listing)
+  const imageAlt = listingImageAlt(listing.business_name, listing.category)
   const detailHref = `/listings/${listing.id}`
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
@@ -52,7 +54,7 @@ export default function BusinessListingCard({
         <div className="relative aspect-square w-full overflow-hidden">
           <ListingImage
             src={image}
-            alt={listing.business_name}
+            alt={imageAlt}
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"

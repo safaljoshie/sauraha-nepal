@@ -17,8 +17,9 @@ import {
 } from "@/lib/listings-catalog"
 import { getMapCoordinates, parseCoordinates } from "@/lib/google-maps"
 import { fetchApprovedListingById } from "@/lib/listings-fetch"
+import { fetchCategoryCatalog } from "@/lib/category-catalog"
+import { buildListingDetailMetadata, listingImageAlt, listingJsonLd } from "@/lib/seo"
 import { SITE_URL } from "@/lib/blog-posts"
-import { listingJsonLd, pageMetadata } from "@/lib/seo"
 
 export const revalidate = 3600
 
@@ -28,22 +29,14 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const listing = await fetchApprovedListingById(id)
+  const [listing, catalog] = await Promise.all([
+    fetchApprovedListingById(id),
+    fetchCategoryCatalog(),
+  ])
   if (!listing) {
-    return { title: "Listing Not Found" }
+    return { title: { absolute: "Listing Not Found | Sauraha Nepal" } }
   }
-  const description =
-    listing.description?.slice(0, 160) ??
-    `${listing.business_name} in Sauraha, Nepal — ${listing.category}`
-  const image = getListingImage(listing)
-
-  return pageMetadata({
-    title: listing.business_name,
-    description,
-    path: `/listings/${id}`,
-    image,
-    type: "website",
-  })
+  return buildListingDetailMetadata(listing, id, catalog)
 }
 
 export default async function ListingDetailPage({ params }: PageProps) {
@@ -53,18 +46,30 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
   const photos = getPhotoUrls(listing)
   const heroImage = getListingImage(listing)
+  const imageAlt = listingImageAlt(listing.business_name, listing.category)
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""
   const callHref = listing.phone?.trim() ? telUrl(listing.phone) : ""
   const listingUrl = `${SITE_URL}/listings/${id}`
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
-  const jsonLd = listingJsonLd(listing)
 
   const mapsLink = listing.google_maps_link?.trim() ?? ""
   let coords = mapsLink ? parseCoordinates(mapsLink) : null
   if (!coords && mapsLink) {
     coords = await getMapCoordinates(mapsLink)
   }
+
+  const jsonLd = listingJsonLd({
+    id: listing.id,
+    business_name: listing.business_name,
+    description: listing.description,
+    address: listing.address,
+    phone: listing.phone,
+    email: listing.email,
+    price_range: listing.price_range,
+    lat: coords?.lat,
+    lng: coords?.lng,
+  })
 
   return (
     <main className="pb-20">
@@ -108,7 +113,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
           <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
             <ListingImage
               src={heroImage}
-              alt={listing.business_name}
+              alt={imageAlt}
               fill
               className="object-cover"
               sizes="(max-width: 1024px) 100vw, 800px"
@@ -143,7 +148,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     rel="noopener noreferrer"
                     className="relative block h-48 overflow-hidden rounded-2xl"
                   >
-                    <ListingImage src={url} alt="" fill className="object-cover transition-transform hover:scale-105" sizes="400px" />
+                    <ListingImage src={url} alt={imageAlt} fill className="object-cover transition-transform hover:scale-105" sizes="400px" />
                   </a>
                 ))}
               </div>

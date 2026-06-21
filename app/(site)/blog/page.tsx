@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { fetchPublishedBlogPosts, formatBlogDate } from "@/lib/blog-db"
-import { pageMetadata } from "@/lib/seo"
+import { blogCoverAlt, pageMetadata } from "@/lib/seo"
 
 export const revalidate = 60
 
@@ -47,7 +47,7 @@ export default async function BlogIndexPage() {
                   <div className="relative h-48">
                     <Image
                       src={image}
-                      alt={post.title}
+                      alt={blogCoverAlt(post.title)}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
                       sizes="(max-width: 768px) 100vw, 400px"

@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { HOMEPAGE_BLOG_FALLBACK } from "@/lib/homepage-blog-fallback"
 import type { BlogPostPreview } from "@/lib/blog-db"
+import { blogCoverAlt } from "@/lib/seo"
 
 type GuideCard = {
   href: string
@@ -59,7 +60,7 @@ export default function HomeTravelGuides({
                 <div className="relative h-24 w-32 shrink-0 overflow-hidden rounded-xl sm:h-28 sm:w-40">
                   <Image
                     src={post.image}
-                    alt=""
+                    alt={blogCoverAlt(post.title)}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
                     sizes="160px"

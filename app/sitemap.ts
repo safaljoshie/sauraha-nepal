@@ -57,7 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: absoluteUrl(`/listings/${listing.id}`),
         lastModified: safeLastModified(listing.created_at, now),
         changeFrequency: "weekly" as const,
-        priority: 0.7,
+        priority: listing.plan === "featured" || listing.plan === "premium" ? 0.8 : 0.7,
       }))
 
     const blogPages: MetadataRoute.Sitemap = blogPosts

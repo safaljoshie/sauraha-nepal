@@ -5,6 +5,7 @@ import { ChatUIProvider } from "@/components/ChatUIProvider"
 import ChatWidgetLoader from "@/components/ChatWidgetLoader"
 import { Inter, Nunito, Playfair_Display, Poppins } from "next/font/google"
 import "./globals.css"
+import { DEFAULT_OG_IMAGE, SITE_KEYWORDS } from "@/lib/seo"
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -35,11 +36,27 @@ const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.saurahanepal.com"),
   title: {
-    default: "Sauraha Nepal – Your Complete Guide to Sauraha",
-    template: "%s – Sauraha Nepal",
+    default:
+      "Sauraha Nepal — Hotels, Restaurants & Jungle Safari Guide | Chitwan National Park",
+    template: "%s | Sauraha Nepal",
   },
   description:
-    "Your complete guide to Sauraha — hotels, restaurants, activities, and everything at the gateway to Chitwan National Park.",
+    "Find verified hotels, restaurants, jungle safari operators and tour guides in Sauraha, Nepal — the gateway to Chitwan National Park. Compare prices, read real reviews, and plan your Chitwan trip.",
+  keywords: [...SITE_KEYWORDS],
+  robots: { index: true, follow: true },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://www.saurahanepal.com",
+    siteName: "Sauraha Nepal",
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sauraha Nepal — Your Complete Chitwan Travel Guide",
+    description: "Hotels, restaurants, jungle safaris and tour guides in Sauraha, Nepal",
+    images: [DEFAULT_OG_IMAGE],
+  },
   ...(googleSiteVerification
     ? {
         verification: {

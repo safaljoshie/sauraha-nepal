@@ -5,19 +5,17 @@ import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { parseCategoryParam } from "@/lib/listings-catalog"
 import { buildListingCoordinateMap } from "@/lib/map-coordinates"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
-import { pageMetadata } from "@/lib/seo"
+import { buildListingsIndexMetadata } from "@/lib/seo"
 
 export const revalidate = 60
 
-export const metadata: Metadata = pageMetadata({
-  title: "All Listings",
-  description:
-    "Browse approved hotels, restaurants, activities, and services in Sauraha, Nepal.",
-  path: "/listings",
-})
-
 type ListingsPageProps = {
   searchParams: Promise<{ search?: string; category?: string; q?: string; view?: string }>
+}
+
+export async function generateMetadata({ searchParams }: ListingsPageProps): Promise<Metadata> {
+  const params = await searchParams
+  return buildListingsIndexMetadata(params.category)
 }
 
 export default async function ListingsPage({ searchParams }: ListingsPageProps) {

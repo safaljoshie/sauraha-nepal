@@ -11,6 +11,7 @@ import {
 } from "@/lib/blog-db"
 import { getBlogSlugRedirect } from "@/lib/blog-slug-redirects"
 import { SITE_URL } from "@/lib/blog-posts"
+import { articleJsonLd, blogCoverAlt, buildBlogPostMetadata } from "@/lib/seo"
 
 export const revalidate = 60
 
@@ -23,32 +24,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const redirectSlug = getBlogSlugRedirect(slug)
   if (redirectSlug) {
     const post = await fetchPublishedBlogPostBySlug(redirectSlug)
-    if (post) {
-      const title = post.meta_title?.trim() || post.title
-      const description = post.meta_description?.trim() || post.excerpt || undefined
-      return { title, description }
-    }
+    if (post) return buildBlogPostMetadata(post)
   }
   const post = await fetchPublishedBlogPostBySlug(slug)
   if (!post) {
-    return { title: "Post Not Found" }
+    return { title: { absolute: "Post Not Found | Sauraha Nepal" } }
   }
-
-  const title = post.meta_title?.trim() || post.title
-  const description = post.meta_description?.trim() || post.excerpt || undefined
-  const image = post.cover_image ?? "/images/sauraha-hero.jpg"
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      url: `${SITE_URL}/blog/${post.slug}`,
-      images: [image],
-    },
-  }
+  return buildBlogPostMetadata(post)
 }
 
 export default async function BlogPostPage({ params }: PageProps) {
@@ -62,9 +44,15 @@ export default async function BlogPostPage({ params }: PageProps) {
   const related = await fetchRelatedBlogPosts(slug)
   const articleUrl = `${SITE_URL}/blog/${post.slug}`
   const cover = post.cover_image ?? "/images/sauraha-hero.jpg"
+  const coverAlt = blogCoverAlt(post.title)
+  const jsonLd = articleJsonLd(post)
 
   return (
     <main className="mt-[68px] bg-cream">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <article className="mx-auto max-w-4xl px-6 py-12">
         <nav className="mb-4 text-sm text-text-light">
           <Link href="/" className="hover:text-green-brand">
@@ -101,7 +89,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-2xl">
             <Image
               src={cover}
-              alt={post.title}
+              alt={coverAlt}
               fill
               className="object-cover"
               sizes="(max-width: 896px) 100vw, 896px"
