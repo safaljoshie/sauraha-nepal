@@ -20,7 +20,7 @@ export default async function SiteLayout({
   return (
     <div id="site-root">
       <Navbar catalog={catalog} />
-      <div className="pb-[calc(6rem+env(safe-area-inset-bottom,0px))] md:pb-0">{children}</div>
+      <div className="mobile-bottom-nav-clearance md:pb-0">{children}</div>
       <Suspense fallback={<FooterFallback />}>
         <SiteFooter />
       </Suspense>

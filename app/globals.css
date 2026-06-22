@@ -605,6 +605,13 @@ body {
   display: none;
 }
 
+/* Space for floating pill nav: 20px offset + 64px bar + 12px gap */
+@media (max-width: 767px) {
+  .mobile-bottom-nav-clearance {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (max-width: 767px) {
   .mobile-bottom-nav {
     position: fixed;

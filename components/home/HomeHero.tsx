@@ -22,7 +22,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
   return (
     <section
       aria-label="Discover Sauraha"
-      className="relative flex min-h-[100dvh] flex-col justify-end overflow-hidden bg-ink"
+      className="relative flex min-h-[100dvh] flex-col justify-end overflow-x-hidden bg-ink max-md:overflow-y-visible md:overflow-hidden"
     >
       {heroVideo ? (
         <HomeHeroVideo url={heroVideo.url} posterUrl={heroVideo.poster_url} />
@@ -32,7 +32,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
         aria-hidden
       />
 
-      <div className="site-container relative z-20 w-full pt-[88px] pb-12 md:pb-8">
+      <div className="site-container mobile-bottom-nav-clearance relative z-20 w-full pt-[88px] md:pb-8">
         <div className="home-hero-content">
         <p className="sr-only">
           <span>Discover Sauraha &amp; Chitwan National Park</span>
