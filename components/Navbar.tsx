@@ -35,13 +35,18 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
   const pathname = usePathname()
   const isHome = pathname === "/"
   const [menuOpen, setMenuOpen] = useState(false)
+  const [onHomePage, setOnHomePage] = useState(isHome)
   const [scrolled, setScrolled] = useState(false)
 
   const closeMenu = useCallback(() => setMenuOpen(false), [])
 
   useLayoutEffect(() => {
+    setOnHomePage(isHome || hasHomeMarker())
+  }, [isHome])
+
+  useLayoutEffect(() => {
     const root = getSiteRoot()
-    const onHome = hasHomeMarker()
+    const onHome = hasHomeMarker() || isHome
 
     if (!onHome) {
       root?.classList.remove("nav-scrolled")
@@ -61,7 +66,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
       window.removeEventListener("scroll", onScroll)
       root?.classList.remove("nav-scrolled")
     }
-  }, [pathname])
+  }, [pathname, isHome])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -80,7 +85,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
     closeMenu()
   }, [pathname, closeMenu])
 
-  const transparent = isHome && !scrolled && !menuOpen
+  const transparent = onHomePage && !scrolled && !menuOpen
 
   return (
     <>
