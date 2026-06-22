@@ -58,14 +58,14 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
         <div className="hero-cta-row mt-8 flex flex-nowrap items-stretch gap-2 md:flex-wrap md:gap-3">
           <Link
             href="#places"
-            className={`hero-cta ${heroCtaCompact} bg-white font-bold tracking-wide text-ink normal-case hover:bg-white/90 md:font-semibold md:uppercase`}
+            className={`hero-cta ${heroCtaCompact} bg-white tracking-wide text-ink normal-case hover:bg-white/90 md:uppercase`}
           >
             Explore places
           </Link>
           <HeroMakeItineraryButton />
           <Link
             href="#plan-trip"
-            className={`hero-cta ${heroCtaCompact} border border-white/70 font-bold text-white hover:bg-white/10 md:font-semibold`}
+            className={`hero-cta ${heroCtaCompact} border border-white/70 text-white hover:bg-white/10`}
           >
             Plan your trip
           </Link>

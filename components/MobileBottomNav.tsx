@@ -192,7 +192,9 @@ export default function MobileBottomNav() {
             onClick={handleToggleChat}
             className="mobile-bottom-nav-dhurbe"
           >
-            <span className="mobile-bottom-nav-dhurbe-inner">
+            <span
+              className={`mobile-bottom-nav-dhurbe-inner ${!open ? "chat-bubble-pulse" : ""}`.trim()}
+            >
               {open ? (
                 <svg
                   width={20}

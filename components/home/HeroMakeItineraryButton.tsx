@@ -10,7 +10,7 @@ export default function HeroMakeItineraryButton() {
     <button
       type="button"
       onClick={openChat}
-      className={`hero-cta ${heroCtaCompact} border border-orange-brand font-bold text-orange-brand hover:bg-orange-brand/20 md:border-2 md:font-semibold`}
+      className={`hero-cta ${heroCtaCompact} border border-orange-brand text-orange-brand hover:bg-orange-brand/20 md:border-2`}
     >
       Make Itinerary
     </button>

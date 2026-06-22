@@ -467,8 +467,15 @@ body {
   }
 }
 
-/* Homepage hero subtitle — 2 lines on mobile, scales with screen width */
+/* Homepage hero — mobile tweaks */
 @media (max-width: 767px) {
+  .home-hero-content .hero-cta {
+    font-size: clamp(0.625rem, calc(-0.25rem + 5vw), 0.875rem) !important;
+    font-weight: 800 !important;
+    min-height: 40px !important;
+    padding: 0.625rem 1rem !important;
+  }
+
   .home-hero-content .hero-subtitle {
     font-size: clamp(0.5625rem, 2.75vw, 0.75rem) !important;
     line-height: 1.35 !important;
@@ -757,7 +764,7 @@ body {
   overflow: hidden;
   border-radius: 50%;
   background: #e8621a;
-  box-shadow: 0 2px 12px rgba(232, 98, 26, 0.4);
+  box-shadow: 0 4px 20px rgba(232, 98, 26, 0.45);
   color: #fff;
 }
 
