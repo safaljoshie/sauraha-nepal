@@ -10,6 +10,7 @@ import HomeNewsletter from "@/components/home/HomeNewsletter"
 import HomePlacesToGo from "@/components/home/HomePlacesToGo"
 import HomePlanTrip from "@/components/home/HomePlanTrip"
 import HomePromoBanner from "@/components/home/HomePromoBanner"
+import HomeScrollToTop from "@/components/home/HomeScrollToTop"
 import HomeTravelGuides from "@/components/home/HomeTravelGuides"
 import HomeTrust from "@/components/home/HomeTrust"
 import HomeWhereToStay from "@/components/home/HomeWhereToStay"
@@ -73,6 +74,7 @@ export default async function HomePage() {
   return (
     <>
       <div id="home-page-marker" hidden aria-hidden />
+      <HomeScrollToTop />
       <HomeJsonLd
         featuredListings={data.featured}
         blogCount={blogPosts.length}
