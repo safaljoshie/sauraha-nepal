@@ -37,7 +37,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
         <p className="sr-only">
           <span>Discover Sauraha &amp; Chitwan National Park</span>
         </p>
-        <div className="max-w-4xl" aria-hidden={false}>
+        <div className="hero-headline-wrap max-w-4xl" aria-hidden={false}>
           <div className="mb-5">
             <Suspense fallback={<HeroWeatherSkeleton />}>
               <HeroWeatherSlot />
@@ -49,28 +49,28 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
         </div>
         <h1 className="sr-only">Discover Sauraha &amp; Chitwan National Park</h1>
 
-        <p className="mt-6 max-w-xl text-base leading-relaxed text-white/90 md:text-lg">
+        <p className="hero-subtitle mt-6 max-w-xl text-base leading-relaxed text-white/90 md:text-lg">
           Your official guide to hotels, jungle safaris, restaurants and travel
           information at the gateway to Chitwan National Park.
         </p>
 
-        <div className="mt-8 flex flex-nowrap items-stretch gap-2 md:flex-wrap md:gap-3">
+        <div className="hero-cta-row mt-8 flex flex-nowrap items-stretch gap-2 md:flex-wrap md:gap-3">
           <Link
             href="#places"
-            className={`${heroCtaCompact} bg-white font-bold tracking-wide text-ink normal-case hover:bg-white/90 md:font-semibold md:uppercase`}
+            className={`hero-cta ${heroCtaCompact} bg-white font-bold tracking-wide text-ink normal-case hover:bg-white/90 md:font-semibold md:uppercase`}
           >
             Explore places
           </Link>
           <HeroMakeItineraryButton />
           <Link
             href="#plan-trip"
-            className={`${heroCtaCompact} border border-white/70 font-bold text-white hover:bg-white/10 md:font-semibold`}
+            className={`hero-cta ${heroCtaCompact} border border-white/70 font-bold text-white hover:bg-white/10 md:font-semibold`}
           >
             Plan your trip
           </Link>
         </div>
 
-        <div className="mt-10 max-w-2xl">
+        <div className="hero-search-wrap mt-10 max-w-2xl">
           <HomeHeroSearchSlot
             searchListings={searchListings}
             searchCategories={searchCategories}

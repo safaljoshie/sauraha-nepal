@@ -21,7 +21,7 @@ export default function HomeDestinationSearch({
     <div id="hero-search" className="w-full scroll-mt-28">
       <HeroSearch listings={searchListings} variant="hero" />
       <div
-        className="mt-3 flex flex-nowrap items-stretch gap-1.5 md:flex-wrap md:gap-2"
+        className="hero-category-chips mt-3 flex flex-nowrap items-stretch gap-1.5 md:flex-wrap md:gap-2"
         role="navigation"
         aria-label="Search by category"
       >
@@ -29,7 +29,7 @@ export default function HomeDestinationSearch({
           <Link
             key={cat.href}
             href={cat.href}
-            className={`${heroSearchChipCompact} border border-white/40 bg-black/25 font-bold tracking-wide text-white normal-case backdrop-blur-sm hover:bg-black/40 md:font-semibold md:uppercase`}
+            className={`hero-category-chip ${heroSearchChipCompact} border border-white/40 bg-black/25 font-bold tracking-wide text-white normal-case backdrop-blur-sm hover:bg-black/40 md:font-semibold md:uppercase`}
           >
             {cat.label}
           </Link>

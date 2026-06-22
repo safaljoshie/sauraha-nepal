@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react"
 import SiteIcon from "@/components/icons/SiteIcon"
 import { getStayListingsHref, type CategoryCatalog } from "@/lib/category-catalog"
 
@@ -30,7 +30,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
 
   const closeMenu = useCallback(() => setMenuOpen(false), [])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isHome) {
       setScrolled(true)
       return

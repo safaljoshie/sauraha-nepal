@@ -58,7 +58,7 @@ export default function HeroSearch({ listings, variant = "default" }: HeroSearch
         onSubmit={handleSubmit}
         className={`flex items-stretch overflow-hidden bg-white ${
           isHero
-            ? "min-h-[44px] rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] md:rounded-2xl"
+            ? "hero-search-form min-h-[44px] rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.2)] md:rounded-2xl"
             : "mx-auto max-w-[600px] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
         }`}
       >
@@ -73,7 +73,7 @@ export default function HeroSearch({ listings, variant = "default" }: HeroSearch
           placeholder="Search hotels, restaurants, activities..."
           className={
             isHero
-              ? heroSearchInputCompact
+              ? `${heroSearchInputCompact} hero-search-input`
               : "flex-1 border-none bg-transparent px-5 py-4 text-base text-ink outline-none md:px-6"
           }
           autoComplete="off"
@@ -82,7 +82,7 @@ export default function HeroSearch({ listings, variant = "default" }: HeroSearch
           type="submit"
           className={
             isHero
-              ? heroSearchButtonCompact
+              ? `${heroSearchButtonCompact} hero-search-button`
               : "cursor-pointer bg-green-brand px-6 font-bold tracking-wide text-white uppercase transition-colors hover:bg-green-mid md:px-8"
           }
         >
