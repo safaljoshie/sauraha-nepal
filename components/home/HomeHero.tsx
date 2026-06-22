@@ -43,13 +43,13 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
               <HeroWeatherSlot />
             </Suspense>
           </div>
-          <span className="nsw-hero-line">Discover</span>
-          <span className="nsw-hero-line text-orange-brand">The Wild</span>
-          <span className="nsw-hero-line">In Sauraha</span>
+          <span className="nsw-hero-line md:!text-[3.3rem] lg:!text-[4.2rem] xl:!text-[5.28rem]">Discover</span>
+          <span className="nsw-hero-line text-orange-brand md:!text-[3.3rem] lg:!text-[4.2rem] xl:!text-[5.28rem]">The Wild</span>
+          <span className="nsw-hero-line md:!text-[3.3rem] lg:!text-[4.2rem] xl:!text-[5.28rem]">In Sauraha</span>
         </div>
         <h1 className="sr-only">Discover Sauraha &amp; Chitwan National Park</h1>
 
-        <p className="hero-subtitle mt-6 max-w-xl leading-snug text-white/90 md:mt-6 md:max-w-[24rem] md:text-[0.9rem] md:leading-relaxed">
+        <p className="hero-subtitle mt-6 max-w-xl leading-snug text-white/90 max-md:text-[clamp(0.5625rem,2.75vw,0.75rem)] max-md:leading-[1.35] md:mt-6 md:max-w-[28.8rem] md:!text-[1.08rem] md:!leading-relaxed">
           Your official guide to hotels, jungle safaris, restaurants and travel
           <br className="md:hidden" aria-hidden />
           {" "}information at the gateway to Chitwan National Park.
