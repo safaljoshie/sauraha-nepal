@@ -4,9 +4,19 @@ import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useChatUI } from "@/components/ChatUIProvider"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
+import DhurbePromptBubble from "@/components/chat/DhurbePromptBubble"
 import ChatMarkdown from "@/components/chat/ChatMarkdown"
 import SiteIcon from "@/components/icons/SiteIcon"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
+import {
+  AUTO_DISMISS_MS,
+  getDhurbePromptMessage,
+  hasScrolledPastHalf,
+  isDhurbePromptBlocked,
+  isKeyboardLikelyOpen,
+  markDhurbePromptBlocked,
+  PROMPT_DELAY_MS,
+} from "@/lib/dhurbe-prompt"
 import { MOBILE_HOME_NAV_TOP } from "@/lib/mobile-home-nav"
 
 function SearchIcon() {
@@ -83,8 +93,110 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
+  const [showPrompt, setShowPrompt] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const promptShownRef = useRef(false)
+  const delayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const autoDismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const promptMessage = getDhurbePromptMessage(pathname)
+
+  const clearPromptTimers = useCallback(() => {
+    if (delayTimerRef.current) {
+      clearTimeout(delayTimerRef.current)
+      delayTimerRef.current = null
+    }
+    if (autoDismissTimerRef.current) {
+      clearTimeout(autoDismissTimerRef.current)
+      autoDismissTimerRef.current = null
+    }
+  }, [])
+
+  const canShowPrompt = useCallback(() => {
+    if (promptShownRef.current) return false
+    if (open) return false
+    if (pathname.startsWith("/admin")) return false
+    if (isDhurbePromptBlocked()) return false
+    if (isKeyboardLikelyOpen()) return false
+    return true
+  }, [open, pathname])
+
+  const dismissPrompt = useCallback(() => {
+    setShowPrompt(false)
+    promptShownRef.current = true
+    markDhurbePromptBlocked()
+    if (autoDismissTimerRef.current) {
+      clearTimeout(autoDismissTimerRef.current)
+      autoDismissTimerRef.current = null
+    }
+  }, [])
+
+  const tryShowPrompt = useCallback(() => {
+    if (!canShowPrompt()) return
+
+    promptShownRef.current = true
+    markDhurbePromptBlocked()
+    setShowPrompt(true)
+
+    if (delayTimerRef.current) {
+      clearTimeout(delayTimerRef.current)
+      delayTimerRef.current = null
+    }
+
+    autoDismissTimerRef.current = setTimeout(() => {
+      setShowPrompt(false)
+      autoDismissTimerRef.current = null
+    }, AUTO_DISMISS_MS)
+  }, [canShowPrompt])
+
+  const openFromPrompt = useCallback(() => {
+    setShowPrompt(false)
+    if (autoDismissTimerRef.current) {
+      clearTimeout(autoDismissTimerRef.current)
+      autoDismissTimerRef.current = null
+    }
+    const text = getDhurbePromptMessage(pathname)
+    setMessages([newMessage("assistant", text)])
+    if (!sessionId) setSessionId(crypto.randomUUID())
+    openChat()
+  }, [pathname, sessionId, openChat])
+
+  useEffect(() => {
+    if (!open) return
+    setShowPrompt(false)
+    promptShownRef.current = true
+    markDhurbePromptBlocked()
+    clearPromptTimers()
+  }, [open, clearPromptTimers])
+
+  useEffect(() => {
+    if (pathname.startsWith("/admin") || isDhurbePromptBlocked()) {
+      return undefined
+    }
+
+    delayTimerRef.current = setTimeout(() => {
+      tryShowPrompt()
+    }, PROMPT_DELAY_MS)
+
+    const onScroll = () => {
+      if (hasScrolledPastHalf()) tryShowPrompt()
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    onScroll()
+
+    const viewport = window.visualViewport
+    const onViewportResize = () => {
+      if (isKeyboardLikelyOpen()) setShowPrompt(false)
+    }
+    viewport?.addEventListener("resize", onViewportResize)
+
+    return () => {
+      clearPromptTimers()
+      window.removeEventListener("scroll", onScroll)
+      viewport?.removeEventListener("resize", onViewportResize)
+    }
+  }, [pathname, tryShowPrompt, clearPromptTimers])
 
   const scrollToBottom = useCallback(() => {
     const el = listRef.current
@@ -324,6 +436,14 @@ export default function ChatWidget() {
           </form>
         </div>
       )}
+
+      {showPrompt && !open ? (
+        <DhurbePromptBubble
+          message={promptMessage}
+          onOpen={openFromPrompt}
+          onDismiss={dismissPrompt}
+        />
+      ) : null}
 
       <div className="site-floating-actions">
         {onHome ? (

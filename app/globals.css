@@ -613,6 +613,43 @@ body {
   flex-shrink: 0;
 }
 
+@keyframes dhurbe-prompt-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.dhurbe-prompt-bubble {
+  animation: dhurbe-prompt-enter 0.25s ease-out;
+}
+
+.dhurbe-prompt-close:hover {
+  color: #e8621a;
+}
+
+@media (min-width: 768px) {
+  .dhurbe-prompt-anchor {
+    position: fixed;
+    right: 1.5rem;
+    bottom: calc(1.5rem + 3rem + 0.75rem);
+    z-index: 1002;
+  }
+}
+
+@media (max-width: 767px) {
+  .dhurbe-prompt-anchor {
+    position: fixed;
+    right: max(7.5vw, 1rem);
+    bottom: calc(20px + 64px + env(safe-area-inset-bottom, 0px) + 0.75rem);
+    z-index: 1002;
+  }
+}
+
 @media (min-width: 768px) {
   .site-search-fab {
     width: 3rem;
