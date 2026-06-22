@@ -445,6 +445,37 @@ body {
   background-color: transparent;
 }
 
+/* Homepage intro — 30% smaller typography on mobile */
+@media (max-width: 767px) {
+  .home-intro .home-intro-title {
+    font-size: clamp(1.225rem, 2.8vw, 1.75rem) !important;
+  }
+
+  .home-intro .home-intro-body {
+    margin-top: 1.05rem !important;
+    font-size: 0.7875rem !important;
+    line-height: 1.6 !important;
+  }
+
+  .home-intro .home-intro-body > * + * {
+    margin-top: 0.875rem !important;
+  }
+
+  .home-intro .home-intro-link {
+    margin-top: 1.4rem !important;
+    font-size: 0.665rem !important;
+  }
+}
+
+/* Homepage hero subtitle — 2 lines on mobile, scales with screen width */
+@media (max-width: 767px) {
+  .home-hero-content .hero-subtitle {
+    font-size: clamp(0.5625rem, 2.75vw, 0.75rem) !important;
+    line-height: 1.35 !important;
+    max-width: 100%;
+  }
+}
+
 /* Homepage hero — 80% desktop sizing (unlayered so Tailwind utilities cannot override) */
 @media (min-width: 768px) {
   .home-hero-content .nsw-hero-line {
@@ -624,9 +655,9 @@ body {
     max-width: 400px;
     height: 64px;
     padding: 0 16px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 50px;
-    background: rgba(255, 247, 242, 0.72);
+    background: rgba(255, 247, 242, 0.47);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
     transform: translateX(-50%) translateZ(0);
     animation: mobile-bottom-nav-rise 0.4s ease-out;

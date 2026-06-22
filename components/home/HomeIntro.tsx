@@ -2,10 +2,10 @@ import Link from "next/link"
 
 export default function HomeIntro() {
   return (
-    <section id="why-visit" className="home-section scroll-mt-24">
+    <section id="why-visit" className="home-section home-intro scroll-mt-24">
       <div className="site-container">
-        <h2 className="nsw-section-title">Sauraha, Nepal</h2>
-        <div className="mt-6 max-w-3xl space-y-5 text-[1.125rem] leading-[1.8] text-ink-muted">
+        <h2 className="nsw-section-title home-intro-title">Sauraha, Nepal</h2>
+        <div className="home-intro-body mt-6 max-w-3xl space-y-5 text-[1.125rem] leading-[1.8] text-ink-muted">
           <p>
             Welcome to Sauraha — the gateway to Chitwan National Park. Let us
             inspire your next journey through Nepal&apos;s wildlife capital, from
@@ -24,7 +24,7 @@ export default function HomeIntro() {
             transport, and seasonal tips.
           </p>
         </div>
-        <Link href="/about" className="nsw-view-all mt-8 inline-flex">
+        <Link href="/about" className="nsw-view-all home-intro-link mt-8 inline-flex">
           Read more about Sauraha
         </Link>
       </div>
