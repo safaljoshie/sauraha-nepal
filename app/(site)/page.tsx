@@ -72,6 +72,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <div id="home-page-marker" hidden aria-hidden />
       <HomeJsonLd
         featuredListings={data.featured}
         blogCount={blogPosts.length}

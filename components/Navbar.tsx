@@ -14,6 +14,15 @@ const baseNavLinks = [
   { href: "/#map", label: "Map" },
 ]
 
+function getSiteRoot() {
+  return document.getElementById("site-root")
+}
+
+function hasHomeMarker() {
+  if (typeof document === "undefined") return false
+  return Boolean(getSiteRoot()?.querySelector("#home-page-marker"))
+}
+
 export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
   const navLinks = useMemo(
     () => [
@@ -31,17 +40,28 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
   const closeMenu = useCallback(() => setMenuOpen(false), [])
 
   useLayoutEffect(() => {
-    if (!isHome) {
+    const root = getSiteRoot()
+    const onHome = hasHomeMarker()
+
+    if (!onHome) {
+      root?.classList.remove("nav-scrolled")
       setScrolled(true)
       return
     }
+
     function onScroll() {
-      setScrolled(window.scrollY > 48)
+      const next = window.scrollY > 48
+      setScrolled(next)
+      root?.classList.toggle("nav-scrolled", next)
     }
+
     onScroll()
     window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [isHome])
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      root?.classList.remove("nav-scrolled")
+    }
+  }, [pathname])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -65,14 +85,14 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
   return (
     <>
       <nav
-        className={`fixed top-0 right-0 left-0 z-[100] transition-colors duration-300 ${
+        className={`site-navbar fixed top-0 right-0 left-0 z-[100] transition-colors duration-300 ${
           transparent
             ? "border-transparent bg-transparent text-white"
             : "border-b border-black/8 bg-white text-ink shadow-sm"
         }`}
       >
         <div className="site-container flex items-center justify-between py-3">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="nav-brand flex items-center gap-3">
           <Image
             src="/one.png"
             alt="Sauraha Nepal"
@@ -95,7 +115,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
             <li key={link.href}>
               <Link
                 href={link.href}
-                className={`text-[0.9rem] font-semibold tracking-wide uppercase transition-colors ${
+                className={`nav-link text-[0.9rem] font-semibold tracking-wide uppercase transition-colors ${
                   transparent
                     ? "text-white/90 hover:text-white"
                     : "text-ink-muted hover:text-green-brand"
@@ -110,7 +130,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
         <div className="flex items-center gap-2">
           <Link
             href="/#hero-search"
-            className={`hidden h-10 w-10 items-center justify-center md:flex ${
+            className={`nav-icon hidden h-10 w-10 items-center justify-center md:flex ${
               transparent ? "text-white" : "text-ink"
             }`}
             aria-label="Search"
@@ -119,7 +139,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
           </Link>
           <Link
             href="/list-your-business"
-            className={`hidden rounded-xl px-5 py-2 text-xs font-bold tracking-wide uppercase transition-colors md:inline-block ${
+            className={`nav-cta hidden rounded-xl px-5 py-2 text-xs font-bold tracking-wide uppercase transition-colors md:inline-block ${
               transparent
                 ? "border border-white/60 text-white hover:bg-white/10"
                 : "bg-green-brand text-white hover:bg-green-mid"
@@ -130,7 +150,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
-            className={`flex h-10 w-10 items-center justify-center text-2xl lg:hidden ${
+            className={`nav-icon flex h-10 w-10 items-center justify-center text-2xl lg:hidden ${
               transparent ? "text-white" : "text-ink"
             }`}
             aria-label={menuOpen ? "Close menu" : "Open menu"}

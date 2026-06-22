@@ -49,7 +49,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
         </div>
         <h1 className="sr-only">Discover Sauraha &amp; Chitwan National Park</h1>
 
-        <p className="hero-subtitle mt-6 max-w-xl text-base leading-relaxed text-white/90 md:text-lg">
+        <p className="hero-subtitle mt-6 max-w-xl text-base leading-relaxed text-white/90 md:max-w-[24rem] md:text-[0.9rem]">
           Your official guide to hotels, jungle safaris, restaurants and travel
           information at the gateway to Chitwan National Park.
         </p>
