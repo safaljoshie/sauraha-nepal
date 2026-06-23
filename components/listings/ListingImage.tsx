@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useState } from "react"
+import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
 
 const PLACEHOLDER = "/images/placeholder-listing.jpg"
 
@@ -15,6 +16,7 @@ type ListingImageProps = {
   sizes?: string
   priority?: boolean
   loading?: "lazy" | "eager"
+  quality?: number
 }
 
 export default function ListingImage({
@@ -27,9 +29,9 @@ export default function ListingImage({
   sizes,
   priority,
   loading = "lazy",
+  quality = DEFAULT_IMAGE_QUALITY,
 }: ListingImageProps) {
   const [imgSrc, setImgSrc] = useState(src)
-  const unoptimized = !imgSrc.includes("unsplash") && !imgSrc.startsWith("/")
 
   return (
     <Image
@@ -40,9 +42,10 @@ export default function ListingImage({
       height={height}
       className={className}
       sizes={sizes}
+      quality={quality}
       priority={priority}
       loading={priority ? undefined : loading}
-      unoptimized={unoptimized}
+      unoptimized={!isNextOptimizedImageSrc(imgSrc)}
       onError={() => setImgSrc(PLACEHOLDER)}
     />
   )

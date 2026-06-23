@@ -307,8 +307,8 @@ export default function ListingsExplorer({
         ) : (
           <ListingsGridErrorBoundary>
             <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {pageListings.map((listing) => (
-                <BusinessListingCard key={listing.id} listing={listing} />
+              {pageListings.map((listing, index) => (
+                <BusinessListingCard key={listing.id} listing={listing} priority={index < 6} />
               ))}
             </div>
 

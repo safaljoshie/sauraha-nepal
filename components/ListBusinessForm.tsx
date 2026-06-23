@@ -14,6 +14,12 @@ import {
   photoLimitForPlan,
 } from "@/lib/list-business-photos"
 import {
+  compressImage,
+  MAX_PRE_COMPRESS_BYTES,
+  POST_COMPRESS_WARN_BYTES,
+} from "@/lib/compress-image"
+import { formatImageBytes } from "@/lib/image"
+import {
   DEFAULT_CATEGORY_CATALOG,
   getActiveCategoryNames,
 } from "@/lib/category-catalog"
@@ -119,6 +125,10 @@ type PhotoFileEntry = {
   id: string
   file: File
   previewUrl: string
+  compressing?: boolean
+  originalSizeBytes?: number
+  compressedSizeBytes?: number
+  sizeWarning?: string
 }
 
 export default function ListBusinessForm({ categories }: { categories: string[] }) {
@@ -169,16 +179,23 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
     })
   }
 
-  function handlePhotoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePhotoFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? [])
     e.target.value = ""
 
     if (selected.length === 0) return
 
+    const tooLarge = selected.find((f) => f.size > MAX_PRE_COMPRESS_BYTES)
+    if (tooLarge) {
+      setStatus("error")
+      setErrorMessage("This image is too large. Please choose a photo under 15MB.")
+      return
+    }
+
     const invalid = selected.find((f) => !isAllowedPhotoFile(f))
     if (invalid) {
       setStatus("error")
-      setErrorMessage("Only JPEG, PNG, and WEBP images are allowed.")
+      setErrorMessage("Only JPEG, PNG, WEBP, and HEIC images are allowed.")
       return
     }
 
@@ -199,14 +216,58 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
       setStatus("error")
     }
 
-    setPhotoFiles((prev) => [
-      ...prev,
-      ...toAdd.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-      })),
-    ])
+    for (const file of toAdd) {
+      const id = crypto.randomUUID()
+      const placeholderPreview = URL.createObjectURL(file)
+
+      setPhotoFiles((prev) => [
+        ...prev,
+        {
+          id,
+          file,
+          previewUrl: placeholderPreview,
+          compressing: true,
+          originalSizeBytes: file.size,
+        },
+      ])
+
+      try {
+        const compressed = await compressImage(file)
+        const sizeWarning =
+          compressed.size > POST_COMPRESS_WARN_BYTES
+            ? "Large file after optimization — upload may be slower."
+            : undefined
+
+        setPhotoFiles((prev) =>
+          prev.map((entry) => {
+            if (entry.id !== id) return entry
+            URL.revokeObjectURL(placeholderPreview)
+            const previewUrl = URL.createObjectURL(compressed)
+            return {
+              ...entry,
+              file: compressed,
+              previewUrl,
+              compressing: false,
+              compressedSizeBytes: compressed.size,
+              sizeWarning,
+            }
+          }),
+        )
+      } catch {
+        setPhotoFiles((prev) =>
+          prev.map((entry) =>
+            entry.id === id
+              ? {
+                  ...entry,
+                  compressing: false,
+                  compressedSizeBytes: entry.file.size,
+                  sizeWarning: "Could not optimize this image — uploading original.",
+                }
+              : entry,
+          ),
+        )
+      }
+    }
   }
 
   function removePhotoFile(id: string) {
@@ -246,6 +307,12 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setStatus("error")
       setErrorMessage("Please provide a valid email address.")
+      return
+    }
+
+    if (photoFiles.some((entry) => entry.compressing)) {
+      setStatus("error")
+      setErrorMessage("Please wait while your photos finish optimizing.")
       return
     }
 
@@ -520,20 +587,21 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
 
       <FormSection title="4. Photos">
         <p className="text-sm text-text-light">
-          Upload JPEG, PNG, or WEBP files and/or paste image links (one per line).{" "}
+          Upload JPEG, PNG, WEBP, or HEIC files and/or paste image links (one per line). Photos are
+          optimized in your browser before upload.{" "}
           <span className="font-semibold text-text-mid">
             {totalPhotoCount} / {photoLimit} used
           </span>{" "}
           on your {plan} plan.
         </p>
-        <Field label="Upload photos (JPEG, PNG, or WEBP)">
+        <Field label="Upload photos (JPEG, PNG, WEBP, or HEIC)">
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif"
             multiple
             className={`${inputClass} cursor-pointer file:mr-4 file:rounded-xl file:border-0 file:bg-green-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white`}
             onChange={handlePhotoFileChange}
-            disabled={isLoading || uploadingPhotos || totalPhotoCount >= photoLimit}
+            disabled={isLoading || uploadingPhotos || photoFiles.some((p) => p.compressing) || totalPhotoCount >= photoLimit}
           />
         </Field>
         {uploadingPhotos && (
@@ -559,6 +627,19 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
                   sizes="120px"
                   unoptimized
                 />
+                <div className="absolute inset-x-0 bottom-0 bg-black/65 px-2 py-1.5 text-[0.65rem] leading-snug text-white">
+                  {entry.compressing ? (
+                    <span>Optimizing image…</span>
+                  ) : entry.originalSizeBytes != null && entry.compressedSizeBytes != null ? (
+                    <span>
+                      {formatImageBytes(entry.originalSizeBytes)} →{" "}
+                      {formatImageBytes(entry.compressedSizeBytes)}
+                    </span>
+                  ) : null}
+                  {entry.sizeWarning ? (
+                    <p className="mt-0.5 text-orange-light">{entry.sizeWarning}</p>
+                  ) : null}
+                </div>
                 <button
                   type="button"
                   onClick={() => removePhotoFile(entry.id)}

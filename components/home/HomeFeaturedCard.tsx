@@ -18,11 +18,13 @@ export default function HomeFeaturedCard({
   listing,
   showStatus = true,
   compactDesktopImage = false,
+  priority = false,
 }: {
   listing: BusinessListing
   showStatus?: boolean
   /** Desktop image at 65% of square height (e.g. Where to stay preview). */
   compactDesktopImage?: boolean
+  priority?: boolean
 }) {
   const image = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category)
@@ -66,6 +68,7 @@ export default function HomeFeaturedCard({
                 ? "(max-width: 768px) 100vw, 25vw"
                 : "(max-width: 768px) 100vw, 33vw"
             }
+            priority={priority}
           />
           {isPremium && (
             <span className="absolute top-3 left-3">

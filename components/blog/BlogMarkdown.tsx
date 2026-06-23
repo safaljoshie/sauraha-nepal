@@ -1,3 +1,4 @@
+import BlogMarkdownImage from "@/components/blog/BlogMarkdownImage"
 import ReactMarkdown from "react-markdown"
 import remarkBreaks from "remark-breaks"
 import remarkGfm from "remark-gfm"
@@ -44,10 +45,7 @@ const components: Components = {
       <table className="blog-table">{children}</table>
     </div>
   ),
-  img: ({ src, alt }) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src ?? ""} alt={alt ?? ""} className="blog-image" />
-  ),
+  img: ({ src, alt }) => <BlogMarkdownImage src={src} alt={alt} />,
 }
 
 export default function BlogMarkdown({ content }: { content: string }) {

@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { HOMEPAGE_BLOG_FALLBACK } from "@/lib/homepage-blog-fallback"
 import type { BlogPostPreview } from "@/lib/blog-db"
+import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
 import { blogCoverAlt } from "@/lib/seo"
 
 type GuideCard = {
@@ -63,8 +64,10 @@ export default function HomeTravelGuides({
                     alt={blogCoverAlt(post.title)}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="160px"
-                    unoptimized={post.image.startsWith("http")}
+                    sizes="(max-width: 640px) 128px, 160px"
+                    quality={DEFAULT_IMAGE_QUALITY}
+                    loading="lazy"
+                    unoptimized={!isNextOptimizedImageSrc(post.image)}
                   />
                 </div>
                 <div className="min-w-0 flex-1">

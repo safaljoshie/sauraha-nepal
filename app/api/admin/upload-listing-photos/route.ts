@@ -50,13 +50,13 @@ export async function POST(request: Request) {
   for (const file of files) {
     if (!isAllowedPhotoFile(file)) {
       return NextResponse.json(
-        { error: "Only JPEG and PNG images are allowed." },
+        { error: "Only JPEG, PNG, WEBP, and HEIC images are allowed." },
         { status: 400 },
       )
     }
     if (file.size > MAX_PHOTO_BYTES) {
       return NextResponse.json(
-        { error: "Each photo must be 5 MB or smaller." },
+        { error: "Each photo must be 15 MB or smaller." },
         { status: 400 },
       )
     }
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(await file.arrayBuffer())
 
     const { error } = await supabase.storage.from(bucket).upload(path, buffer, {
-      contentType: file.type || "image/jpeg",
+      contentType: file.type === "image/webp" ? "image/webp" : file.type || "image/jpeg",
       upsert: false,
     })
 

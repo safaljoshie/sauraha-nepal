@@ -148,7 +148,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     rel="noopener noreferrer"
                     className="relative block h-48 overflow-hidden rounded-2xl"
                   >
-                    <ListingImage src={url} alt={imageAlt} fill className="object-cover transition-transform hover:scale-105" sizes="400px" />
+                    <ListingImage
+                      src={url}
+                      alt={imageAlt}
+                      fill
+                      className="object-cover transition-transform hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, 400px"
+                      loading="lazy"
+                    />
                   </a>
                 ))}
               </div>

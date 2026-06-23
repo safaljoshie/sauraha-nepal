@@ -19,9 +19,11 @@ import {
 export default function BusinessListingCard({
   listing,
   showStatus = true,
+  priority = false,
 }: {
   listing: BusinessListing
   showStatus?: boolean
+  priority?: boolean
 }) {
   const image = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category)
@@ -58,6 +60,7 @@ export default function BusinessListingCard({
             fill
             className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            priority={priority}
           />
           {isPremium && (
             <span className="absolute top-3 left-3">

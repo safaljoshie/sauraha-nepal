@@ -12,6 +12,7 @@ import {
 import { getBlogSlugRedirect } from "@/lib/blog-slug-redirects"
 import { SITE_URL } from "@/lib/blog-posts"
 import { articleJsonLd, blogCoverAlt, buildBlogPostMetadata, DEFAULT_OG_IMAGE } from "@/lib/seo"
+import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
 
 export const revalidate = 60
 
@@ -93,8 +94,9 @@ export default async function BlogPostPage({ params }: PageProps) {
               fill
               className="object-cover"
               sizes="(max-width: 896px) 100vw, 896px"
+              quality={DEFAULT_IMAGE_QUALITY}
               priority
-              unoptimized={cover.startsWith("http")}
+              unoptimized={!isNextOptimizedImageSrc(cover)}
             />
           </div>
         </header>

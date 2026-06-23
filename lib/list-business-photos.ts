@@ -1,10 +1,23 @@
 import type { ListingPlan } from "@/lib/list-business"
 
-export const MAX_PHOTO_BYTES = 5 * 1024 * 1024
+export const MAX_PHOTO_BYTES = 15 * 1024 * 1024
 
-export const ALLOWED_PHOTO_MIME = new Set(["image/jpeg", "image/png", "image/webp"])
+export const ALLOWED_PHOTO_MIME = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+])
 
-export const ALLOWED_PHOTO_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"])
+export const ALLOWED_PHOTO_EXTENSIONS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".heic",
+  ".heif",
+])
 
 export function getListingPhotosBucket() {
   return (
@@ -53,6 +66,14 @@ export function isAllowedPhotoFile(file: File) {
 }
 
 export function sanitizePhotoFilename(name: string) {
+  const stem = name
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .slice(0, 100)
+  const lower = name.toLowerCase()
+  if (lower.endsWith(".webp")) {
+    return `${stem || `photo-${Date.now()}`}.webp`
+  }
   const base = name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120)
   return base || `photo-${Date.now()}.jpg`
 }

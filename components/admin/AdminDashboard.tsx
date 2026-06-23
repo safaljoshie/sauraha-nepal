@@ -1,12 +1,19 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate, planLabel } from "@/lib/business-listing"
 import { DEFAULT_CATEGORY_CATALOG, getActiveCategoryNames } from "@/lib/category-catalog"
+import {
+  compressImage,
+  MAX_PRE_COMPRESS_BYTES,
+  POST_COMPRESS_WARN_BYTES,
+} from "@/lib/compress-image"
 import { mergePhotoLinks } from "@/lib/list-business-photos"
+import { isNextOptimizedImageSrc } from "@/lib/image"
 import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
@@ -333,12 +340,30 @@ export default function AdminDashboard() {
     e.target.value = ""
     if (!editForm || files.length === 0) return
 
+    const tooLarge = files.find((file) => file.size > MAX_PRE_COMPRESS_BYTES)
+    if (tooLarge) {
+      setEditErrors("This image is too large. Please choose a photo under 15MB.")
+      showToast("error", "Image must be under 15MB.")
+      return
+    }
+
     setUploadingPhotos(true)
     setEditErrors("")
     try {
+      const compressedFiles: File[] = []
+      for (const file of files) {
+        const compressed = await compressImage(file)
+        if (compressed.size > POST_COMPRESS_WARN_BYTES) {
+          console.warn(
+            `${file.name} is still ${Math.round(compressed.size / (1024 * 1024))}MB after optimization.`,
+          )
+        }
+        compressedFiles.push(compressed)
+      }
+
       const formData = new FormData()
       formData.set("folder", `admin/${editForm.id}`)
-      for (const file of files) {
+      for (const file of compressedFiles) {
         formData.append("files", file)
       }
 
@@ -1020,7 +1045,7 @@ export default function AdminDashboard() {
                       className="hidden"
                     />
                   </label>
-                  <span className="text-xs text-text-light">JPEG/PNG, max 5MB each</span>
+                  <span className="text-xs text-text-light">JPEG/PNG/WEBP/HEIC, max 15MB each (optimized before upload)</span>
                 </div>
                 <textarea
                   value={editForm.photo_links}
@@ -1042,11 +1067,14 @@ export default function AdminDashboard() {
                             className="group relative aspect-square overflow-hidden rounded-lg border border-border-brand bg-cream"
                             title={url}
                           >
-                            <img
+                            <Image
                               src={url}
                               alt=""
-                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                              fill
+                              className="object-cover transition-transform group-hover:scale-105"
+                              sizes="120px"
                               loading="lazy"
+                              unoptimized={!isNextOptimizedImageSrc(url)}
                             />
                           </a>
                         ))}

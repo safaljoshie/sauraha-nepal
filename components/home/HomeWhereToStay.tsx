@@ -31,12 +31,13 @@ export default function HomeWhereToStay({
         ) : (
           <div className="home-where-to-stay-preview">
             <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-              {stayListings.map((listing) => (
+              {stayListings.map((listing, index) => (
                 <HomeFeaturedCard
                   key={listing.id}
                   listing={listing}
                   showStatus={false}
                   compactDesktopImage
+                  priority={index < 3}
                 />
               ))}
             </div>

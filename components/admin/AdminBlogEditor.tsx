@@ -2,11 +2,13 @@
 
 import "@uiw/react-md-editor/markdown-editor.css"
 import dynamic from "next/dynamic"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState, type ChangeEvent } from "react"
 import { BLOG_TAGS, type BlogPostRow } from "@/lib/blog-db"
 import { slugifyTitle } from "@/lib/blog-slug"
+import { isNextOptimizedImageSrc } from "@/lib/image"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
@@ -354,11 +356,16 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
             placeholder="https://… after upload, or /images/…"
           />
           {form.cover_image.trim() && (
-            <img
-              src={form.cover_image}
-              alt="Cover preview"
-              className="mt-3 max-h-56 w-full rounded-xl border border-border-brand object-cover"
-            />
+            <div className="relative mt-3 h-56 w-full overflow-hidden rounded-xl border border-border-brand">
+              <Image
+                src={form.cover_image}
+                alt="Cover preview"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 640px"
+                unoptimized={!isNextOptimizedImageSrc(form.cover_image)}
+              />
+            </div>
           )}
         </div>
 

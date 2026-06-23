@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { DEFAULT_IMAGE_QUALITY } from "@/lib/image"
 
 type HomeImageCardProps = {
   href: string
@@ -8,6 +9,7 @@ type HomeImageCardProps = {
   subtitle: string
   aspect?: "portrait" | "landscape"
   sizes?: string
+  priority?: boolean
 }
 
 export default function HomeImageCard({
@@ -17,6 +19,7 @@ export default function HomeImageCard({
   subtitle,
   aspect = "portrait",
   sizes = "(max-width: 768px) 80vw, 25vw",
+  priority = false,
 }: HomeImageCardProps) {
   const aspectClass =
     aspect === "portrait" ? "nsw-destination-card" : "nsw-experience-card"
@@ -30,7 +33,9 @@ export default function HomeImageCard({
           fill
           className="nsw-card-image"
           sizes={sizes}
-          quality={90}
+          quality={DEFAULT_IMAGE_QUALITY}
+          priority={priority}
+          loading={priority ? undefined : "lazy"}
         />
         <div className="nsw-destination-overlay" aria-hidden />
         <div className="absolute right-0 bottom-0 left-0 p-5 text-white md:p-6">

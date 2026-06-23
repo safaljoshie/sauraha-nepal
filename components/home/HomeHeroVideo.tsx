@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import { DEFAULT_IMAGE_QUALITY } from "@/lib/image"
 import { useEffect, useRef, useState } from "react"
 
 /** Shown only while the video buffers when no CMS poster is set. */
@@ -46,6 +47,7 @@ export default function HomeHeroVideo({ url, posterUrl }: HomeHeroVideoProps) {
         aria-hidden
         fill
         priority
+        quality={DEFAULT_IMAGE_QUALITY}
         sizes="100vw"
         className={`pointer-events-none absolute inset-0 z-0 object-cover transition-opacity duration-700 ${
           videoReady ? "opacity-0" : "opacity-100"

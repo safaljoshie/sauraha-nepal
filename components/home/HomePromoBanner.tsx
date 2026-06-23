@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { DEFAULT_IMAGE_QUALITY } from "@/lib/image"
 
 export default function HomePromoBanner() {
   return (
@@ -16,7 +17,7 @@ export default function HomePromoBanner() {
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-[1.02]"
             sizes="(max-width: 768px) 100vw, 1400px"
-            quality={90}
+            quality={DEFAULT_IMAGE_QUALITY}
           />
           <div className="absolute inset-0 bg-black/45" aria-hidden />
           <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-14">

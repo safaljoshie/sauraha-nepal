@@ -1,5 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
+import { DEFAULT_IMAGE_QUALITY } from "@/lib/image"
 import { EAT_SHOWCASE } from "@/lib/homepage-constants"
 
 export default function HomeEatDrink() {
@@ -24,7 +25,9 @@ export default function HomeEatDrink() {
                 alt={item.title}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
-                sizes="300px"
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                quality={DEFAULT_IMAGE_QUALITY}
+                loading="lazy"
               />
               <div className="nsw-destination-overlay" aria-hidden />
               <div className="absolute right-0 bottom-0 left-0 p-5 text-white">

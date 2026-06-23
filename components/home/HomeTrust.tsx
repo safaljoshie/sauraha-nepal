@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { TESTIMONIALS, TRAVELLER_PHOTOS } from "@/lib/homepage-constants"
+import { DEFAULT_IMAGE_QUALITY } from "@/lib/image"
 
 type HomeTrustProps = {
   businessCount: number
@@ -80,7 +81,7 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 33vw, (max-width: 1400px) 16vw, 240px"
-                quality={90}
+                quality={DEFAULT_IMAGE_QUALITY}
               />
             </div>
           ))}

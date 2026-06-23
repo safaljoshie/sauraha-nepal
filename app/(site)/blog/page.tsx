@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { fetchPublishedBlogPosts, formatBlogDate } from "@/lib/blog-db"
+import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
 import { blogCoverAlt, pageMetadata } from "@/lib/seo"
 
 export const revalidate = 60
@@ -36,7 +37,7 @@ export default async function BlogIndexPage() {
           </div>
         ) : (
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => {
+            {posts.map((post, index) => {
               const image = post.cover_image ?? "/images/placeholder-listing.jpg"
               return (
                 <Link
@@ -50,8 +51,11 @@ export default async function BlogIndexPage() {
                       alt={blogCoverAlt(post.title)}
                       fill
                       className="object-cover transition-transform group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 400px"
-                      unoptimized={image.startsWith("http")}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                      quality={DEFAULT_IMAGE_QUALITY}
+                      priority={index === 0}
+                      loading={index === 0 ? undefined : "lazy"}
+                      unoptimized={!isNextOptimizedImageSrc(image)}
                     />
                   </div>
                   <div className="p-6">
