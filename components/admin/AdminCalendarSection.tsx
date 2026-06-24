@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import AdminNoticeBoard from "@/components/admin/AdminNoticeBoard"
 import CalendarFilters from "@/components/calendar/CalendarFilters"
 import CalendarGridView from "@/components/calendar/CalendarGridView"
 import CalendarListView from "@/components/calendar/CalendarListView"
@@ -279,6 +280,8 @@ export default function AdminCalendarSection() {
           + New Entry
         </button>
       </div>
+
+      <AdminNoticeBoard />
 
       <CalendarSummary entries={monthEntries} />
 

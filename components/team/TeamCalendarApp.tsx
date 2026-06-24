@@ -8,6 +8,7 @@ import CalendarFilters from "@/components/calendar/CalendarFilters"
 import CalendarGridView from "@/components/calendar/CalendarGridView"
 import CalendarListView from "@/components/calendar/CalendarListView"
 import CalendarSummary from "@/components/calendar/CalendarSummary"
+import TeamNoticeBoard from "@/components/team/TeamNoticeBoard"
 import TeamNextMonthNotice, {
   TEAM_NEXT_MONTH_NOTICE_KEY,
 } from "@/components/team/TeamNextMonthNotice"
@@ -20,6 +21,7 @@ import {
   shiftMonthKey,
   type ContentCalendarEntry,
 } from "@/lib/content-calendar"
+import type { TeamNotice } from "@/lib/team-notices"
 
 type ViewMode = "list" | "calendar"
 const VIEW_STORAGE_KEY = "team-calendar-view"
@@ -35,6 +37,8 @@ export default function TeamCalendarApp() {
   const router = useRouter()
   const [entries, setEntries] = useState<ContentCalendarEntry[]>([])
   const [nextMonthEntries, setNextMonthEntries] = useState<ContentCalendarEntry[]>([])
+  const [notices, setNotices] = useState<TeamNotice[]>([])
+  const [noticesLoading, setNoticesLoading] = useState(true)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [viewMode, setViewMode] = useState<ViewMode>("list")
@@ -77,6 +81,29 @@ export default function TeamCalendarApp() {
     sessionStorage.setItem(TEAM_NEXT_MONTH_NOTICE_KEY, previewMonth)
     setNoticeDismissed(true)
   }
+
+  const loadNotices = useCallback(async () => {
+    setNoticesLoading(true)
+    try {
+      const res = await fetch("/api/team/notices")
+      if (res.status === 401) {
+        router.push("/team")
+        return
+      }
+      const data = (await res.json()) as { notices?: TeamNotice[] }
+      if (res.ok) {
+        setNotices(data.notices ?? [])
+      }
+    } catch {
+      // Notice board is supplementary — don't block the calendar on failure
+    } finally {
+      setNoticesLoading(false)
+    }
+  }, [router])
+
+  useEffect(() => {
+    loadNotices()
+  }, [loadNotices])
 
   const loadEntries = useCallback(async () => {
     setLoading(true)
@@ -176,6 +203,8 @@ export default function TeamCalendarApp() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">
+        <TeamNoticeBoard notices={notices} loading={noticesLoading} />
+
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CalendarSummary entries={monthEntries} />
           <div className="flex flex-wrap gap-2">
