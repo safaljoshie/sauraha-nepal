@@ -171,14 +171,38 @@ export function monthDateRange(monthKey: string) {
   return { start, end }
 }
 
-export function addOneMonth(dateStr: string) {
+export type DuplicateInterval = "day" | "week" | "month"
+
+export const DUPLICATE_INTERVAL_LABELS: Record<DuplicateInterval, string> = {
+  day: "Daily",
+  week: "Weekly",
+  month: "Monthly",
+}
+
+export function shiftScheduledDate(dateStr: string, interval: DuplicateInterval) {
   const [year, month, day] = dateStr.split("-").map(Number)
   const date = new Date(year, month - 1, day)
-  date.setMonth(date.getMonth() + 1)
+
+  switch (interval) {
+    case "day":
+      date.setDate(date.getDate() + 1)
+      break
+    case "week":
+      date.setDate(date.getDate() + 7)
+      break
+    case "month":
+      date.setMonth(date.getMonth() + 1)
+      break
+  }
+
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, "0")
   const d = String(date.getDate()).padStart(2, "0")
   return `${y}-${m}-${d}`
+}
+
+export function addOneMonth(dateStr: string) {
+  return shiftScheduledDate(dateStr, "month")
 }
 
 export function buildMonthGrid(year: number, month: number) {

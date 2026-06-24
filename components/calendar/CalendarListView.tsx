@@ -1,20 +1,106 @@
 "use client"
 
+import { useEffect, useRef, useState } from "react"
 import {
+  DUPLICATE_INTERVAL_LABELS,
   formatCalendarDate,
   platformBadgeClass,
   platformIcon,
   statusBadgeClass,
   statusLabel,
   type ContentCalendarEntry,
+  type DuplicateInterval,
 } from "@/lib/content-calendar"
+
+const DUPLICATE_INTERVALS: DuplicateInterval[] = ["day", "week", "month"]
+
+const actionButtonClass =
+  "cursor-pointer rounded-lg border border-border-brand px-2.5 py-1 text-xs font-semibold text-text-mid hover:border-green-mid hover:text-green-brand disabled:opacity-60"
+
+function DuplicateActions({
+  entry,
+  onDuplicate,
+  busy,
+}: {
+  entry: ContentCalendarEntry
+  onDuplicate: (entry: ContentCalendarEntry, interval: DuplicateInterval) => void
+  busy?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+
+    function handlePointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false)
+    }
+
+    document.addEventListener("mousedown", handlePointerDown)
+    document.addEventListener("keydown", handleEscape)
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown)
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [open])
+
+  function handleSelect(interval: DuplicateInterval) {
+    setOpen(false)
+    onDuplicate(entry, interval)
+  }
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        disabled={busy}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className={`${actionButtonClass} inline-flex items-center gap-1`}
+      >
+        Duplicate
+        <span aria-hidden className="text-[0.6rem]">
+          ▾
+        </span>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 z-20 mt-1 min-w-[9.5rem] overflow-hidden rounded-lg border border-border-brand bg-white py-1 shadow-lg"
+        >
+          {DUPLICATE_INTERVALS.map((interval) => (
+            <button
+              key={interval}
+              type="button"
+              role="menuitem"
+              onClick={() => handleSelect(interval)}
+              className="flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-2 text-left text-xs font-semibold text-text-mid hover:bg-cream hover:text-green-brand"
+            >
+              <span>{DUPLICATE_INTERVAL_LABELS[interval]}</span>
+              <span className="text-[0.65rem] font-normal text-text-light">
+                {interval === "day" ? "+1 day" : interval === "week" ? "+1 week" : "+1 month"}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 type CalendarListViewProps = {
   entries: ContentCalendarEntry[]
   onStatusClick?: (entry: ContentCalendarEntry) => void
   onEdit?: (entry: ContentCalendarEntry) => void
   onDelete?: (entry: ContentCalendarEntry) => void
-  onDuplicate?: (entry: ContentCalendarEntry) => void
+  onDuplicate?: (entry: ContentCalendarEntry, interval: DuplicateInterval) => void
   actionBusyId?: string | null
 }
 
@@ -128,21 +214,18 @@ export default function CalendarListView({
                         <button
                           type="button"
                           onClick={() => onEdit(entry)}
-                          className="cursor-pointer rounded-lg border border-border-brand px-2.5 py-1 text-xs font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
+                          className={actionButtonClass}
                           disabled={actionBusyId === entry.id}
                         >
                           Edit
                         </button>
                       )}
                       {onDuplicate && (
-                        <button
-                          type="button"
-                          onClick={() => onDuplicate(entry)}
-                          className="cursor-pointer rounded-lg border border-border-brand px-2.5 py-1 text-xs font-semibold text-text-mid hover:border-orange-brand hover:text-orange-brand"
-                          disabled={actionBusyId === entry.id}
-                        >
-                          Duplicate +1mo
-                        </button>
+                        <DuplicateActions
+                          entry={entry}
+                          onDuplicate={onDuplicate}
+                          busy={actionBusyId === entry.id}
+                        />
                       )}
                       {onDelete && (
                         <button
@@ -202,19 +285,17 @@ export default function CalendarListView({
                   <button
                     type="button"
                     onClick={() => onEdit(entry)}
-                    className="cursor-pointer rounded-lg border border-border-brand px-3 py-1.5 text-xs font-semibold"
+                    className={actionButtonClass}
                   >
                     Edit
                   </button>
                 )}
                 {onDuplicate && (
-                  <button
-                    type="button"
-                    onClick={() => onDuplicate(entry)}
-                    className="cursor-pointer rounded-lg border border-border-brand px-3 py-1.5 text-xs font-semibold"
-                  >
-                    Duplicate +1mo
-                  </button>
+                  <DuplicateActions
+                    entry={entry}
+                    onDuplicate={onDuplicate}
+                    busy={actionBusyId === entry.id}
+                  />
                 )}
                 {onDelete && (
                   <button

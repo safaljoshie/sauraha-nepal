@@ -10,12 +10,13 @@ import CalendarSummary from "@/components/calendar/CalendarSummary"
 import {
   CALENDAR_PLATFORMS,
   CALENDAR_STATUSES,
-  addOneMonth,
   currentMonthKey,
   cycleStatus,
   filterCalendarEntries,
+  shiftScheduledDate,
   statusLabel,
   type ContentCalendarEntry,
+  type DuplicateInterval,
 } from "@/lib/content-calendar"
 
 type ViewMode = "list" | "calendar"
@@ -225,14 +226,14 @@ export default function AdminCalendarSection() {
     }
   }
 
-  async function handleDuplicate(entry: ContentCalendarEntry) {
+  async function handleDuplicate(entry: ContentCalendarEntry, interval: DuplicateInterval) {
     setActionBusyId(entry.id)
     try {
       const res = await fetch("/api/admin/calendar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          scheduled_date: addOneMonth(entry.scheduled_date),
+          scheduled_date: shiftScheduledDate(entry.scheduled_date, interval),
           content_title: entry.content_title,
           platform: entry.platform,
           status: "draft",
