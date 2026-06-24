@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { ADMIN_COOKIE, isAdminAuthenticated } from "@/lib/admin-auth"
+import { TEAM_COOKIE, isTeamAuthenticated } from "@/lib/team-auth"
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  if (pathname.startsWith("/team/calendar")) {
+    const teamSession = request.cookies.get(TEAM_COOKIE)?.value
+    const adminSession = request.cookies.get(ADMIN_COOKIE)?.value
+
+    if (!isTeamAuthenticated(teamSession) && !isAdminAuthenticated(adminSession)) {
+      return NextResponse.redirect(new URL("/team", request.url))
+    }
+
+    return NextResponse.next()
+  }
 
   if (pathname === "/admin" || !pathname.startsWith("/admin/")) {
     return NextResponse.next()
@@ -20,5 +32,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/team/calendar"],
 }

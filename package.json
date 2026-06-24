@@ -11,7 +11,9 @@
     "start": "next start",
     "lint": "eslint",
     "generate:og-image": "node scripts/generate-og-image.mjs",
-    "setup:mail-dns": "node scripts/setup-mail-receiving.mjs"
+    "setup:mail-dns": "node scripts/setup-mail-receiving.mjs",
+    "compress-photos": "tsx scripts/compress-existing-photos.ts",
+    "compress-photos:dry": "tsx scripts/compress-existing-photos.ts --dry-run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",
@@ -41,6 +43,7 @@
     "eslint-config-next": "16.2.6",
     "sharp": "^0.35.2",
     "tailwindcss": "^4",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }

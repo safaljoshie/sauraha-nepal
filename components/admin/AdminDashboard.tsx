@@ -16,6 +16,7 @@ import { mergePhotoLinks } from "@/lib/list-business-photos"
 import { isNextOptimizedImageSrc } from "@/lib/image"
 import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
+import AdminCalendarSection from "@/components/admin/AdminCalendarSection"
 import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
 import AdminTabNav, { type AdminTab } from "@/components/admin/AdminTabNav"
 import SiteIcon from "@/components/icons/SiteIcon"
@@ -557,7 +558,7 @@ export default function AdminDashboard() {
             Sauraha Nepal — Admin Dashboard
           </h1>
           <p className="mt-1 text-sm text-text-light">
-            Manage listings, blog posts, and site settings
+            Manage listings, blog posts, content calendar, and site settings
           </p>
         </div>
         <div className="flex gap-2">
@@ -598,6 +599,8 @@ export default function AdminDashboard() {
       <AdminTabNav active={adminTab} onChange={setAdminTab} />
 
       {adminTab === "blog" && <AdminBlogSection />}
+
+      {adminTab === "calendar" && <AdminCalendarSection />}
 
       {adminTab === "settings" && <AdminSiteSettingsSection />}
 
