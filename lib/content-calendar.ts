@@ -153,6 +153,16 @@ export function currentMonthKey() {
   return toMonthKey(now.getFullYear(), now.getMonth() + 1)
 }
 
+export function shiftMonthKey(monthKey: string, deltaMonths: number) {
+  const { year, month } = parseMonthKey(monthKey)
+  const date = new Date(year, month - 1 + deltaMonths, 1)
+  return toMonthKey(date.getFullYear(), date.getMonth() + 1)
+}
+
+export function nextMonthKey(monthKey?: string) {
+  return shiftMonthKey(monthKey ?? currentMonthKey(), 1)
+}
+
 export function monthDateRange(monthKey: string) {
   const { year, month } = parseMonthKey(monthKey)
   const start = `${monthKey}-01`
