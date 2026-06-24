@@ -6,10 +6,12 @@ import AdminNoticeBoard from "@/components/admin/AdminNoticeBoard"
 import CalendarFilters from "@/components/calendar/CalendarFilters"
 import CalendarGridView from "@/components/calendar/CalendarGridView"
 import CalendarListView from "@/components/calendar/CalendarListView"
+import CalendarMobileToolbar from "@/components/calendar/CalendarMobileToolbar"
 import CalendarSummary from "@/components/calendar/CalendarSummary"
 import {
   CALENDAR_PLATFORMS,
   CALENDAR_STATUSES,
+  countActiveCalendarFilters,
   currentMonthKey,
   cycleStatus,
   filterCalendarEntries,
@@ -18,6 +20,7 @@ import {
   type ContentCalendarEntry,
   type DuplicateInterval,
 } from "@/lib/content-calendar"
+import { useIsMobile } from "@/lib/use-media-query"
 
 type ViewMode = "list" | "calendar"
 
@@ -60,6 +63,9 @@ export default function AdminCalendarSection() {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [actionBusyId, setActionBusyId] = useState<string | null>(null)
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
+  const isMobile = useIsMobile()
+  const activeFilterCount = countActiveCalendarFilters({ platform, status, owner })
 
   const loadEntries = useCallback(async () => {
     setLoading(true)
@@ -286,7 +292,7 @@ export default function AdminCalendarSection() {
 
       <CalendarSummary entries={monthEntries} />
 
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-6 hidden flex-wrap gap-2 md:flex">
         <button
           type="button"
           onClick={() => setViewMode("list")}
@@ -308,6 +314,18 @@ export default function AdminCalendarSection() {
       </div>
 
       <div className="mt-6">
+        <CalendarMobileToolbar
+          month={month}
+          search={search}
+          filtersExpanded={filtersExpanded}
+          activeFilterCount={activeFilterCount}
+          onMonthChange={setMonth}
+          onSearchChange={setSearch}
+          onFiltersExpandedChange={setFiltersExpanded}
+          showThisMonth
+          currentMonthKey={currentMonthKey()}
+          onThisMonth={() => setMonth(currentMonthKey())}
+        />
         <CalendarFilters
           month={month}
           platform={platform}
@@ -320,6 +338,7 @@ export default function AdminCalendarSection() {
           onStatusChange={setStatus}
           onOwnerChange={setOwner}
           onSearchChange={setSearch}
+          mobileFiltersExpanded={filtersExpanded}
         />
       </div>
 
@@ -334,7 +353,7 @@ export default function AdminCalendarSection() {
           <div className="rounded-2xl border border-border-brand bg-white px-6 py-12 text-center text-text-light">
             Loading calendar…
           </div>
-        ) : viewMode === "list" ? (
+        ) : viewMode === "list" || isMobile ? (
           <CalendarListView
             entries={filteredEntries}
             onStatusClick={handleStatusCycle}

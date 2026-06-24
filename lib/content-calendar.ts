@@ -272,6 +272,33 @@ export function filterCalendarEntries(
   return result.sort((a, b) => a.scheduled_date.localeCompare(b.scheduled_date))
 }
 
+export function groupEntriesByDate(entries: ContentCalendarEntry[]) {
+  const groups: Array<{ date: string; entries: ContentCalendarEntry[] }> = []
+
+  for (const entry of entries) {
+    const last = groups[groups.length - 1]
+    if (last?.date === entry.scheduled_date) {
+      last.entries.push(entry)
+    } else {
+      groups.push({ date: entry.scheduled_date, entries: [entry] })
+    }
+  }
+
+  return groups
+}
+
+export function countActiveCalendarFilters(filters: {
+  platform: string
+  status: string
+  owner: string
+}) {
+  let count = 0
+  if (filters.platform !== "All") count += 1
+  if (filters.status !== "All") count += 1
+  if (filters.owner !== "All") count += 1
+  return count
+}
+
 export function monthStats(entries: ContentCalendarEntry[]) {
   const scheduled = entries.filter((e) => e.status === "scheduled").length
   const published = entries.filter((e) => e.status === "published").length

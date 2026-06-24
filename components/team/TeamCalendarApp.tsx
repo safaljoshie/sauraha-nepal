@@ -7,12 +7,14 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import CalendarFilters from "@/components/calendar/CalendarFilters"
 import CalendarGridView from "@/components/calendar/CalendarGridView"
 import CalendarListView from "@/components/calendar/CalendarListView"
+import CalendarMobileToolbar from "@/components/calendar/CalendarMobileToolbar"
 import CalendarSummary from "@/components/calendar/CalendarSummary"
 import TeamNoticeBoard from "@/components/team/TeamNoticeBoard"
 import TeamNextMonthNotice, {
   TEAM_NEXT_MONTH_NOTICE_KEY,
 } from "@/components/team/TeamNextMonthNotice"
 import {
+  countActiveCalendarFilters,
   currentMonthKey,
   filterCalendarEntries,
   formatMonthLabel,
@@ -22,6 +24,7 @@ import {
   type ContentCalendarEntry,
 } from "@/lib/content-calendar"
 import type { TeamNotice } from "@/lib/team-notices"
+import { useIsMobile } from "@/lib/use-media-query"
 
 type ViewMode = "list" | "calendar"
 const VIEW_STORAGE_KEY = "team-calendar-view"
@@ -48,6 +51,9 @@ export default function TeamCalendarApp() {
   const [owner, setOwner] = useState("All")
   const [search, setSearch] = useState("")
   const [noticeDismissed, setNoticeDismissed] = useState(false)
+  const [filtersExpanded, setFiltersExpanded] = useState(false)
+  const isMobile = useIsMobile()
+  const activeFilterCount = countActiveCalendarFilters({ platform, status, owner })
 
   const viewingNextMonth = month === nextMonthKey()
   const previewMonth = nextMonthKey(month)
@@ -207,7 +213,7 @@ export default function TeamCalendarApp() {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CalendarSummary entries={monthEntries} />
-          <div className="flex flex-wrap gap-2">
+          <div className="hidden flex-wrap gap-2 md:flex">
             <button
               type="button"
               onClick={goToPreviousMonth}
@@ -257,7 +263,7 @@ export default function TeamCalendarApp() {
           </p>
         )}
 
-        <div className="mt-6 flex flex-wrap gap-2">
+        <div className="mt-6 hidden flex-wrap gap-2 md:flex">
           <button
             type="button"
             onClick={() => changeView("list")}
@@ -283,6 +289,18 @@ export default function TeamCalendarApp() {
         </div>
 
         <div className="mt-6">
+          <CalendarMobileToolbar
+            month={month}
+            search={search}
+            filtersExpanded={filtersExpanded}
+            activeFilterCount={activeFilterCount}
+            onMonthChange={setMonth}
+            onSearchChange={setSearch}
+            onFiltersExpandedChange={setFiltersExpanded}
+            showThisMonth
+            currentMonthKey={currentMonthKey()}
+            onThisMonth={() => setMonth(currentMonthKey())}
+          />
           <CalendarFilters
             month={month}
             platform={platform}
@@ -295,6 +313,7 @@ export default function TeamCalendarApp() {
             onStatusChange={setStatus}
             onOwnerChange={setOwner}
             onSearchChange={setSearch}
+            mobileFiltersExpanded={filtersExpanded}
           />
         </div>
 
@@ -309,7 +328,7 @@ export default function TeamCalendarApp() {
             <div className="rounded-2xl border border-border-brand bg-white px-6 py-12 text-center text-text-light">
               Loading calendar…
             </div>
-          ) : viewMode === "list" ? (
+          ) : viewMode === "list" || isMobile ? (
             <CalendarListView entries={filteredEntries} />
           ) : (
             <CalendarGridView

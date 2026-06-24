@@ -1,9 +1,11 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
+import CalendarEntryActionsMenu from "@/components/calendar/CalendarEntryActionsMenu"
 import {
   DUPLICATE_INTERVAL_LABELS,
   formatCalendarDate,
+  groupEntriesByDate,
   platformBadgeClass,
   platformIcon,
   statusBadgeClass,
@@ -16,6 +18,23 @@ const DUPLICATE_INTERVALS: DuplicateInterval[] = ["day", "week", "month"]
 
 const actionButtonClass =
   "cursor-pointer rounded-lg border border-border-brand px-2.5 py-1 text-xs font-semibold text-text-mid hover:border-green-mid hover:text-green-brand disabled:opacity-60"
+
+function EntryTitle({ entry }: { entry: ContentCalendarEntry }) {
+  if (entry.link) {
+    return (
+      <a
+        href={entry.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-semibold text-text-brand hover:text-green-brand hover:underline"
+      >
+        {entry.content_title}
+      </a>
+    )
+  }
+
+  return <span className="font-semibold text-text-brand">{entry.content_title}</span>
+}
 
 function DuplicateActions({
   entry,
@@ -95,15 +114,6 @@ function DuplicateActions({
   )
 }
 
-type CalendarListViewProps = {
-  entries: ContentCalendarEntry[]
-  onStatusClick?: (entry: ContentCalendarEntry) => void
-  onEdit?: (entry: ContentCalendarEntry) => void
-  onDelete?: (entry: ContentCalendarEntry) => void
-  onDuplicate?: (entry: ContentCalendarEntry, interval: DuplicateInterval) => void
-  actionBusyId?: string | null
-}
-
 function StatusBadge({
   entry,
   onClick,
@@ -134,6 +144,87 @@ function StatusBadge({
   return <span className={className}>{statusLabel(entry.status)}</span>
 }
 
+function MobileEntryCard({
+  entry,
+  onStatusClick,
+  onEdit,
+  onDelete,
+  onDuplicate,
+  actionBusyId,
+  showActions,
+}: {
+  entry: ContentCalendarEntry
+  onStatusClick?: (entry: ContentCalendarEntry) => void
+  onEdit?: (entry: ContentCalendarEntry) => void
+  onDelete?: (entry: ContentCalendarEntry) => void
+  onDuplicate?: (entry: ContentCalendarEntry, interval: DuplicateInterval) => void
+  actionBusyId?: string | null
+  showActions: boolean
+}) {
+  const busy = actionBusyId === entry.id
+
+  return (
+    <article className="rounded-2xl border border-border-brand bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base leading-snug">
+            <EntryTitle entry={entry} />
+          </h3>
+          {entry.link && (
+            <a
+              href={entry.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-block text-xs font-semibold text-green-brand hover:underline"
+            >
+              Open link ↗
+            </a>
+          )}
+        </div>
+        <div className="flex shrink-0 items-start gap-2">
+          <StatusBadge
+            entry={entry}
+            onClick={onStatusClick ? () => onStatusClick(entry) : undefined}
+            busy={busy}
+          />
+          {showActions && (onEdit || onDelete || onDuplicate) && (
+            <CalendarEntryActionsMenu
+              entry={entry}
+              busy={busy}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onDuplicate={onDuplicate}
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${platformBadgeClass(entry.platform)}`}
+        >
+          <span aria-hidden>{platformIcon(entry.platform)}</span>
+          {entry.platform}
+        </span>
+        <span className="rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-text-mid">
+          {entry.owner}
+        </span>
+      </div>
+
+      {entry.notes && <p className="mt-2 text-sm text-text-light">{entry.notes}</p>}
+    </article>
+  )
+}
+
+type CalendarListViewProps = {
+  entries: ContentCalendarEntry[]
+  onStatusClick?: (entry: ContentCalendarEntry) => void
+  onEdit?: (entry: ContentCalendarEntry) => void
+  onDelete?: (entry: ContentCalendarEntry) => void
+  onDuplicate?: (entry: ContentCalendarEntry, interval: DuplicateInterval) => void
+  actionBusyId?: string | null
+}
+
 export default function CalendarListView({
   entries,
   onStatusClick,
@@ -143,6 +234,7 @@ export default function CalendarListView({
   actionBusyId,
 }: CalendarListViewProps) {
   const showActions = Boolean(onEdit || onDelete || onDuplicate)
+  const groupedEntries = groupEntriesByDate(entries)
 
   if (entries.length === 0) {
     return (
@@ -173,18 +265,7 @@ export default function CalendarListView({
                   {formatCalendarDate(entry.scheduled_date)}
                 </td>
                 <td className="px-4 py-3 font-medium text-text-brand">
-                  {entry.link ? (
-                    <a
-                      href={entry.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-green-brand hover:underline"
-                    >
-                      {entry.content_title}
-                    </a>
-                  ) : (
-                    entry.content_title
-                  )}
+                  <EntryTitle entry={entry} />
                   {entry.notes && (
                     <p className="mt-1 line-clamp-1 text-xs font-normal text-text-light">
                       {entry.notes}
@@ -246,69 +327,27 @@ export default function CalendarListView({
         </table>
       </div>
 
-      <div className="space-y-3 md:hidden">
-        {entries.map((entry) => (
-          <article
-            key={entry.id}
-            className="rounded-2xl border border-border-brand bg-white p-4 shadow-sm"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold text-text-light">
-                  {formatCalendarDate(entry.scheduled_date)}
-                </p>
-                <h3 className="mt-1 font-semibold text-text-brand">{entry.content_title}</h3>
-              </div>
-              <StatusBadge
-                entry={entry}
-                onClick={onStatusClick ? () => onStatusClick(entry) : undefined}
-                busy={actionBusyId === entry.id}
-              />
+      <div className="space-y-5 md:hidden">
+        {groupedEntries.map((group) => (
+          <section key={group.date}>
+            <h3 className="sticky top-[7.25rem] z-20 -mx-1 mb-2 rounded-lg bg-cream/95 px-2 py-2 text-sm font-bold text-green-brand backdrop-blur-sm">
+              {formatCalendarDate(group.date)}
+            </h3>
+            <div className="space-y-3">
+              {group.entries.map((entry) => (
+                <MobileEntryCard
+                  key={entry.id}
+                  entry={entry}
+                  onStatusClick={onStatusClick}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  onDuplicate={onDuplicate}
+                  actionBusyId={actionBusyId}
+                  showActions={showActions}
+                />
+              ))}
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${platformBadgeClass(entry.platform)}`}
-              >
-                <span aria-hidden>{platformIcon(entry.platform)}</span>
-                {entry.platform}
-              </span>
-              <span className="rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-text-mid">
-                {entry.owner}
-              </span>
-            </div>
-            {entry.notes && (
-              <p className="mt-2 text-sm text-text-light">{entry.notes}</p>
-            )}
-            {showActions && (
-              <div className="mt-3 flex flex-wrap gap-2 border-t border-border-brand pt-3">
-                {onEdit && (
-                  <button
-                    type="button"
-                    onClick={() => onEdit(entry)}
-                    className={actionButtonClass}
-                  >
-                    Edit
-                  </button>
-                )}
-                {onDuplicate && (
-                  <DuplicateActions
-                    entry={entry}
-                    onDuplicate={onDuplicate}
-                    busy={actionBusyId === entry.id}
-                  />
-                )}
-                {onDelete && (
-                  <button
-                    type="button"
-                    onClick={() => onDelete(entry)}
-                    className="cursor-pointer rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-            )}
-          </article>
+          </section>
         ))}
       </div>
     </>

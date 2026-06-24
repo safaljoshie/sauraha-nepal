@@ -10,24 +10,10 @@ import {
 } from "@/lib/content-calendar"
 
 const selectClass =
-  "rounded-xl border border-border-brand bg-white px-3 py-2 text-sm text-text-brand outline-none focus:border-green-mid"
+  "rounded-xl border border-border-brand bg-white px-3 py-2.5 text-sm text-text-brand outline-none focus:border-green-mid"
 
 const inputClass =
-  "w-full rounded-xl border border-border-brand bg-white px-3 py-2 text-sm text-text-brand outline-none focus:border-green-mid"
-
-type CalendarFiltersProps = {
-  month: string
-  platform: string
-  status: string
-  owner: string
-  search: string
-  allEntries: ContentCalendarEntry[]
-  onMonthChange: (value: string) => void
-  onPlatformChange: (value: string) => void
-  onStatusChange: (value: string) => void
-  onOwnerChange: (value: string) => void
-  onSearchChange: (value: string) => void
-}
+  "w-full rounded-xl border border-border-brand bg-white px-3 py-2.5 text-sm text-text-brand outline-none focus:border-green-mid"
 
 function monthOptions() {
   const options: { value: string; label: string }[] = []
@@ -41,39 +27,43 @@ function monthOptions() {
   return options
 }
 
-export default function CalendarFilters({
-  month,
+type CalendarFiltersProps = {
+  month: string
+  platform: string
+  status: string
+  owner: string
+  search: string
+  allEntries: ContentCalendarEntry[]
+  onMonthChange: (value: string) => void
+  onPlatformChange: (value: string) => void
+  onStatusChange: (value: string) => void
+  onOwnerChange: (value: string) => void
+  onSearchChange: (value: string) => void
+  mobileFiltersExpanded?: boolean
+}
+
+function SecondaryFilters({
   platform,
   status,
   owner,
-  search,
   allEntries,
-  onMonthChange,
   onPlatformChange,
   onStatusChange,
   onOwnerChange,
-  onSearchChange,
-}: CalendarFiltersProps) {
+}: Pick<
+  CalendarFiltersProps,
+  | "platform"
+  | "status"
+  | "owner"
+  | "allEntries"
+  | "onPlatformChange"
+  | "onStatusChange"
+  | "onOwnerChange"
+>) {
   const owners = uniqueOwners(allEntries)
-  const months = monthOptions()
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-      <label className="block">
-        <span className="mb-1 block text-xs font-semibold text-text-light">Month</span>
-        <select
-          className={`${selectClass} w-full`}
-          value={month || currentMonthKey()}
-          onChange={(e) => onMonthChange(e.target.value)}
-        >
-          {months.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-      </label>
-
+    <>
       <label className="block">
         <span className="mb-1 block text-xs font-semibold text-text-light">Platform</span>
         <select
@@ -121,17 +111,79 @@ export default function CalendarFilters({
           ))}
         </select>
       </label>
+    </>
+  )
+}
 
-      <label className="block sm:col-span-2 lg:col-span-1">
-        <span className="mb-1 block text-xs font-semibold text-text-light">Search</span>
-        <input
-          type="search"
-          className={inputClass}
-          placeholder="Filter by title…"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+export default function CalendarFilters({
+  month,
+  platform,
+  status,
+  owner,
+  search,
+  allEntries,
+  onMonthChange,
+  onPlatformChange,
+  onStatusChange,
+  onOwnerChange,
+  onSearchChange,
+  mobileFiltersExpanded = false,
+}: CalendarFiltersProps) {
+  const months = monthOptions()
+
+  return (
+    <>
+      <div className="hidden gap-3 md:grid md:grid-cols-2 lg:grid-cols-5">
+        <label className="block">
+          <span className="mb-1 block text-xs font-semibold text-text-light">Month</span>
+          <select
+            className={`${selectClass} w-full`}
+            value={month || currentMonthKey()}
+            onChange={(e) => onMonthChange(e.target.value)}
+          >
+            {months.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <SecondaryFilters
+          platform={platform}
+          status={status}
+          owner={owner}
+          allEntries={allEntries}
+          onPlatformChange={onPlatformChange}
+          onStatusChange={onStatusChange}
+          onOwnerChange={onOwnerChange}
         />
-      </label>
-    </div>
+
+        <label className="block sm:col-span-2 lg:col-span-1">
+          <span className="mb-1 block text-xs font-semibold text-text-light">Search</span>
+          <input
+            type="search"
+            className={inputClass}
+            placeholder="Filter by title…"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+          />
+        </label>
+      </div>
+
+      {mobileFiltersExpanded && (
+        <div className="mt-3 grid gap-3 rounded-2xl border border-border-brand bg-white p-4 md:hidden">
+          <SecondaryFilters
+            platform={platform}
+            status={status}
+            owner={owner}
+            allEntries={allEntries}
+            onPlatformChange={onPlatformChange}
+            onStatusChange={onStatusChange}
+            onOwnerChange={onOwnerChange}
+          />
+        </div>
+      )}
+    </>
   )
 }

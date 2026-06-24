@@ -8,22 +8,22 @@ export default function CalendarSummary({ entries }: { entries: ContentCalendarE
   const breakdown = statusBreakdown(entries)
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <span className="rounded-full bg-orange-brand/10 px-4 py-1.5 text-sm font-semibold text-orange-brand">
-          {stats.scheduled} scheduled this month
+    <div className="space-y-3">
+      <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap text-xs sm:gap-2 sm:text-sm">
+        <span className="shrink-0 rounded-full bg-orange-brand/10 px-2.5 py-1 font-semibold text-orange-brand sm:px-3 sm:py-1.5">
+          {stats.scheduled} scheduled
         </span>
-        <span className="rounded-full bg-green-mid/15 px-4 py-1.5 text-sm font-semibold text-green-brand">
+        <span className="shrink-0 rounded-full bg-green-mid/15 px-2.5 py-1 font-semibold text-green-brand sm:px-3 sm:py-1.5">
           {stats.published} published
         </span>
-        <span className="rounded-full bg-gray-200 px-4 py-1.5 text-sm font-semibold text-gray-700">
+        <span className="shrink-0 rounded-full bg-gray-200 px-2.5 py-1 font-semibold text-gray-700 sm:px-3 sm:py-1.5">
           {stats.drafts} drafts
         </span>
       </div>
 
       {stats.total > 0 && (
         <div>
-          <div className="flex h-3 overflow-hidden rounded-full bg-gray-200">
+          <div className="flex h-2 overflow-hidden rounded-full bg-gray-200 sm:h-3">
             {breakdown.published > 0 && (
               <div
                 className="bg-green-brand"
@@ -46,7 +46,7 @@ export default function CalendarSummary({ entries }: { entries: ContentCalendarE
               />
             )}
           </div>
-          <div className="mt-2 flex flex-wrap gap-4 text-xs text-text-light">
+          <div className="mt-1.5 flex items-center gap-3 overflow-x-auto whitespace-nowrap text-[0.65rem] text-text-light sm:mt-2 sm:gap-4 sm:text-xs">
             <span className="inline-flex items-center gap-1.5">
               <span className={`h-2 w-2 rounded-full ${statusDotClass("published")}`} />
               Published {breakdown.published}%
