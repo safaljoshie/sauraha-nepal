@@ -3,9 +3,6 @@
 import { useRouter } from "next/navigation"
 import { useState, type FormEvent } from "react"
 
-const inputClass =
-  "w-full rounded-[10px] border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:opacity-60"
-
 export default function TeamLoginForm() {
   const router = useRouter()
   const [password, setPassword] = useState("")
@@ -42,12 +39,12 @@ export default function TeamLoginForm() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <label className="mb-1.5 block text-sm font-semibold text-text-mid">
+      <label className="team-body-text mb-1.5 block font-semibold text-text-mid">
         Team password
       </label>
       <input
         type="password"
-        className={inputClass}
+        className="team-input rounded-[10px] border-[1.5px] bg-cream focus:bg-white disabled:opacity-60"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Enter team password"
@@ -56,16 +53,16 @@ export default function TeamLoginForm() {
         autoComplete="current-password"
       />
       {error && (
-        <p role="alert" className="mt-3 text-center text-sm font-semibold text-orange-brand">
+        <p role="alert" className="team-body-text mt-3 text-center font-semibold text-orange-brand">
           {error}
         </p>
       )}
       <button
         type="submit"
-        className="btn-primary mt-6 w-full cursor-pointer py-3.5 disabled:cursor-not-allowed disabled:opacity-60"
+        className="btn-primary team-action-btn mt-5 w-full cursor-pointer disabled:cursor-not-allowed disabled:opacity-60 sm:mt-6"
         disabled={loading}
       >
-        {loading ? "Signing in…" : "View calendar"}
+        {loading ? "Signing in…" : "Sign in"}
       </button>
     </form>
   )

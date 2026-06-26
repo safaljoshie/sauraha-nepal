@@ -34,11 +34,11 @@ export default function TeamNextMonthNotice({
   return (
     <div
       role="status"
-      className="mt-6 rounded-2xl border border-orange-brand/30 bg-orange-brand/10 px-4 py-4 md:flex md:items-center md:justify-between md:gap-4"
+      className="mt-5 rounded-2xl border border-orange-brand/30 bg-orange-brand/10 px-3 py-3.5 sm:mt-6 sm:px-4 sm:py-4 md:flex md:items-center md:justify-between md:gap-4"
     >
       <div>
-        <p className="text-sm font-bold text-orange-brand">Upcoming next month</p>
-        <p className="mt-1 text-sm text-text-mid">
+        <p className="team-card-title text-orange-brand">Upcoming next month</p>
+        <p className="team-body-text mt-1">
           <span className="font-semibold text-text-brand">{label}</span> has{" "}
           <span className="font-semibold text-text-brand">
             {entries.length} planned item{entries.length === 1 ? "" : "s"}
@@ -61,14 +61,14 @@ export default function TeamNextMonthNotice({
         <button
           type="button"
           onClick={onViewNextMonth}
-          className="cursor-pointer rounded-full bg-orange-brand px-4 py-2 text-sm font-semibold text-white hover:bg-orange-brand/90"
+          className="team-action-btn cursor-pointer rounded-full bg-orange-brand text-white hover:bg-orange-brand/90"
         >
           View {label}
         </button>
         <button
           type="button"
           onClick={onDismiss}
-          className="cursor-pointer rounded-full border border-orange-brand/40 bg-white px-4 py-2 text-sm font-semibold text-text-mid hover:text-orange-brand"
+          className="team-nav-btn cursor-pointer border border-orange-brand/40 bg-white text-text-mid hover:text-orange-brand"
         >
           Dismiss
         </button>

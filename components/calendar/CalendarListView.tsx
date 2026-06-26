@@ -152,6 +152,7 @@ function MobileEntryCard({
   onDuplicate,
   actionBusyId,
   showActions,
+  teamLayout = false,
 }: {
   entry: ContentCalendarEntry
   onStatusClick?: (entry: ContentCalendarEntry) => void
@@ -160,14 +161,21 @@ function MobileEntryCard({
   onDuplicate?: (entry: ContentCalendarEntry, interval: DuplicateInterval) => void
   actionBusyId?: string | null
   showActions: boolean
+  teamLayout?: boolean
 }) {
   const busy = actionBusyId === entry.id
+  const titleClass = teamLayout ? "team-card-title leading-snug" : "text-base font-semibold leading-snug text-text-brand"
+  const linkClass = teamLayout
+    ? "team-meta mt-1 inline-block font-semibold text-green-brand hover:underline"
+    : "mt-1 inline-block text-xs font-semibold text-green-brand hover:underline"
+  const badgeClass = teamLayout ? "team-meta rounded-full px-2.5 py-1 font-semibold" : "rounded-full px-2.5 py-1 text-xs font-semibold"
+  const notesClass = teamLayout ? "team-body-text mt-2 text-text-light" : "mt-2 text-sm text-text-light"
 
   return (
-    <article className="rounded-2xl border border-border-brand bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3">
+    <article className="rounded-2xl border border-border-brand bg-white p-3 shadow-sm sm:p-4">
+      <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="text-base leading-snug">
+          <h3 className={titleClass}>
             <EntryTitle entry={entry} />
           </h3>
           {entry.link && (
@@ -175,7 +183,7 @@ function MobileEntryCard({
               href={entry.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-1 inline-block text-xs font-semibold text-green-brand hover:underline"
+              className={linkClass}
             >
               Open link ↗
             </a>
@@ -201,17 +209,15 @@ function MobileEntryCard({
 
       <div className="mt-3 flex flex-wrap gap-2">
         <span
-          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${platformBadgeClass(entry.platform)}`}
+          className={`inline-flex items-center gap-1 ${badgeClass} ${platformBadgeClass(entry.platform)}`}
         >
           <span aria-hidden>{platformIcon(entry.platform)}</span>
           {entry.platform}
         </span>
-        <span className="rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-text-mid">
-          {entry.owner}
-        </span>
+        <span className={`${badgeClass} bg-cream text-text-mid`}>{entry.owner}</span>
       </div>
 
-      {entry.notes && <p className="mt-2 text-sm text-text-light">{entry.notes}</p>}
+      {entry.notes && <p className={notesClass}>{entry.notes}</p>}
     </article>
   )
 }
@@ -223,6 +229,7 @@ type CalendarListViewProps = {
   onDelete?: (entry: ContentCalendarEntry) => void
   onDuplicate?: (entry: ContentCalendarEntry, interval: DuplicateInterval) => void
   actionBusyId?: string | null
+  teamLayout?: boolean
 }
 
 export default function CalendarListView({
@@ -232,14 +239,17 @@ export default function CalendarListView({
   onDelete,
   onDuplicate,
   actionBusyId,
+  teamLayout = false,
 }: CalendarListViewProps) {
   const showActions = Boolean(onEdit || onDelete || onDuplicate)
   const groupedEntries = groupEntriesByDate(entries)
 
   if (entries.length === 0) {
     return (
-      <div className="rounded-2xl border border-border-brand bg-white px-6 py-12 text-center text-text-light">
-        No entries match your filters.
+      <div className="rounded-2xl border border-border-brand bg-white px-4 py-10 text-center sm:px-6 sm:py-12">
+        <p className={teamLayout ? "team-empty-state" : "text-text-light"}>
+          No entries match your filters.
+        </p>
       </div>
     )
   }
@@ -327,10 +337,16 @@ export default function CalendarListView({
         </table>
       </div>
 
-      <div className="space-y-5 md:hidden">
+      <div className="space-y-4 md:hidden sm:space-y-5">
         {groupedEntries.map((group) => (
           <section key={group.date}>
-            <h3 className="sticky top-[7.25rem] z-20 -mx-1 mb-2 rounded-lg bg-cream/95 px-2 py-2 text-sm font-bold text-green-brand backdrop-blur-sm">
+            <h3
+              className={
+                teamLayout
+                  ? "team-section-title sticky top-[6.5rem] z-20 -mx-1 mb-2 rounded-lg bg-cream/95 px-2 py-2 backdrop-blur-sm"
+                  : "sticky top-[7.25rem] z-20 -mx-1 mb-2 rounded-lg bg-cream/95 px-2 py-2 text-sm font-bold text-green-brand backdrop-blur-sm"
+              }
+            >
               {formatCalendarDate(group.date)}
             </h3>
             <div className="space-y-3">
@@ -344,6 +360,7 @@ export default function CalendarListView({
                   onDuplicate={onDuplicate}
                   actionBusyId={actionBusyId}
                   showActions={showActions}
+                  teamLayout={teamLayout}
                 />
               ))}
             </div>

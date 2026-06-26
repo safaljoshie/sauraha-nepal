@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import ResourceFileIcon from "@/components/resources/ResourceFileIcon"
 import TeamPageHeader from "@/components/team/TeamPageHeader"
+import TeamShell from "@/components/team/TeamShell"
 import type { TeamLibraryConfig } from "@/lib/team-library-config"
 import {
   formatLibraryDate,
@@ -69,14 +70,14 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
   }
 
   return (
-    <div className="min-h-screen bg-cream">
+    <TeamShell>
       <TeamPageHeader
         page={config.teamPage}
         title={config.teamTitle}
         subtitle={config.teamSubtitle}
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">
+      <main className="team-main">
         <label className="block">
           <span className="sr-only">Search {config.itemLabelPlural}</span>
           <input
@@ -84,31 +85,31 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by title…"
-            className="w-full rounded-xl border border-border-brand bg-white px-4 py-3 text-sm text-text-brand outline-none focus:border-green-mid"
+            className="team-input"
           />
         </label>
 
         {error && (
-          <p role="alert" className="mt-4 text-sm font-semibold text-orange-brand">
+          <p role="alert" className="team-body-text mt-4 font-semibold text-orange-brand">
             {error}
           </p>
         )}
 
-        <div className="mt-6">
+        <div className="mt-5 sm:mt-6">
           {loading ? (
-            <div className="rounded-2xl border border-border-brand bg-white px-6 py-12 text-center text-text-light">
-              Loading…
+            <div className="rounded-2xl border border-border-brand bg-white px-4 py-10 text-center sm:px-6 sm:py-12">
+              <p className="team-empty-state">Loading…</p>
             </div>
           ) : items.length === 0 ? (
-            <div className="rounded-2xl border border-border-brand bg-white px-6 py-12 text-center text-text-light">
-              {config.emptyTeamMessage}
+            <div className="rounded-2xl border border-border-brand bg-white px-4 py-10 text-center sm:px-6 sm:py-12">
+              <p className="team-empty-state">{config.emptyTeamMessage}</p>
             </div>
           ) : grouped.length === 0 ? (
-            <div className="rounded-2xl border border-border-brand bg-white px-6 py-12 text-center text-text-light">
-              {config.emptySearchMessage}
+            <div className="rounded-2xl border border-border-brand bg-white px-4 py-10 text-center sm:px-6 sm:py-12">
+              <p className="team-empty-state">{config.emptySearchMessage}</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {grouped.map((group) => {
                 const isOpen = openCategories[group.category] ?? true
 
@@ -120,41 +121,39 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
                     <button
                       type="button"
                       onClick={() => toggleCategory(group.category)}
-                      className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-4 text-left md:px-6"
+                      className="flex w-full cursor-pointer items-center justify-between gap-3 px-3 py-3.5 text-left sm:px-5 sm:py-4"
                       aria-expanded={isOpen}
                     >
-                      <div>
-                        <h2 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-green-brand">
-                          {group.category}
-                        </h2>
-                        <p className="mt-0.5 text-sm text-text-light">
+                      <div className="min-w-0">
+                        <h2 className="team-section-title">{group.category}</h2>
+                        <p className="team-meta mt-0.5">
                           {group.items.length} file{group.items.length === 1 ? "" : "s"}
                         </p>
                       </div>
-                      <span className="text-sm font-semibold text-text-mid" aria-hidden>
+                      <span className="team-meta shrink-0 font-semibold" aria-hidden>
                         {isOpen ? "▾" : "▸"}
                       </span>
                     </button>
 
                     {isOpen && (
-                      <div className="border-t border-border-brand px-4 pb-4 md:px-6 md:pb-6">
-                        <ul className="grid gap-3 pt-4 sm:grid-cols-2">
+                      <div className="border-t border-border-brand px-3 pb-3 sm:px-5 sm:pb-5">
+                        <ul className="grid gap-3 pt-3 sm:grid-cols-2 sm:pt-4">
                           {group.items.map((item) => (
                             <li
                               key={item.id}
-                              className="flex flex-col rounded-xl border border-border-brand bg-cream/40 p-4"
+                              className="flex flex-col rounded-xl border border-border-brand bg-cream/40 p-3 sm:p-4"
                             >
-                              <div className="flex items-start gap-3">
+                              <div className="flex items-start gap-2.5 sm:gap-3">
                                 <ResourceFileIcon
                                   kind={libraryFileKind(item.file_type, item.file_name)}
-                                  className="text-green-brand"
+                                  className="h-8 w-8 shrink-0 text-green-brand sm:h-10 sm:w-10"
                                 />
                                 <div className="min-w-0 flex-1">
-                                  <h3 className="font-semibold text-text-brand">{item.title}</h3>
+                                  <h3 className="team-card-title">{item.title}</h3>
                                   {item.description && (
-                                    <p className="mt-1 text-sm text-text-light">{item.description}</p>
+                                    <p className="team-body-text mt-1">{item.description}</p>
                                   )}
-                                  <p className="mt-2 text-xs text-text-light">
+                                  <p className="team-meta mt-2">
                                     {formatLibraryFileSize(item.file_size_kb)} ·{" "}
                                     {formatLibraryDate(item.created_at)}
                                   </p>
@@ -165,7 +164,7 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 download={item.file_name}
-                                className="btn-primary mt-4 inline-flex w-full items-center justify-center px-4 py-2.5 text-sm font-semibold"
+                                className="btn-primary team-action-btn mt-3 w-full sm:mt-4"
                               >
                                 Download
                               </a>
@@ -181,6 +180,6 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
           )}
         </div>
       </main>
-    </div>
+    </TeamShell>
   )
 }

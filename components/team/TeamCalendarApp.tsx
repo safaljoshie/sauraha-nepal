@@ -9,6 +9,7 @@ import CalendarMobileToolbar from "@/components/calendar/CalendarMobileToolbar"
 import CalendarSummary from "@/components/calendar/CalendarSummary"
 import TeamNoticeBoard from "@/components/team/TeamNoticeBoard"
 import TeamPageHeader from "@/components/team/TeamPageHeader"
+import TeamShell from "@/components/team/TeamShell"
 import TeamNextMonthNotice, {
   TEAM_NEXT_MONTH_NOTICE_KEY,
 } from "@/components/team/TeamNextMonthNotice"
@@ -165,18 +166,18 @@ export default function TeamCalendarApp() {
     month === currentMonthKey() && nextMonthEntries.length > 0
 
   return (
-    <div className="min-h-screen bg-cream">
+    <TeamShell>
       <TeamPageHeader
         page="calendar"
         title="Team Content Calendar"
         subtitle="View-only monthly content plan"
       />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">
+      <main className="team-main">
         <TeamNoticeBoard notices={notices} loading={noticesLoading} />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <CalendarSummary entries={monthEntries} />
+          <CalendarSummary entries={monthEntries} teamLayout />
           <div className="hidden flex-wrap gap-2 md:flex">
             <button
               type="button"
@@ -221,7 +222,7 @@ export default function TeamCalendarApp() {
         )}
 
         {!showNextMonthNotice && viewingNextMonth && monthEntries.length > 0 && (
-          <p className="mt-6 rounded-2xl border border-green-mid/30 bg-green-mid/10 px-4 py-3 text-sm text-text-mid">
+          <p className="team-body-text mt-5 rounded-2xl border border-green-mid/30 bg-green-mid/10 px-3 py-3 sm:mt-6 sm:px-4">
             Viewing <span className="font-semibold text-green-brand">{monthLabel}</span> —{" "}
             {monthEntries.length} item{monthEntries.length === 1 ? "" : "s"} planned.
           </p>
@@ -252,7 +253,7 @@ export default function TeamCalendarApp() {
           </button>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-5 sm:mt-6">
           <CalendarMobileToolbar
             month={month}
             search={search}
@@ -264,6 +265,7 @@ export default function TeamCalendarApp() {
             showThisMonth
             currentMonthKey={currentMonthKey()}
             onThisMonth={() => setMonth(currentMonthKey())}
+            teamLayout
           />
           <CalendarFilters
             month={month}
@@ -282,18 +284,18 @@ export default function TeamCalendarApp() {
         </div>
 
         {error && (
-          <p role="alert" className="mt-4 text-sm font-semibold text-orange-brand">
+          <p role="alert" className="team-body-text mt-4 font-semibold text-orange-brand">
             {error}
           </p>
         )}
 
-        <div className="mt-6">
+        <div className="mt-5 sm:mt-6">
           {loading ? (
-            <div className="rounded-2xl border border-border-brand bg-white px-6 py-12 text-center text-text-light">
-              Loading calendar…
+            <div className="rounded-2xl border border-border-brand bg-white px-4 py-10 text-center sm:px-6 sm:py-12">
+              <p className="team-empty-state">Loading calendar…</p>
             </div>
           ) : viewMode === "list" || isMobile ? (
-            <CalendarListView entries={filteredEntries} />
+            <CalendarListView entries={filteredEntries} teamLayout />
           ) : (
             <CalendarGridView
               entries={filteredEntries}
@@ -303,6 +305,6 @@ export default function TeamCalendarApp() {
           )}
         </div>
       </main>
-    </div>
+    </TeamShell>
   )
 }
