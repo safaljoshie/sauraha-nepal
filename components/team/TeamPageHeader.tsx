@@ -3,11 +3,16 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import {
+  ITINERARY_LIBRARY_CONFIG,
+  RESOURCE_LIBRARY_CONFIG,
+  type TeamPageId,
+} from "@/lib/team-library-config"
 
-type TeamPage = "calendar" | "resources"
+const TEAM_LIBRARY_LINKS = [RESOURCE_LIBRARY_CONFIG, ITINERARY_LIBRARY_CONFIG]
 
 type TeamPageHeaderProps = {
-  page: TeamPage
+  page: TeamPageId
   title: string
   subtitle: string
 }
@@ -53,16 +58,19 @@ export default function TeamPageHeader({ page, title, subtitle }: TeamPageHeader
               >
                 📅 Calendar
               </Link>
-              <Link
-                href="/team/resources"
-                className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
-                  page === "resources"
-                    ? "border-green-brand bg-green-brand text-white"
-                    : "border-border-brand bg-white text-text-mid hover:border-green-mid hover:text-green-brand"
-                }`}
-              >
-                📁 Resources
-              </Link>
+              {TEAM_LIBRARY_LINKS.map((library) => (
+                <Link
+                  key={library.id}
+                  href={library.teamPath}
+                  className={`rounded-full border px-4 py-2 text-sm font-semibold transition-colors ${
+                    page === library.teamPage
+                      ? "border-green-brand bg-green-brand text-white"
+                      : "border-border-brand bg-white text-text-mid hover:border-green-mid hover:text-green-brand"
+                  }`}
+                >
+                  {library.navEmoji} {library.navLabel}
+                </Link>
+              ))}
             </nav>
             <Link
               href="/"

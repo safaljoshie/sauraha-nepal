@@ -1,0 +1,135 @@
+import {
+  LIBRARY_SIGNED_URL_TTL_SECONDS,
+  TEAM_LIBRARY_BUCKET,
+  type TeamLibraryItem,
+  type TeamLibraryItemPayload,
+  type TeamLibraryItemWithDownload,
+  MAX_LIBRARY_FILE_BYTES,
+} from "@/lib/team-library-shared"
+import type { TeamLibraryConfig } from "@/lib/team-library-config"
+import { getSupabaseAdmin } from "@/lib/supabase"
+
+export async function ensureTeamLibraryBucket() {
+  const supabase = getSupabaseAdmin()
+  const { data: buckets, error: listError } = await supabase.storage.listBuckets()
+
+  if (listError) {
+    throw new Error(listError.message)
+  }
+
+  if (buckets?.some((bucket) => bucket.name === TEAM_LIBRARY_BUCKET)) {
+    return
+  }
+
+  const { error } = await supabase.storage.createBucket(TEAM_LIBRARY_BUCKET, {
+    public: false,
+    fileSizeLimit: MAX_LIBRARY_FILE_BYTES,
+  })
+
+  if (error && !error.message.toLowerCase().includes("already exists")) {
+    throw new Error(error.message)
+  }
+}
+
+export async function fetchTeamLibraryItems(config: Pick<TeamLibraryConfig, "table">) {
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase
+    .from(config.table)
+    .select("*")
+    .order("category", { ascending: true })
+    .order("created_at", { ascending: false })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return (data ?? []) as TeamLibraryItem[]
+}
+
+export async function fetchTeamLibraryItemById(
+  config: Pick<TeamLibraryConfig, "table">,
+  id: string,
+) {
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase
+    .from(config.table)
+    .select("*")
+    .eq("id", id)
+    .maybeSingle()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return data as TeamLibraryItem | null
+}
+
+export async function createTeamLibraryItem(
+  config: Pick<TeamLibraryConfig, "table">,
+  payload: TeamLibraryItemPayload,
+) {
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase
+    .from(config.table)
+    .insert(payload)
+    .select("*")
+    .single()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return data as TeamLibraryItem
+}
+
+export async function deleteTeamLibraryItem(config: Pick<TeamLibraryConfig, "table">, id: string) {
+  const supabase = getSupabaseAdmin()
+  const { error } = await supabase.from(config.table).delete().eq("id", id)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export async function uploadTeamLibraryFile(path: string, buffer: Buffer, contentType: string) {
+  const supabase = getSupabaseAdmin()
+  const { error } = await supabase.storage.from(TEAM_LIBRARY_BUCKET).upload(path, buffer, {
+    contentType: contentType || "application/octet-stream",
+    upsert: false,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+export async function deleteTeamLibraryFile(path: string) {
+  const supabase = getSupabaseAdmin()
+  const { error } = await supabase.storage.from(TEAM_LIBRARY_BUCKET).remove([path])
+
+  if (error) {
+    throw new Error(error.message)
+  }
+}
+
+async function createLibrarySignedUrl(path: string) {
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase.storage
+    .from(TEAM_LIBRARY_BUCKET)
+    .createSignedUrl(path, LIBRARY_SIGNED_URL_TTL_SECONDS)
+
+  if (error || !data?.signedUrl) {
+    throw new Error(error?.message ?? "Failed to create download link.")
+  }
+
+  return data.signedUrl
+}
+
+export async function attachLibrarySignedDownloadUrls(items: TeamLibraryItem[]) {
+  return Promise.all(
+    items.map(async (item) => ({
+      ...item,
+      download_url: await createLibrarySignedUrl(item.file_url),
+    })),
+  ) as Promise<TeamLibraryItemWithDownload[]>
+}

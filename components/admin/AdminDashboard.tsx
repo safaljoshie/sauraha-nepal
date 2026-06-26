@@ -18,6 +18,7 @@ import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminCalendarSection from "@/components/admin/AdminCalendarSection"
 import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
+import AdminTeamItinerarySection from "@/components/admin/AdminTeamItinerarySection"
 import AdminTeamResourcesSection from "@/components/admin/AdminTeamResourcesSection"
 import AdminTabNav, { type AdminTab } from "@/components/admin/AdminTabNav"
 import SiteIcon from "@/components/icons/SiteIcon"
@@ -604,6 +605,8 @@ export default function AdminDashboard() {
       {adminTab === "calendar" && <AdminCalendarSection />}
 
       {adminTab === "resources" && <AdminTeamResourcesSection />}
+
+      {adminTab === "itineraries" && <AdminTeamItinerarySection />}
 
       {adminTab === "settings" && <AdminSiteSettingsSection />}
 

@@ -59,6 +59,7 @@ const LUCIDE_BY_NAME: Record<string, LucideIcon> = {
   "pen-line": PenLine,
   calendar: Calendar,
   "folder-open": FolderOpen,
+  map: Map,
   "book-open": BookOpen,
   cloud: Cloud,
   "cloud-sun": CloudSun,
