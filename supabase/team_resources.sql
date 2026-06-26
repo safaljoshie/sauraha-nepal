@@ -17,3 +17,7 @@ CREATE TABLE IF NOT EXISTS team_resources (
 ALTER TABLE team_resources ENABLE ROW LEVEL SECURITY;
 
 -- No public policies — accessed only via server-side API routes using the service role key.
+
+-- Storage: create a PRIVATE bucket named "team-resources" in Supabase Dashboard
+-- (Storage → New bucket → Public OFF). The admin upload API will also attempt to
+-- create this bucket automatically on first upload when using the service role key.

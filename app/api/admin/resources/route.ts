@@ -3,6 +3,7 @@ import { requireAdminApi } from "@/lib/admin-auth"
 import {
   attachSignedDownloadUrls,
   createTeamResource,
+  ensureTeamResourcesBucket,
   fetchTeamResources,
   uploadTeamResourceFile,
 } from "@/lib/team-resources-db"
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
   const buffer = Buffer.from(await file.arrayBuffer())
 
   try {
+    await ensureTeamResourcesBucket()
     await uploadTeamResourceFile(storagePath, buffer, file.type || "application/octet-stream")
 
     const resource = await createTeamResource({
@@ -83,6 +85,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, resource })
   } catch (error) {
     console.error("Admin resource upload error:", error)
-    return NextResponse.json({ error: "Failed to upload resource." }, { status: 500 })
+    const message = error instanceof Error ? error.message : "Failed to upload resource."
+    const hint =
+      message.toLowerCase().includes("bucket not found")
+        ? " Create the private 'team-resources' bucket in Supabase Storage, or retry after deploying the latest code."
+        : ""
+    return NextResponse.json({ error: `${message}${hint}` }, { status: 500 })
   }
 }

@@ -1,4 +1,5 @@
 import {
+  MAX_RESOURCE_BYTES,
   SIGNED_URL_TTL_SECONDS,
   TEAM_RESOURCES_BUCKET,
   type TeamResource,
@@ -6,6 +7,28 @@ import {
   type TeamResourceWithDownload,
 } from "@/lib/team-resources"
 import { getSupabaseAdmin } from "@/lib/supabase"
+
+export async function ensureTeamResourcesBucket() {
+  const supabase = getSupabaseAdmin()
+  const { data: buckets, error: listError } = await supabase.storage.listBuckets()
+
+  if (listError) {
+    throw new Error(listError.message)
+  }
+
+  if (buckets?.some((bucket) => bucket.name === TEAM_RESOURCES_BUCKET)) {
+    return
+  }
+
+  const { error } = await supabase.storage.createBucket(TEAM_RESOURCES_BUCKET, {
+    public: false,
+    fileSizeLimit: MAX_RESOURCE_BYTES,
+  })
+
+  if (error && !error.message.toLowerCase().includes("already exists")) {
+    throw new Error(error.message)
+  }
+}
 
 export async function fetchTeamResources() {
   const supabase = getSupabaseAdmin()
