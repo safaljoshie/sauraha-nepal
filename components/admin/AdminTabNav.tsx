@@ -2,12 +2,13 @@
 
 import SiteIcon from "@/components/icons/SiteIcon"
 
-export type AdminTab = "listings" | "blog" | "settings" | "calendar"
+export type AdminTab = "listings" | "blog" | "calendar" | "resources" | "settings"
 
 const TABS: { id: AdminTab; label: string; icon: string }[] = [
   { id: "listings", label: "Listings", icon: "clipboard-list" },
   { id: "blog", label: "Blog Posts", icon: "pen-line" },
   { id: "calendar", label: "Content Calendar", icon: "calendar" },
+  { id: "resources", label: "Team Resources", icon: "folder-open" },
   { id: "settings", label: "Site Settings", icon: "settings" },
 ]
 

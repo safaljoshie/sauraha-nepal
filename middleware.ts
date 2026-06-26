@@ -6,7 +6,7 @@ import { TEAM_COOKIE, isTeamAuthenticated } from "@/lib/team-auth"
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (pathname.startsWith("/team/calendar")) {
+  if (pathname.startsWith("/team/calendar") || pathname.startsWith("/team/resources")) {
     const teamSession = request.cookies.get(TEAM_COOKIE)?.value
     const adminSession = request.cookies.get(ADMIN_COOKIE)?.value
 
@@ -32,5 +32,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/team/calendar"],
+  matcher: ["/admin/:path*", "/team/calendar", "/team/resources"],
 }

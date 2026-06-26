@@ -1,7 +1,5 @@
 "use client"
 
-import Image from "next/image"
-import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import CalendarFilters from "@/components/calendar/CalendarFilters"
@@ -10,6 +8,7 @@ import CalendarListView from "@/components/calendar/CalendarListView"
 import CalendarMobileToolbar from "@/components/calendar/CalendarMobileToolbar"
 import CalendarSummary from "@/components/calendar/CalendarSummary"
 import TeamNoticeBoard from "@/components/team/TeamNoticeBoard"
+import TeamPageHeader from "@/components/team/TeamPageHeader"
 import TeamNextMonthNotice, {
   TEAM_NEXT_MONTH_NOTICE_KEY,
 } from "@/components/team/TeamNextMonthNotice"
@@ -165,48 +164,13 @@ export default function TeamCalendarApp() {
   const showNextMonthNotice =
     month === currentMonthKey() && nextMonthEntries.length > 0
 
-  async function handleLogout() {
-    await fetch("/api/team/logout", { method: "POST" })
-    router.push("/team")
-    router.refresh()
-  }
-
   return (
     <div className="min-h-screen bg-cream">
-      <header className="border-b border-border-brand bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 md:flex-row md:items-center md:justify-between md:px-8">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/one.png"
-              alt="Sauraha Nepal"
-              width={48}
-              height={48}
-              className="h-12 w-12 rounded-full object-cover"
-            />
-            <div>
-              <h1 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand">
-                Team Content Calendar
-              </h1>
-              <p className="text-sm text-text-light">View-only monthly content plan</p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/"
-              className="rounded-full border border-border-brand bg-white px-4 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
-            >
-              Main site
-            </Link>
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="cursor-pointer rounded-full border border-border-brand bg-white px-4 py-2 text-sm font-semibold text-text-mid hover:border-orange-brand hover:text-orange-brand"
-            >
-              Log out
-            </button>
-          </div>
-        </div>
-      </header>
+      <TeamPageHeader
+        page="calendar"
+        title="Team Content Calendar"
+        subtitle="View-only monthly content plan"
+      />
 
       <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">
         <TeamNoticeBoard notices={notices} loading={noticesLoading} />
