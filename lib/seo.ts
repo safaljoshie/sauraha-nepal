@@ -9,23 +9,23 @@ export const DEFAULT_OG_IMAGE = "/og-image.jpg"
 
 export const SITE_KEYWORDS = [
   "Sauraha Nepal",
+  "Sauraha travel guide",
+  "things to do in Sauraha",
   "Chitwan National Park hotels",
   "Sauraha hotels",
   "jungle safari Chitwan",
   "Sauraha restaurants",
   "Chitwan jeep safari",
-  "things to do in Sauraha",
-  "Tharu cultural show",
-  "canoe ride Rapti River",
-  "Sauraha travel guide",
+  "Tharu cultural show Sauraha",
+  "Sauraha to Chitwan National Park distance",
+  "how far is Sauraha from Kathmandu",
+  "Sauraha Nepal itinerary",
   "Chitwan National Park entry fee",
   "best time to visit Chitwan",
-  "how to get to Sauraha",
-  "elephant safari Nepal",
   "one horned rhino Chitwan",
+  "Sauraha Nepal weather",
+  "Rapti River Sauraha",
   "Sauraha tour guides",
-  "Chitwan accommodation",
-  "Sauraha things to do",
 ] as const
 
 const CATEGORY_PHRASE_BY_GROUP: Record<string, string> = {
@@ -97,9 +97,40 @@ export function getCategoryPhrase(category: string, catalog?: CategoryCatalog) {
   return CATEGORY_PHRASE_BY_GROUP[groupId] ?? `${getCategoryDisplay(category, catalog).toLowerCase()} in Sauraha`
 }
 
+/** Natural proximity language from address or coarse coordinates — no invented distances. */
+export function getListingProximityPhrase(
+  address: string | null | undefined,
+  lat?: number | null,
+  lng?: number | null,
+): string {
+  const text = (address ?? "").toLowerCase()
+
+  if (/\brapti\b/.test(text)) return "near the Rapti River"
+  if (/\bnarayani\b/.test(text)) return "near the Narayani River"
+  if (/\bbis[\s-]?hazari\b/.test(text)) return "near Bis Hazari Lake"
+  if (/\btharu\b/.test(text) && /\b(museum|cultural|village)\b/.test(text)) {
+    return "near the Tharu Cultural Museum area"
+  }
+  if (
+    /\bcentral\b|\bbazaar\b|\bmain\s*(road|street|bazaar)\b|\bmarket\b|\bvillage\s*cent(re|er)\b/.test(
+      text,
+    )
+  ) {
+    return "in central Sauraha"
+  }
+  if (/\bpark\b|\bchitwan\s*national\b|\bjungle\b/.test(text)) return "near Chitwan National Park"
+
+  if (lat != null && lng != null && Number.isFinite(lat) && Number.isFinite(lng)) {
+    if (lng < 84.485) return "near the Rapti River"
+    if (lng >= 84.485 && lng <= 84.51 && lat >= 27.575 && lat <= 27.59) return "in central Sauraha"
+  }
+
+  return "near Chitwan National Park"
+}
+
 export function listingImageAlt(businessName: string, category: string, catalog?: CategoryCatalog) {
   const display = getCategoryDisplay(category, catalog)
-  return `${businessName} — ${display} in Sauraha, Chitwan National Park`
+  return `${businessName} — ${display} near Chitwan National Park, Sauraha`
 }
 
 export function blogCoverAlt(title: string) {
@@ -156,16 +187,22 @@ export function pageMetadata({
   }
 }
 
-export function buildListingDetailMetadata(listing: BusinessListing, id: string, catalog?: CategoryCatalog): Metadata {
+export function buildListingDetailMetadata(
+  listing: BusinessListing,
+  id: string,
+  catalog?: CategoryCatalog,
+  coords?: { lat: number; lng: number } | null,
+): Metadata {
   const categoryPhrase = getCategoryPhrase(listing.category, catalog)
   const title = truncateMetaTitle(`${listing.business_name} — ${categoryPhrase} | Sauraha, Nepal`)
   const priceBit = listing.price_range?.trim() ? `${listing.price_range.trim()} ` : ""
-  const location = listing.address?.trim() || "Sauraha"
+  const proximity = getListingProximityPhrase(listing.address, coords?.lat, coords?.lng)
+  const addressPart = listing.address?.trim() ? ` in ${listing.address.trim()}` : ""
   const snippet = listing.description?.trim()
     ? truncateMetaDescription(listing.description, 100).replace(/…$/, "")
     : ""
   const description = truncateMetaDescription(
-    `${listing.business_name} is a ${priceBit}${categoryPhrase} located in ${location}, near Chitwan National Park.${snippet ? ` ${snippet}` : ""} Read reviews, see photos and contact details on Sauraha Nepal.`,
+    `${listing.business_name} is a ${priceBit}${categoryPhrase}${addressPart}, ${proximity}.${snippet ? ` ${snippet}` : ""} See photos, reviews and contact details.`,
   )
   const image = getListingImage(listing)
   const categoryLabel = getCategoryDisplay(listing.category, catalog)
@@ -206,9 +243,9 @@ export function buildListingDetailMetadata(listing: BusinessListing, id: string,
 export function buildListingsIndexMetadata(categorySlug?: string | null): Metadata {
   const category = categorySlug?.trim().toLowerCase()
   const meta = category && LISTINGS_CATEGORY_META[category] ? LISTINGS_CATEGORY_META[category] : {
-    title: "Sauraha Hotels, Restaurants & Tours — Browse All Listings",
+    title: "Sauraha Hotels, Restaurants & Tours — Browse Verified Local Listings",
     description:
-      "Browse verified hotels, restaurants, jungle safari tours and guides in Sauraha near Chitwan National Park. Filter by category, price range and read real reviews.",
+      "Browse hotels, restaurants, jungle safari operators and licensed guides in Sauraha, near Chitwan National Park. Filter by category and price, with real traveller reviews.",
   }
 
   const path = category ? `/listings?category=${encodeURIComponent(category)}` : "/listings"

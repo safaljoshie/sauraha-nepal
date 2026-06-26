@@ -3,6 +3,8 @@ import { GoogleAnalytics } from "@next/third-parties/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ChatUIProvider } from "@/components/ChatUIProvider"
 import ChatWidgetLoader from "@/components/ChatWidgetLoader"
+import SiteJsonLd from "@/components/seo/SiteJsonLd"
+import { SITE_KEYWORDS } from "@/lib/seo"
 import { Inter, Nunito, Playfair_Display, Poppins } from "next/font/google"
 import "./globals.css"
 
@@ -36,31 +38,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.saurahanepal.com"),
   title: {
     default:
-      "Sauraha Nepal — Hotels, Restaurants & Jungle Safari Guide | Chitwan National Park",
+      "Sauraha Nepal Travel Guide — Hotels, Safari & Things to Do Near Chitwan National Park",
     template: "%s | Sauraha Nepal",
   },
   description:
-    "Find verified hotels, restaurants, jungle safari operators and tour guides in Sauraha, Nepal — the gateway to Chitwan National Park. Compare prices, read real reviews, and plan your Chitwan trip.",
-  keywords: [
-    "Sauraha Nepal",
-    "Chitwan National Park hotels",
-    "Sauraha hotels",
-    "jungle safari Chitwan",
-    "Sauraha restaurants",
-    "Chitwan jeep safari",
-    "things to do in Sauraha",
-    "Tharu cultural show",
-    "canoe ride Rapti River",
-    "Sauraha travel guide",
-    "Chitwan National Park entry fee",
-    "best time to visit Chitwan",
-    "how to get to Sauraha",
-    "elephant safari Nepal",
-    "one horned rhino Chitwan",
-    "Sauraha tour guides",
-    "Chitwan accommodation",
-    "Sauraha things to do",
-  ],
+    "Independent local guide to Sauraha, Nepal. Find verified hotels, restaurants and jungle safari operators near Chitwan National Park, read real traveller reviews, and get distances, prices and practical travel tips.",
+  keywords: [...SITE_KEYWORDS],
   robots: { index: true, follow: true },
   openGraph: {
     type: "website",
@@ -71,8 +54,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Sauraha Nepal — Your Complete Chitwan Travel Guide",
-    description: "Hotels, restaurants, jungle safaris and tour guides in Sauraha, Nepal",
+    title: "Sauraha Nepal — Independent Local Travel Guide",
+    description:
+      "Hotels, restaurants, jungle safaris and practical travel tips for Sauraha, Nepal — gateway to Chitwan National Park",
     images: ["/og-image.jpg"],
   },
   ...(googleSiteVerification
@@ -97,6 +81,7 @@ export default function RootLayout({
       className={`${playfair.variable} ${nunito.variable} ${poppins.variable} ${inter.variable}`}
     >
       <body className="font-[family-name:var(--font-inter)] antialiased">
+        <SiteJsonLd />
         <ChatUIProvider>
           {children}
           <ChatWidgetLoader />

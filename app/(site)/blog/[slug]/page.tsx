@@ -3,12 +3,14 @@ import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
 import type { Metadata } from "next"
 import BlogMarkdown from "@/components/blog/BlogMarkdown"
+import BlogRelatedLinks from "@/components/blog/BlogRelatedLinks"
 import BlogShareBar from "@/components/blog/BlogShareBar"
 import {
   fetchPublishedBlogPostBySlug,
   fetchRelatedBlogPosts,
   formatBlogDate,
 } from "@/lib/blog-db"
+import { getBlogPostRelatedLinks } from "@/lib/blog-related-links"
 import { getBlogSlugRedirect } from "@/lib/blog-slug-redirects"
 import { SITE_URL } from "@/lib/blog-posts"
 import { articleJsonLd, blogCoverAlt, buildBlogPostMetadata, DEFAULT_OG_IMAGE } from "@/lib/seo"
@@ -43,6 +45,7 @@ export default async function BlogPostPage({ params }: PageProps) {
   if (!post) notFound()
 
   const related = await fetchRelatedBlogPosts(slug)
+  const relatedLinks = getBlogPostRelatedLinks(post.slug)
   const articleUrl = `${SITE_URL}/blog/${post.slug}`
   const cover = post.cover_image ?? DEFAULT_OG_IMAGE
   const coverAlt = blogCoverAlt(post.title)
@@ -131,6 +134,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             </div>
           </section>
         )}
+
+        <BlogRelatedLinks links={relatedLinks} />
       </article>
     </main>
   )

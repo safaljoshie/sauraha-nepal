@@ -36,17 +36,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!listing) {
     return { title: { absolute: "Listing Not Found | Sauraha Nepal" } }
   }
-  return buildListingDetailMetadata(listing, id, catalog)
+  const mapsLink = listing.google_maps_link?.trim() ?? ""
+  const coords = mapsLink ? parseCoordinates(mapsLink) : null
+  return buildListingDetailMetadata(listing, id, catalog, coords)
 }
 
 export default async function ListingDetailPage({ params }: PageProps) {
   const { id } = await params
-  const listing = await fetchApprovedListingById(id)
+  const [listing, catalog] = await Promise.all([
+    fetchApprovedListingById(id),
+    fetchCategoryCatalog(),
+  ])
   if (!listing) notFound()
 
   const photos = getPhotoUrls(listing)
   const heroImage = getListingImage(listing)
-  const imageAlt = listingImageAlt(listing.business_name, listing.category)
+  const imageAlt = listingImageAlt(listing.business_name, listing.category, catalog)
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""
   const callHref = listing.phone?.trim() ? telUrl(listing.phone) : ""
   const listingUrl = `${SITE_URL}/listings/${id}`

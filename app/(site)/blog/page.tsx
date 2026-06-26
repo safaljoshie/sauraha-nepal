@@ -8,9 +8,9 @@ import { blogCoverAlt, pageMetadata } from "@/lib/seo"
 export const revalidate = 60
 
 export const metadata: Metadata = pageMetadata({
-  title: "Travel Tips & Guides",
+  title: "Sauraha Nepal Travel Guides & Tips",
   description:
-    "Travel guides for Sauraha and Chitwan — best time to visit, getting here, park fees, and local tips.",
+    "Long-tail travel guides for Sauraha and Chitwan — weather by month, getting from Kathmandu, safety tips, itineraries, and free things to do near Chitwan National Park.",
   path: "/blog",
 })
 

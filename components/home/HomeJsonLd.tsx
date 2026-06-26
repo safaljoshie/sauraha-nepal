@@ -82,18 +82,6 @@ export default function HomeJsonLd({ featuredListings, blogCount }: HomeJsonLdPr
     telephone: listing.phone ?? undefined,
   }))
 
-  const website = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Sauraha Nepal",
-    url: SITE,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: `${SITE}/listings?search={search_term_string}`,
-      "query-input": "required name=search_term_string",
-    },
-  }
-
   const blogListing =
     blogCount > 0
       ? {
@@ -113,7 +101,7 @@ export default function HomeJsonLd({ featuredListings, blogCount }: HomeJsonLdPr
         }
       : null
 
-  const graphs = [destination, faqPage, website, ...businesses, blogListing].filter(Boolean)
+  const graphs = [destination, faqPage, ...businesses, blogListing].filter(Boolean)
 
   return (
     <script

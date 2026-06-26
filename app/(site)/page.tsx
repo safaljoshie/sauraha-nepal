@@ -33,16 +33,16 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: {
       absolute:
-        "Sauraha Nepal — Hotels, Restaurants & Jungle Safari Guide | Chitwan National Park",
+        "Sauraha Nepal Travel Guide — Hotels, Safari & Things to Do Near Chitwan National Park",
     },
     description:
-      "Discover the best hotels, restaurants and jungle safari operators near Chitwan National Park. Browse 100+ verified Sauraha listings, read real traveller reviews, and find jeep safari, canoe rides, Tharu cultural shows and more.",
+      "Plan your trip to Sauraha with real local listings, traveller reviews, distances to Chitwan National Park, and practical guides on jungle safaris, getting there, and the best time to visit.",
     keywords: [...SITE_KEYWORDS],
     alternates: { canonical: "https://www.saurahanepal.com" },
     openGraph: {
-      title: "Sauraha Nepal — Hotels, Restaurants & Jungle Safari Guide",
+      title: "Sauraha Nepal Travel Guide — Hotels, Safari & Things to Do",
       description:
-        "Discover verified hotels, restaurants and jungle safari operators near Chitwan National Park in Sauraha, Nepal.",
+        "Plan your trip to Sauraha with local listings, reviews, and practical guides on jungle safaris and Chitwan National Park.",
       url: "https://www.saurahanepal.com",
       siteName: "Sauraha Nepal",
       locale: "en_US",
@@ -51,8 +51,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Sauraha Nepal — Your Complete Chitwan Travel Guide",
-      description: "Hotels, restaurants, jungle safaris and tour guides in Sauraha, Nepal",
+      title: "Sauraha Nepal — Independent Local Travel Guide",
+      description:
+        "Hotels, restaurants, jungle safaris and practical travel tips for Sauraha, Nepal — gateway to Chitwan National Park",
       images: [ogImage],
     },
   }

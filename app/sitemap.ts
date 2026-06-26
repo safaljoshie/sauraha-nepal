@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 import { fetchPublishedBlogPosts } from "@/lib/blog-db"
+import { SEO_PRIORITY_BLOG_SLUGS } from "@/lib/blog-related-links"
 import { SITE_URL } from "@/lib/blog-posts"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 
@@ -66,7 +67,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: absoluteUrl(`/blog/${post.slug}`),
         lastModified: safeLastModified(post.published_at ?? post.updated_at, now),
         changeFrequency: "monthly" as const,
-        priority: 0.7,
+        priority: SEO_PRIORITY_BLOG_SLUGS.has(post.slug) ? 0.8 : 0.7,
       }))
 
     return [...pages, ...blogPages, ...listingPages]
