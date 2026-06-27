@@ -252,17 +252,25 @@ body {
     animation-delay: 0.3s;
   }
 
-  /* Published blog body — aligned with admin markdown editor preview */
+  /* Published blog body — packing-guide theme */
   .blog-content {
     @apply text-[1.05rem] leading-[1.75] text-text-mid;
   }
 
+  .blog-article-card {
+    @apply rounded-2xl border border-border-brand bg-white px-5 py-8 shadow-sm md:px-8 md:py-10;
+  }
+
+  .blog-lead {
+    @apply mb-8 border-l-4 border-orange-brand bg-white px-5 py-4 text-[1.1rem] leading-relaxed text-text-mid md:px-6;
+  }
+
   .blog-heading-1 {
-    @apply mt-10 mb-4 font-[family-name:var(--font-playfair)] text-3xl font-bold text-green-brand first:mt-0;
+    @apply mt-10 mb-4 border-b border-border-brand pb-3 font-[family-name:var(--font-playfair)] text-3xl font-bold text-green-brand first:mt-0;
   }
 
   .blog-heading-2 {
-    @apply mt-10 mb-4 font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand first:mt-0;
+    @apply mt-12 mb-4 border-b border-green-brand/15 pb-2 font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand first:mt-0;
   }
 
   .blog-heading-3 {
@@ -271,6 +279,31 @@ body {
 
   .blog-heading-4 {
     @apply mt-6 mb-2 text-lg font-bold text-green-brand;
+  }
+
+  .blog-toc-heading {
+    @apply border-orange-brand/30;
+  }
+
+  .blog-toc-heading + ol {
+    @apply mb-8 rounded-xl border border-border-brand bg-cream/60 p-5 md:p-6;
+  }
+
+  .blog-toc-heading + ol .blog-list-item {
+    @apply leading-relaxed;
+  }
+
+  .blog-pro-tip-heading {
+    @apply mt-8 mb-0 rounded-t-xl border border-b-0 border-orange-brand/25 bg-orange-brand/10 px-4 py-2 text-base font-bold text-orange-brand;
+  }
+
+  .blog-pro-tip-heading + p,
+  .blog-pro-tip-heading + ul {
+    @apply mb-6 rounded-b-xl border border-t-0 border-orange-brand/25 bg-orange-brand/5 px-4 py-3;
+  }
+
+  .blog-faq-heading + h3 {
+    @apply mt-6 border-t border-border-brand/60 pt-4 text-lg;
   }
 
   .blog-paragraph {
@@ -297,8 +330,31 @@ body {
     @apply mb-2;
   }
 
+  .blog-list:has(.blog-check-item) {
+    @apply ml-0 list-none space-y-1;
+  }
+
+  .blog-list .blog-check-item {
+    @apply ml-0 pl-0;
+  }
+
+  .blog-check-item {
+    @apply mb-2 flex gap-2 leading-relaxed;
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .blog-check-yes {
+    @apply text-text-mid;
+  }
+
+  .blog-check-no {
+    @apply text-text-light;
+  }
+
   .blog-blockquote {
-    @apply my-6 border-l-4 border-green-mid/60 py-1 pl-5 text-text-light italic;
+    @apply my-6 border-l-4 border-green-mid/60 bg-cream/50 py-3 pl-5 text-text-mid italic;
   }
 
   .blog-hr {
@@ -322,7 +378,7 @@ body {
   }
 
   .blog-code-inline {
-    @apply rounded-md bg-white px-1.5 py-0.5 font-mono text-[0.9em] text-green-brand;
+    @apply rounded-md bg-cream px-1.5 py-0.5 font-mono text-[0.9em] text-green-brand;
   }
 
   .blog-pre .blog-code-inline {
@@ -330,20 +386,28 @@ body {
   }
 
   .blog-table-wrap {
-    @apply my-6 overflow-x-auto;
+    @apply my-8 overflow-x-auto rounded-xl border border-border-brand;
   }
 
   .blog-table {
-    @apply w-full border-collapse text-sm;
+    @apply w-full min-w-[280px] border-collapse text-sm;
   }
 
   .blog-table th,
   .blog-table td {
-    @apply border border-border-brand px-3 py-2 text-left;
+    @apply border-b border-border-brand px-4 py-3 text-left;
+  }
+
+  .blog-table tr:last-child td {
+    @apply border-b-0;
   }
 
   .blog-table th {
-    @apply bg-cream font-semibold text-green-brand;
+    @apply bg-green-brand/5 font-semibold text-green-brand;
+  }
+
+  .blog-table tbody tr:nth-child(even) td {
+    @apply bg-cream/40;
   }
 
   .blog-image {
@@ -357,11 +421,11 @@ body {
 
   .w-md-editor-preview .wmde-markdown h1,
   .w-md-editor-preview .wmde-markdown h2 {
-    @apply mt-8 mb-4 font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand;
+    @apply mt-10 mb-4 border-b border-green-brand/15 pb-2 font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand;
   }
 
   .w-md-editor-preview .wmde-markdown h3 {
-    @apply mt-6 mb-3 font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand;
+    @apply mt-8 mb-3 font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand;
   }
 
   .w-md-editor-preview .wmde-markdown p {
@@ -382,11 +446,24 @@ body {
   }
 
   .w-md-editor-preview .wmde-markdown blockquote {
-    @apply my-6 border-l-4 border-green-mid/60 pl-5 italic text-text-light;
+    @apply my-6 border-l-4 border-green-mid/60 bg-cream/50 py-3 pl-5 italic text-text-mid;
   }
 
   .w-md-editor-preview .wmde-markdown hr {
-    @apply my-8 border-border-brand;
+    @apply my-10 border-border-brand;
+  }
+
+  .w-md-editor-preview .wmde-markdown table {
+    @apply my-6 w-full border-collapse text-sm;
+  }
+
+  .w-md-editor-preview .wmde-markdown th,
+  .w-md-editor-preview .wmde-markdown td {
+    @apply border border-border-brand px-3 py-2 text-left;
+  }
+
+  .w-md-editor-preview .wmde-markdown th {
+    @apply bg-green-brand/5 font-semibold text-green-brand;
   }
 
   /* Leaflet map — green pins + popup polish */
@@ -893,5 +970,46 @@ body {
     min-width: clamp(2.5rem, 2.2rem + 1vw, 2.75rem);
     min-height: clamp(2.5rem, 2.2rem + 1vw, 2.75rem);
     font-size: clamp(1rem, 0.9rem + 0.4vw, 1.125rem);
+  }
+
+  /* Admin listings table — fluid text and padding with viewport */
+  .admin-listings-box {
+    font-size: clamp(0.6875rem, 0.62rem + 0.32vw, 0.875rem);
+  }
+
+  .admin-listings-table {
+    min-width: clamp(40rem, 68vw, 60rem);
+  }
+
+  .admin-listings-table th {
+    font-size: clamp(0.6rem, 0.54rem + 0.22vw, 0.75rem);
+    padding: clamp(0.35rem, 0.28rem + 0.28vw, 0.75rem)
+      clamp(0.45rem, 0.35rem + 0.4vw, 1rem);
+  }
+
+  .admin-listings-table td {
+    padding: clamp(0.35rem, 0.28rem + 0.28vw, 0.75rem)
+      clamp(0.45rem, 0.35rem + 0.4vw, 1rem);
+  }
+
+  .admin-listings-badge {
+    font-size: clamp(0.575rem, 0.52rem + 0.18vw, 0.75rem);
+    padding: clamp(0.1rem, 0.06rem + 0.1vw, 0.125rem)
+      clamp(0.4rem, 0.3rem + 0.35vw, 0.625rem);
+  }
+
+  .admin-listings-submitted-time {
+    font-size: clamp(0.6rem, 0.54rem + 0.16vw, 0.75rem);
+  }
+
+  .admin-listings-action-btn {
+    padding: clamp(0.15rem, 0.1rem + 0.12vw, 0.25rem)
+      clamp(0.3rem, 0.22rem + 0.28vw, 0.5rem);
+    line-height: 1;
+  }
+
+  .admin-listings-action-btn svg {
+    width: clamp(0.75rem, 0.65rem + 0.35vw, 1rem);
+    height: clamp(0.75rem, 0.65rem + 0.35vw, 1rem);
   }
 }

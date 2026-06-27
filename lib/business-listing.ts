@@ -26,13 +26,23 @@ export type BusinessListing = {
 }
 
 export function formatSubmittedDate(iso: string) {
-  return new Date(iso).toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  const { date, time } = formatSubmittedDateParts(iso)
+  return `${date}, ${time}`
+}
+
+export function formatSubmittedDateParts(iso: string) {
+  const d = new Date(iso)
+  return {
+    date: d.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }),
+    time: d.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  }
 }
 
 export function planLabel(plan: string) {

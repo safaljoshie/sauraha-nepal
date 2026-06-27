@@ -5,7 +5,7 @@ import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
-import { formatSubmittedDate, planLabel } from "@/lib/business-listing"
+import { formatSubmittedDate, formatSubmittedDateParts, planLabel } from "@/lib/business-listing"
 import { DEFAULT_CATEGORY_CATALOG, getActiveCategoryNames } from "@/lib/category-catalog"
 import {
   compressImage,
@@ -701,12 +701,12 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-border-brand bg-white shadow-sm">
+      <div className="admin-listings-box w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-border-brand bg-white shadow-sm">
         <div className="w-full max-w-full overflow-x-auto">
-          <table className="w-full min-w-[960px] text-left text-sm">
+          <table className="admin-listings-table w-full text-left">
             <thead>
-              <tr className="border-b border-border-brand bg-cream/80 text-xs font-bold uppercase tracking-wide text-text-light">
-                <th className="px-4 py-3">
+              <tr className="border-b border-border-brand bg-cream/80 font-bold uppercase tracking-wide text-text-light">
+                <th>
                   <input
                     type="checkbox"
                     checked={allVisibleSelected}
@@ -714,39 +714,41 @@ export default function AdminDashboard() {
                     aria-label="Select all visible listings"
                   />
                 </th>
-                <th className="px-4 py-3">Business</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3">Plan</th>
-                <th className="px-4 py-3">Owner</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">Submitted</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Actions</th>
+                <th>Business</th>
+                <th>Category</th>
+                <th>Plan</th>
+                <th>Owner</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Submitted</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-12 text-center text-text-light">
+                  <td colSpan={10} className="py-12 text-center text-text-light">
                     Loading listings…
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-4 py-12 text-center text-text-light">
+                  <td colSpan={10} className="py-12 text-center text-text-light">
                     {debouncedSearch.trim()
                       ? "No listings match your search."
                       : "No listings found."}
                   </td>
                 </tr>
               ) : (
-                filtered.map((listing) => (
+                filtered.map((listing) => {
+                  const submitted = formatSubmittedDateParts(listing.created_at)
+                  return (
                   <tr
                     key={listing.id}
                     className="border-b border-border-brand/60 hover:bg-cream/40"
                   >
-                    <td className="px-4 py-3">
+                    <td>
                       <input
                         type="checkbox"
                         checked={selectedIds.includes(listing.id)}
@@ -754,19 +756,19 @@ export default function AdminDashboard() {
                         aria-label={`Select ${listing.business_name}`}
                       />
                     </td>
-                    <td className="max-w-[12rem] truncate px-4 py-3 font-semibold text-text-brand">
+                    <td className="max-w-[12rem] truncate font-semibold text-text-brand">
                       {listing.business_name}
                     </td>
-                    <td className="max-w-[8rem] truncate px-4 py-3 text-text-mid">{listing.category}</td>
-                    <td className="px-4 py-3">
+                    <td className="max-w-[8rem] truncate text-text-mid">{listing.category}</td>
+                    <td>
                       <span
-                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${planBadgeClass(listing.plan)}`}
+                        className={`admin-listings-badge inline-block rounded-full font-bold ${planBadgeClass(listing.plan)}`}
                       >
                         {planLabel(listing.plan)}
                       </span>
                     </td>
-                    <td className="max-w-[9rem] truncate px-4 py-3 text-text-mid">{listing.owner_name}</td>
-                    <td className="max-w-[11rem] truncate px-4 py-3">
+                    <td className="max-w-[9rem] truncate text-text-mid">{listing.owner_name}</td>
+                    <td className="max-w-[11rem] truncate">
                       {listing.email ? (
                         <a
                           href={`mailto:${listing.email}`}
@@ -779,24 +781,27 @@ export default function AdminDashboard() {
                         <span className="text-text-light">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-text-mid">{listing.phone ?? "—"}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-text-light">
-                      {formatSubmittedDate(listing.created_at)}
+                    <td className="text-text-mid">{listing.phone ?? "—"}</td>
+                    <td className="text-text-light">
+                      <div className="flex flex-col leading-snug">
+                        <span className="whitespace-nowrap">{submitted.date}</span>
+                        <span className="admin-listings-submitted-time text-text-light">{submitted.time}</span>
+                      </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       <span
-                        className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold capitalize ${statusBadgeClass(listing.status)}`}
+                        className={`admin-listings-badge inline-block rounded-full font-bold capitalize ${statusBadgeClass(listing.status)}`}
                       >
                         {listing.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td>
                       <div className="flex flex-wrap gap-1">
                         <button
                           type="button"
                           title="View"
                           onClick={() => setSelected(listing)}
-                          className="cursor-pointer rounded-lg bg-gray-200 px-2 py-1 text-sm text-gray-800 hover:bg-gray-300"
+                          className="admin-listings-action-btn cursor-pointer rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300"
                         >
                           <SiteIcon name="eye" size={16} strokeWidth={2.25} />
                         </button>
@@ -805,7 +810,7 @@ export default function AdminDashboard() {
                           title="Edit"
                           onClick={() => openEdit(listing)}
                           disabled={actionId === listing.id}
-                          className="cursor-pointer rounded-lg bg-blue-100 px-2 py-1 text-sm text-blue-700 hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="admin-listings-action-btn cursor-pointer rounded-lg bg-blue-100 text-blue-700 hover:bg-blue-200 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           <SiteIcon name="pencil" size={16} strokeWidth={2.25} />
                         </button>
@@ -814,7 +819,7 @@ export default function AdminDashboard() {
                           title="Approve"
                           disabled={actionId === listing.id || listing.status === "approved"}
                           onClick={() => handleAction(listing.id, "approve")}
-                          className="cursor-pointer rounded-lg bg-green-100 px-2 py-1 text-sm text-green-700 hover:bg-green-200 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="admin-listings-action-btn cursor-pointer rounded-lg bg-green-100 text-green-700 hover:bg-green-200 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           ✓
                         </button>
@@ -823,7 +828,7 @@ export default function AdminDashboard() {
                           title="Reject"
                           disabled={actionId === listing.id || listing.status === "rejected"}
                           onClick={() => handleAction(listing.id, "reject")}
-                          className="cursor-pointer rounded-lg bg-orange-100 px-2 py-1 text-sm text-orange-700 hover:bg-orange-200 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="admin-listings-action-btn cursor-pointer rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           ✗
                         </button>
@@ -832,14 +837,15 @@ export default function AdminDashboard() {
                           title="Delete"
                           disabled={actionId === listing.id}
                           onClick={() => handleDelete(listing)}
-                          className="cursor-pointer rounded-lg bg-red-100 px-2 py-1 text-sm text-red-700 hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="admin-listings-action-btn cursor-pointer rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           🗑
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))
+                  )
+                })
               )}
             </tbody>
           </table>

@@ -3,6 +3,7 @@ import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
 import type { Metadata } from "next"
 import BlogMarkdown from "@/components/blog/BlogMarkdown"
+import BlogPostCard from "@/components/blog/BlogPostCard"
 import BlogRelatedLinks from "@/components/blog/BlogRelatedLinks"
 import BlogShareBar from "@/components/blog/BlogShareBar"
 import {
@@ -55,6 +56,11 @@ export default async function BlogPostPage({ params }: PageProps) {
   const cover = post.cover_image ?? DEFAULT_OG_IMAGE
   const coverAlt = blogCoverAlt(post.title)
   const jsonLd = articleJsonLd(post)
+  const lead =
+    post.excerpt?.trim() &&
+    !post.excerpt.toLowerCase().startsWith("draft brief:")
+      ? post.excerpt.trim()
+      : null
 
   return (
     <main className="mt-[68px] bg-cream">
@@ -62,24 +68,24 @@ export default async function BlogPostPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <article className="mx-auto max-w-4xl px-6 py-12">
-        <nav className="mb-4 text-sm text-text-light">
+      <article className="mx-auto max-w-3xl px-4 py-10 md:px-6 md:py-12">
+        <nav className="mb-4 flex flex-wrap gap-x-2 text-sm text-text-light">
           <Link href="/" className="hover:text-green-brand">
             Home
           </Link>
-          <span className="mx-2">›</span>
+          <span aria-hidden>›</span>
           <Link href="/blog" className="hover:text-green-brand">
             Blog
           </Link>
           {post.tag && (
             <>
-              <span className="mx-2">›</span>
+              <span aria-hidden>›</span>
               <span className="text-text-mid">{post.tag}</span>
             </>
           )}
         </nav>
 
-        <header className="mb-12">
+        <header className="mb-8">
           <Link
             href="/blog"
             className="text-sm font-semibold text-green-mid transition-colors hover:text-green-brand"
@@ -87,7 +93,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             ← Back to Blog
           </Link>
           {post.tag && <span className="section-label mt-6 block">{post.tag}</span>}
-          <h1 className="font-[family-name:var(--font-playfair)] text-4xl leading-tight font-bold text-green-brand md:text-5xl">
+          <h1 className="font-[family-name:var(--font-playfair)] text-3xl leading-tight font-bold text-green-brand md:text-4xl lg:text-5xl">
             {post.title}
           </h1>
           <p className="mt-3 text-sm text-text-light">
@@ -95,13 +101,13 @@ export default async function BlogPostPage({ params }: PageProps) {
             {post.read_time && <> · {post.read_time}</>}
             {post.published_at && <> · {formatBlogDate(post.published_at)}</>}
           </p>
-          <div className="relative mt-8 h-[3in] w-full overflow-hidden rounded-2xl">
+          <div className="relative mt-8 h-[3in] w-full overflow-hidden rounded-2xl border border-border-brand shadow-sm">
             <Image
               src={cover}
               alt={coverAlt}
               fill
               className="object-cover"
-              sizes="(max-width: 896px) 100vw, 896px"
+              sizes="(max-width: 768px) 100vw, 768px"
               quality={DEFAULT_IMAGE_QUALITY}
               priority
               unoptimized={!isNextOptimizedImageSrc(cover)}
@@ -109,9 +115,13 @@ export default async function BlogPostPage({ params }: PageProps) {
           </div>
         </header>
 
-        <BlogMarkdown content={post.content ?? ""} />
+        {lead && <p className="blog-lead rounded-2xl">{lead}</p>}
 
-        <div className="mt-12">
+        <div className="blog-article-card">
+          <BlogMarkdown content={post.content ?? ""} />
+        </div>
+
+        <div className="mt-10">
           <BlogShareBar title={post.title} url={articleUrl} />
         </div>
 
@@ -122,19 +132,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             </h2>
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
               {related.map((item) => (
-                <Link
-                  key={item.slug}
-                  href={`/blog/${item.slug}`}
-                  className="rounded-2xl border border-border-brand bg-white p-5 transition-shadow hover:shadow-md"
-                >
-                  <span className="text-xs font-bold text-orange-brand uppercase">
-                    {item.tag}
-                  </span>
-                  <h3 className="mt-2 font-semibold text-green-brand">{item.title}</h3>
-                  {item.excerpt && (
-                    <p className="mt-1 line-clamp-2 text-sm text-text-light">{item.excerpt}</p>
-                  )}
-                </Link>
+                <BlogPostCard key={item.slug} post={item} />
               ))}
             </div>
           </section>

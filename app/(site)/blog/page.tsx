@@ -1,9 +1,7 @@
-import Image from "next/image"
-import Link from "next/link"
 import type { Metadata } from "next"
-import { fetchPublishedBlogPosts, formatBlogDate } from "@/lib/blog-db"
-import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
-import { blogCoverAlt, pageMetadata } from "@/lib/seo"
+import BlogPostCard from "@/components/blog/BlogPostCard"
+import { fetchPublishedBlogPosts } from "@/lib/blog-db"
+import { pageMetadata } from "@/lib/seo"
 
 export const revalidate = 60
 
@@ -18,12 +16,12 @@ export default async function BlogIndexPage() {
   const posts = await fetchPublishedBlogPosts()
 
   return (
-    <main className="mt-[68px] bg-cream py-16">
+    <main className="mt-[68px] bg-cream py-12 md:py-16">
       <div className="site-container">
         <p className="section-label">Travel Tips</p>
         <h1 className="section-title">Sauraha & Chitwan Guides</h1>
         <p className="mt-4 max-w-2xl text-lg text-text-mid">
-          Practical advice for planning your trip — seasons, transport, park permits, and more.
+          Practical advice for planning your trip — seasons, transport, park permits, packing lists, and more.
         </p>
 
         {posts.length === 0 ? (
@@ -37,52 +35,9 @@ export default async function BlogIndexPage() {
           </div>
         ) : (
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post, index) => {
-              const image = post.cover_image ?? "/images/placeholder-listing.jpg"
-              return (
-                <Link
-                  key={post.id}
-                  href={`/blog/${post.slug}`}
-                  className="group overflow-hidden rounded-2xl border border-border-brand bg-white shadow-sm transition-shadow hover:shadow-md"
-                >
-                  <div className="relative h-48">
-                    <Image
-                      src={image}
-                      alt={blogCoverAlt(post.title)}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
-                      quality={DEFAULT_IMAGE_QUALITY}
-                      priority={index === 0}
-                      loading={index === 0 ? undefined : "lazy"}
-                      unoptimized={!isNextOptimizedImageSrc(image)}
-                    />
-                  </div>
-                  <div className="p-6">
-                    {post.tag && (
-                      <span className="text-xs font-bold tracking-wide text-orange-brand uppercase">
-                        {post.tag}
-                      </span>
-                    )}
-                    <h2 className="mt-2 font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
-                      {post.title}
-                    </h2>
-                    {post.excerpt && (
-                      <p className="mt-2 line-clamp-2 text-sm text-text-light">{post.excerpt}</p>
-                    )}
-                    <p className="mt-2 text-sm text-text-light">
-                      {post.read_time ?? "Article"}
-                      {post.published_at && (
-                        <>
-                          {" "}
-                          · {formatBlogDate(post.published_at)}
-                        </>
-                      )}
-                    </p>
-                  </div>
-                </Link>
-              )
-            })}
+            {posts.map((post, index) => (
+              <BlogPostCard key={post.id} post={post} priority={index === 0} />
+            ))}
           </div>
         )}
       </div>
