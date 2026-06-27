@@ -13,7 +13,7 @@ export default function BlogMarkdownImage({ src, alt }: BlogMarkdownImageProps) 
   if (!url) return null
 
   return (
-    <span className="relative my-6 block min-h-[12rem] w-full overflow-hidden rounded-xl">
+    <span className="relative my-6 block h-[3in] w-full overflow-hidden rounded-xl">
       <Image
         src={url}
         alt={alt ?? ""}

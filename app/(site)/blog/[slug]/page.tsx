@@ -95,7 +95,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             {post.read_time && <> · {post.read_time}</>}
             {post.published_at && <> · {formatBlogDate(post.published_at)}</>}
           </p>
-          <div className="relative mt-8 aspect-[8/9] overflow-hidden rounded-2xl">
+          <div className="relative mt-8 h-[3in] w-full overflow-hidden rounded-2xl">
             <Image
               src={cover}
               alt={coverAlt}
