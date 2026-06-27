@@ -314,6 +314,7 @@ export function listingJsonLd(
     phone: string | null
     email: string
     price_range?: string | null
+    image?: string | null
     lat?: number
     lng?: number
     aggregateRating?: { ratingValue: number; reviewCount: number }
@@ -327,6 +328,12 @@ export function listingJsonLd(
     telephone: listing.phone ?? undefined,
     url: `${SITE_URL}/listings/${listing.id}`,
     priceRange: listing.price_range ?? undefined,
+  }
+
+  if (listing.image?.trim()) {
+    schema.image = listing.image.startsWith("http")
+      ? listing.image
+      : `${SITE_URL}${listing.image.startsWith("/") ? listing.image : `/${listing.image}`}`
   }
 
   if (listing.address?.trim()) {

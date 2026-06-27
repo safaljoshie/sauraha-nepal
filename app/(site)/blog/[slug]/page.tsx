@@ -6,11 +6,12 @@ import BlogMarkdown from "@/components/blog/BlogMarkdown"
 import BlogRelatedLinks from "@/components/blog/BlogRelatedLinks"
 import BlogShareBar from "@/components/blog/BlogShareBar"
 import {
+  fetchPublishedBlogPosts,
   fetchPublishedBlogPostBySlug,
   fetchRelatedBlogPosts,
   formatBlogDate,
 } from "@/lib/blog-db"
-import { getBlogPostRelatedLinks } from "@/lib/blog-related-links"
+import { filterBlogRelatedLinks, getBlogPostRelatedLinks } from "@/lib/blog-related-links"
 import { getBlogSlugRedirect } from "@/lib/blog-slug-redirects"
 import { SITE_URL } from "@/lib/blog-posts"
 import { articleJsonLd, blogCoverAlt, buildBlogPostMetadata, DEFAULT_OG_IMAGE } from "@/lib/seo"
@@ -44,8 +45,12 @@ export default async function BlogPostPage({ params }: PageProps) {
   const post = await fetchPublishedBlogPostBySlug(slug)
   if (!post) notFound()
 
-  const related = await fetchRelatedBlogPosts(slug)
-  const relatedLinks = getBlogPostRelatedLinks(post.slug)
+  const [related, publishedPosts] = await Promise.all([
+    fetchRelatedBlogPosts(slug),
+    fetchPublishedBlogPosts(),
+  ])
+  const publishedSlugs = new Set(publishedPosts.map((p) => p.slug))
+  const relatedLinks = filterBlogRelatedLinks(getBlogPostRelatedLinks(post.slug), publishedSlugs)
   const articleUrl = `${SITE_URL}/blog/${post.slug}`
   const cover = post.cover_image ?? DEFAULT_OG_IMAGE
   const coverAlt = blogCoverAlt(post.title)

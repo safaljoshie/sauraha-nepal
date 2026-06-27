@@ -155,7 +155,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
-            className={`nav-icon flex h-10 w-10 items-center justify-center text-2xl lg:hidden ${
+            className={`nav-icon flex h-11 w-11 items-center justify-center text-2xl lg:hidden ${
               transparent ? "text-white" : "text-ink"
             }`}
             aria-label={menuOpen ? "Close menu" : "Open menu"}
@@ -190,7 +190,12 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
         >
           <div className="mb-8 flex items-center justify-between">
             <span className="font-heading text-lg font-bold text-ink">Menu</span>
-            <button type="button" onClick={closeMenu} className="text-ink" aria-label="Close">
+            <button
+              type="button"
+              onClick={closeMenu}
+              className="flex h-11 w-11 items-center justify-center text-ink"
+              aria-label="Close"
+            >
               <SiteIcon name="close" size={24} strokeWidth={2.5} />
             </button>
           </div>
@@ -211,6 +216,16 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link href="/about" onClick={closeMenu} className="block py-3 font-semibold text-ink-muted hover:text-green-brand">
+                About
+              </Link>
+            </li>
+            <li>
+              <Link href="/contact" onClick={closeMenu} className="block py-3 font-semibold text-ink-muted hover:text-green-brand">
+                Contact
+              </Link>
+            </li>
           </ul>
           <Link
             href="/list-your-business"

@@ -72,6 +72,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
     phone: listing.phone,
     email: listing.email,
     price_range: listing.price_range,
+    image: heroImage,
     lat: coords?.lat,
     lng: coords?.lng,
   })

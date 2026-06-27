@@ -33,8 +33,8 @@ const BLOG_RELATED: Record<string, BlogRelatedLink[]> = {
   ],
   "sauraha-nepal-weather-by-month": [
     {
-      href: "/blog/best-time-to-visit-chitwan",
-      label: "Best time to visit Chitwan",
+      href: "/blog/best-time-to-visit-sauraha",
+      label: "Best time to visit Sauraha & Chitwan",
       description: "Seasons, wildlife viewing and what to pack.",
     },
     {
@@ -121,4 +121,20 @@ const DEFAULT_LINKS: BlogRelatedLink[] = [
 
 export function getBlogPostRelatedLinks(slug: string): BlogRelatedLink[] {
   return BLOG_RELATED[slug] ?? DEFAULT_LINKS
+}
+
+/** Drop links to unpublished blog posts so related blocks never 404. */
+export function filterBlogRelatedLinks(
+  links: BlogRelatedLink[],
+  publishedSlugs: ReadonlySet<string>,
+): BlogRelatedLink[] {
+  const isPublishedBlogLink = (href: string) => {
+    if (!href.startsWith("/blog/") || href === "/blog") return true
+    return publishedSlugs.has(href.slice("/blog/".length))
+  }
+
+  const filtered = links.filter((link) => isPublishedBlogLink(link.href))
+  if (filtered.length > 0) return filtered
+
+  return DEFAULT_LINKS.filter((link) => isPublishedBlogLink(link.href))
 }
