@@ -2,7 +2,11 @@ import { NextResponse } from "next/server"
 import { Resend } from "resend"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { hasListingContactEmail, type BusinessListing } from "@/lib/business-listing"
-import { fetchCategoryCatalog, isValidCategoryName } from "@/lib/category-catalog"
+import { fetchCategoryCatalog, areValidCategoryNames } from "@/lib/category-catalog"
+import {
+  normalizeListingCategoriesInput,
+  serializeListingCategories,
+} from "@/lib/listing-categories"
 import { buildApprovalEmail, buildRejectionEmail } from "@/lib/emails/listing-status"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
@@ -16,6 +20,7 @@ type ListingUpdatePayload = {
   id?: string
   business_name?: string
   category?: string
+  categories?: string[]
   description?: string
   price_range?: string
   opening_hours?: string
@@ -51,16 +56,17 @@ export async function PUT(request: Request) {
 
   const id = payload.id?.trim()
   const business_name = payload.business_name?.trim() ?? ""
-  const category = payload.category?.trim() ?? ""
+  const categoryNames = normalizeListingCategoriesInput(payload.categories, payload.category)
+  const category = serializeListingCategories(categoryNames)
   const owner_name = payload.owner_name?.trim() ?? ""
   const email = payload.email?.trim() ?? ""
 
   if (!id) {
     return NextResponse.json({ error: "Listing id is required." }, { status: 400 })
   }
-  if (!business_name || !category || !owner_name || !email) {
+  if (!business_name || categoryNames.length === 0 || !owner_name || !email) {
     return NextResponse.json(
-      { error: "Business name, category, owner name, and email are required." },
+      { error: "Business name, at least one category, owner name, and email are required." },
       { status: 400 },
     )
   }
@@ -68,8 +74,8 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Please provide a valid email address." }, { status: 400 })
   }
   const catalog = await fetchCategoryCatalog({ includeInactive: true })
-  if (!isValidCategoryName(category, catalog, { includeInactive: true })) {
-    return NextResponse.json({ error: "Invalid category." }, { status: 400 })
+  if (!areValidCategoryNames(categoryNames, catalog, { includeInactive: true })) {
+    return NextResponse.json({ error: "Invalid category selection." }, { status: 400 })
   }
 
   const normalizedPlan = payload.plan?.trim().toLowerCase() ?? ""

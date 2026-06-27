@@ -6,6 +6,9 @@ import {
   type CategoryCatalog,
   type CategoryGroupId,
 } from "@/lib/category-catalog"
+import {
+  parseListingCategories,
+} from "@/lib/listing-categories"
 
 export type { CategoryGroupId } from "@/lib/category-catalog"
 
@@ -33,15 +36,28 @@ export function getCategoryGroupId(
   catalog?: CategoryCatalog,
 ): CategoryGroupId {
   const groups = resolveGroups(catalog)
-  const group = groups.find((g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(category))
-  return group?.id ?? "info"
+  const names = parseListingCategories(category)
+  if (names.length === 0) return "info"
+  for (const name of names) {
+    const group = groups.find(
+      (g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(name),
+    )
+    if (group) return group.id
+  }
+  return "info"
 }
 
 export function getCategoryDisplay(category: string, catalog?: CategoryCatalog) {
-  const groups = resolveGroups(catalog)
-  const group = groups.find((g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(category))
-  if (group) return group.label
-  return category
+  const names = parseListingCategories(category)
+  if (names.length === 0) return "Other"
+  if (names.length === 1) {
+    const groups = resolveGroups(catalog)
+    const group = groups.find(
+      (g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(names[0]),
+    )
+    return group?.label ?? names[0]
+  }
+  return names.join(" · ")
 }
 
 export function sortListingsForDisplay(listings: BusinessListing[]) {
@@ -82,12 +98,16 @@ export function matchesCategoryGroup(
   const groups = resolveGroups(catalog)
   const group = groups.find((g) => g.id === groupId)
   if (!group) return false
+  const names = parseListingCategories(listing.category)
   if (groupId === "info") {
-    return !groups.some(
-      (g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(listing.category),
+    if (names.length === 0) return true
+    return !names.some((name) =>
+      groups.some(
+        (g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(name),
+      ),
     )
   }
-  return group.matchers.includes(listing.category)
+  return names.some((name) => group.matchers.includes(name))
 }
 
 export function matchesPlanFilter(listing: BusinessListing, plan: PlanFilterId) {

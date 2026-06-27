@@ -277,6 +277,15 @@ export function isValidCategoryName(
   return list.includes(trimmed)
 }
 
+export function areValidCategoryNames(
+  names: string[],
+  catalog: CategoryCatalog,
+  options?: { includeInactive?: boolean },
+) {
+  if (names.length === 0) return false
+  return names.every((name) => isValidCategoryName(name, catalog, options))
+}
+
 export function getActiveCategoryNames(catalog: CategoryCatalog) {
   return catalog.activeCategoryNames.length > 0
     ? catalog.activeCategoryNames

@@ -15,8 +15,12 @@ import {
 import { mergePhotoLinks } from "@/lib/list-business-photos"
 import { isNextOptimizedImageSrc } from "@/lib/image"
 import { matchesAdminListingSearch } from "@/lib/listings-catalog"
+import { parseListingCategories, serializeListingCategories } from "@/lib/listing-categories"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminCalendarSection from "@/components/admin/AdminCalendarSection"
+import AdminListingCategoryPicker, {
+  type CategoryPickerOption,
+} from "@/components/admin/AdminListingCategoryPicker"
 import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
 import AdminTeamItinerarySection from "@/components/admin/AdminTeamItinerarySection"
 import AdminTeamResourcesSection from "@/components/admin/AdminTeamResourcesSection"
@@ -84,7 +88,7 @@ type Toast = {
 type EditFormState = {
   id: string
   business_name: string
-  category: string
+  categories: string[]
   description: string
   price_range: string
   opening_hours: string
@@ -102,10 +106,11 @@ type EditFormState = {
 }
 
 function normalizeEditForm(listing: BusinessListing, defaultCategory: string): EditFormState {
+  const categories = parseListingCategories(listing.category)
   return {
     id: listing.id,
     business_name: listing.business_name ?? "",
-    category: listing.category ?? defaultCategory,
+    categories: categories.length > 0 ? categories : defaultCategory ? [defaultCategory] : [],
     description: listing.description ?? "",
     price_range: listing.price_range ?? "",
     opening_hours: listing.opening_hours ?? "",
@@ -154,8 +159,12 @@ export default function AdminDashboard() {
   const [adminTab, setAdminTab] = useState<AdminTab>("listings")
   const [searchInput, setSearchInput] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [categoryOptions, setCategoryOptions] = useState<string[]>(
-    getActiveCategoryNames(DEFAULT_CATEGORY_CATALOG),
+  const [categoryPickerOptions, setCategoryPickerOptions] = useState<CategoryPickerOption[]>(() =>
+    getActiveCategoryNames(DEFAULT_CATEGORY_CATALOG).map((name) => ({
+      name,
+      groupLabel: "Other",
+      is_active: true,
+    })),
   )
 
   const loadCategoryOptions = useCallback(async () => {
@@ -163,13 +172,25 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/categories")
       if (res.status === 401) return
       const data = (await res.json()) as {
-        categories?: { name: string; is_active: boolean }[]
+        categories?: {
+          name: string
+          is_active: boolean
+          category_groups?: { label?: string } | { label?: string }[] | null
+        }[]
       }
       if (!res.ok) return
-      const names = (data.categories ?? [])
-        .filter((c) => c.is_active)
-        .map((c) => c.name)
-      if (names.length > 0) setCategoryOptions(names)
+      const options: CategoryPickerOption[] = (data.categories ?? []).map((cat) => {
+        const group = cat.category_groups
+        const groupLabel = Array.isArray(group)
+          ? group[0]?.label
+          : group?.label
+        return {
+          name: cat.name,
+          groupLabel: groupLabel ?? "Other",
+          is_active: cat.is_active,
+        }
+      })
+      if (options.length > 0) setCategoryPickerOptions(options)
     } catch {
       // keep defaults
     }
@@ -211,7 +232,10 @@ export default function AdminDashboard() {
     return () => window.clearTimeout(timer)
   }, [searchInput])
 
-  const defaultCategory = categoryOptions[0] ?? ""
+  const defaultCategory =
+    categoryPickerOptions.find((c) => c.is_active)?.name ??
+    getActiveCategoryNames(DEFAULT_CATEGORY_CATALOG)[0] ??
+    ""
 
   const stats = useMemo(() => {
     const total = listings.length
@@ -396,8 +420,13 @@ export default function AdminDashboard() {
   }
 
   function validateEditForm(form: EditFormState) {
-    if (!form.business_name.trim() || !form.category.trim() || !form.owner_name.trim() || !form.email.trim()) {
-      return "Business name, category, owner name, and email are required."
+    if (
+      !form.business_name.trim() ||
+      form.categories.length === 0 ||
+      !form.owner_name.trim() ||
+      !form.email.trim()
+    ) {
+      return "Business name, at least one category, owner name, and email are required."
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       return "Please provide a valid email address."
@@ -418,10 +447,12 @@ export default function AdminDashboard() {
     setError("")
     setEditErrors("")
     const previousListings = listings
+    const serializedCategory = serializeListingCategories(editForm.categories)
+    const { categories: _categories, ...editRest } = editForm
     const optimistic = {
-      ...editForm,
+      ...editRest,
       business_name: editForm.business_name.trim(),
-      category: editForm.category.trim(),
+      category: serializedCategory,
       description: editForm.description.trim() || null,
       price_range: editForm.price_range.trim() || null,
       opening_hours: editForm.opening_hours.trim() || null,
@@ -443,7 +474,10 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/update-listing", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify({
+          ...editForm,
+          categories: editForm.categories,
+        }),
       })
       if (res.status === 401) {
         router.push("/admin")
@@ -759,7 +793,19 @@ export default function AdminDashboard() {
                     <td className="max-w-[12rem] truncate font-semibold text-text-brand">
                       {listing.business_name}
                     </td>
-                    <td className="max-w-[8rem] truncate text-text-mid">{listing.category}</td>
+                    <td className="max-w-[10rem] px-4 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {parseListingCategories(listing.category).map((cat) => (
+                          <span
+                            key={cat}
+                            className="admin-listings-badge inline-block max-w-full truncate rounded-full bg-cream font-medium text-text-mid"
+                            title={cat}
+                          >
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
                     <td>
                       <span
                         className={`admin-listings-badge inline-block rounded-full font-bold ${planBadgeClass(listing.plan)}`}
@@ -877,7 +923,10 @@ export default function AdminDashboard() {
               </button>
             </div>
             <dl>
-              <DetailRow label="Category" value={selected.category} />
+              <DetailRow
+                label="Categories"
+                value={parseListingCategories(selected.category).join(", ")}
+              />
               <DetailRow label="Plan" value={planLabel(selected.plan)} />
               <DetailRow label="Status" value={selected.status} />
               <DetailRow label="Owner" value={selected.owner_name} />
@@ -954,16 +1003,13 @@ export default function AdminDashboard() {
                   className={fieldClass}
                 />
               </EditField>
-              <EditField label="Category" required>
-                <select
-                  value={editForm.category}
-                  onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
-                  className={fieldClass}
-                >
-                  {categoryOptions.map((cat) => (
-                    <option key={cat}>{cat}</option>
-                  ))}
-                </select>
+              <EditField label="Categories" required className="md:col-span-2">
+                <AdminListingCategoryPicker
+                  options={categoryPickerOptions}
+                  value={editForm.categories}
+                  onChange={(categories) => setEditForm({ ...editForm, categories })}
+                  disabled={actionId === editForm.id}
+                />
               </EditField>
               <EditField label="Description" className="md:col-span-2">
                 <textarea

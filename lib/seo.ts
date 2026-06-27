@@ -3,6 +3,7 @@ import type { BusinessListing } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { BlogPostRow } from "@/lib/blog-db"
 import { SITE_URL } from "@/lib/blog-posts"
+import { getPrimaryListingCategory } from "@/lib/listing-categories"
 import { getCategoryDisplay, getCategoryGroupId, getListingImage } from "@/lib/listings-catalog"
 
 export const DEFAULT_OG_IMAGE = "/og-image.jpg"
@@ -129,7 +130,8 @@ export function getListingProximityPhrase(
 }
 
 export function listingImageAlt(businessName: string, category: string, catalog?: CategoryCatalog) {
-  const display = getCategoryDisplay(category, catalog)
+  const primary = getPrimaryListingCategory(category) || category
+  const display = getCategoryDisplay(primary, catalog)
   return `${businessName} — ${display} near Chitwan National Park, Sauraha`
 }
 
@@ -193,7 +195,8 @@ export function buildListingDetailMetadata(
   catalog?: CategoryCatalog,
   coords?: { lat: number; lng: number } | null,
 ): Metadata {
-  const categoryPhrase = getCategoryPhrase(listing.category, catalog)
+  const primaryCategory = getPrimaryListingCategory(listing.category) || listing.category
+  const categoryPhrase = getCategoryPhrase(primaryCategory, catalog)
   const title = truncateMetaTitle(`${listing.business_name} — ${categoryPhrase} | Sauraha, Nepal`)
   const priceBit = listing.price_range?.trim() ? `${listing.price_range.trim()} ` : ""
   const proximity = getListingProximityPhrase(listing.address, coords?.lat, coords?.lng)
