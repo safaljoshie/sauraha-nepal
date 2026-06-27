@@ -1,11 +1,12 @@
 import Link from "next/link"
 import ListingCardActions from "@/components/listings/ListingCardActions"
 import ListingImage from "@/components/listings/ListingImage"
+import ListingVerifiedBadge from "@/components/listings/ListingVerifiedBadge"
 import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import OpenNowBadge from "@/components/listings/OpenNowBadge"
 import { listingImageAlt } from "@/lib/seo"
 import type { BusinessListing } from "@/lib/business-listing"
-import { isNewListing } from "@/lib/listing-badges"
+import { isListingVerified, isNewListing } from "@/lib/listing-badges"
 import {
   formatListingDate,
   getCategoryDisplay,
@@ -35,6 +36,7 @@ export default function BusinessListingCard({
   const callHref = listing.phone?.trim() ? telUrl(listing.phone) : ""
   const isNew = isNewListing(listing.created_at)
   const hasPlanBadge = isPremium || isFeatured
+  const verified = isListingVerified(listing)
 
   return (
     <article
@@ -79,6 +81,11 @@ export default function BusinessListingCard({
               }`}
             >
               New
+            </span>
+          )}
+          {verified && (
+            <span className="absolute bottom-2 left-2 z-[2] sm:bottom-3 sm:left-3">
+              <ListingVerifiedBadge size="card" />
             </span>
           )}
         </div>

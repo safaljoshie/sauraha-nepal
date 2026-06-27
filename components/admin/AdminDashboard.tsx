@@ -103,6 +103,7 @@ type EditFormState = {
   photo_links: string
   plan: "basic" | "featured" | "premium"
   status: "pending" | "approved" | "rejected"
+  verified: boolean
 }
 
 function normalizeEditForm(listing: BusinessListing, defaultCategory: string): EditFormState {
@@ -129,6 +130,7 @@ function normalizeEditForm(listing: BusinessListing, defaultCategory: string): E
     status: (["pending", "approved", "rejected"].includes(listing.status)
       ? listing.status
       : "pending") as "pending" | "approved" | "rejected",
+    verified: listing.verified === true,
   }
 }
 
@@ -467,6 +469,7 @@ export default function AdminDashboard() {
       photo_links: editForm.photo_links.trim() || null,
       plan: editForm.plan,
       status: editForm.status,
+      verified: editForm.verified,
     } as Partial<BusinessListing>
     updateListingState(editForm.id, (listing) => mergeListing(listing, optimistic))
 
@@ -929,6 +932,7 @@ export default function AdminDashboard() {
               />
               <DetailRow label="Plan" value={planLabel(selected.plan)} />
               <DetailRow label="Status" value={selected.status} />
+              <DetailRow label="Verified" value={selected.verified ? "Yes — badge visible on site" : "No"} />
               <DetailRow label="Owner" value={selected.owner_name} />
               <DetailRow label="Email" value={selected.email} />
               <DetailRow label="Phone" value={selected.phone} />
@@ -1182,6 +1186,27 @@ export default function AdminDashboard() {
                   <option value="approved">approved</option>
                   <option value="rejected">rejected</option>
                 </select>
+              </EditField>
+              <EditField label="Verified badge" className="md:col-span-2">
+                <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-border-brand bg-cream px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={editForm.verified}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, verified: e.target.checked })
+                    }
+                    className="mt-1 h-4 w-4 shrink-0 accent-green-brand"
+                  />
+                  <span>
+                    <span className="block text-sm font-semibold text-text-brand">
+                      Show verified sticker on public listing
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-text-light">
+                      Turn on after you have checked the business details. The badge appears on
+                      the listing card and detail page photo.
+                    </span>
+                  </span>
+                </label>
               </EditField>
             </div>
 

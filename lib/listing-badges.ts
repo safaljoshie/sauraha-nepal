@@ -5,3 +5,7 @@ export function isNewListing(createdAt: string) {
   if (Number.isNaN(created)) return false
   return Date.now() - created < NEW_LISTING_MS
 }
+
+export function isListingVerified(listing: { verified?: boolean | null }) {
+  return listing.verified === true
+}

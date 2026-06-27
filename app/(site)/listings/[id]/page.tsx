@@ -5,6 +5,7 @@ import ListingImage from "@/components/listings/ListingImage"
 import ListingDetailMapSection from "@/components/listings/ListingDetailMapSection"
 import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import ListingShareButtons from "@/components/listings/ListingShareButtons"
+import ListingVerifiedBadge from "@/components/listings/ListingVerifiedBadge"
 import OpeningHoursDisplay from "@/components/listings/OpeningHoursDisplay"
 import {
   formatListingDate,
@@ -17,6 +18,7 @@ import {
 } from "@/lib/listings-catalog"
 import { getMapCoordinates, parseCoordinates } from "@/lib/google-maps"
 import { fetchApprovedListingById } from "@/lib/listings-fetch"
+import { isListingVerified } from "@/lib/listing-badges"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { buildListingDetailMetadata, listingImageAlt, listingJsonLd } from "@/lib/seo"
 import { SITE_URL } from "@/lib/blog-posts"
@@ -57,6 +59,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const listingUrl = `${SITE_URL}/listings/${id}`
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
+  const verified = isListingVerified(listing)
 
   const mapsLink = listing.google_maps_link?.trim() ?? ""
   let coords = mapsLink ? parseCoordinates(mapsLink) : null
@@ -104,6 +107,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 Featured
               </span>
             )}
+            {verified && (
+              <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                Officially verified
+              </span>
+            )}
             {listing.price_range && (
               <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
                 {listing.price_range}
@@ -125,6 +133,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
               sizes="(max-width: 1024px) 100vw, 800px"
               priority
             />
+            {verified && (
+              <span className="absolute bottom-3 left-3 z-[2] sm:bottom-4 sm:left-4">
+                <ListingVerifiedBadge size="detail" />
+              </span>
+            )}
           </div>
 
           {listing.description && (

@@ -35,6 +35,7 @@ type ListingUpdatePayload = {
   photo_links?: string
   plan?: string
   status?: string
+  verified?: boolean
 }
 
 function normalizeOptional(value: unknown) {
@@ -122,6 +123,7 @@ export async function PUT(request: Request) {
       photo_links: normalizeOptional(payload.photo_links),
       plan: normalizedPlan,
       status: normalizedStatus,
+      verified: payload.verified === true,
     }
 
     const { data: updated, error: updateError } = await supabase

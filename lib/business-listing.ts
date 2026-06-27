@@ -23,6 +23,7 @@ export type BusinessListing = {
   plan: string
   status: string
   agreed_to_terms: boolean | null
+  verified: boolean | null
 }
 
 export function formatSubmittedDate(iso: string) {
