@@ -207,7 +207,10 @@ export default function ChatWidget() {
     if (open) {
       setUnread(false)
       scrollToBottom()
-      requestAnimationFrame(() => inputRef.current?.focus())
+      const isMobile = window.matchMedia("(max-width: 767px)").matches
+      if (!isMobile) {
+        requestAnimationFrame(() => inputRef.current?.focus())
+      }
     }
   }, [open, messages, loading, scrollToBottom, setUnread])
 

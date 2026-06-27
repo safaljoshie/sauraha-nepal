@@ -73,6 +73,7 @@ export default function ListingsExplorer({
 
   useEffect(() => {
     if (!focusSearchOnMount) return
+    if (window.matchMedia("(max-width: 767px)").matches) return
     const timer = window.setTimeout(() => searchInputRef.current?.focus(), 50)
     return () => window.clearTimeout(timer)
   }, [focusSearchOnMount])

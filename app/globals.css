@@ -30,12 +30,27 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: clip;
 }
 
 body {
   font-family: var(--font-nunito), "Nunito", sans-serif;
   background-color: #faf7f2;
   color: #1c2b1e;
+  overflow-x: clip;
+  width: 100%;
+  min-width: 0;
+}
+
+/* iOS Safari zooms focused inputs below 16px — keep form controls at least 1rem on mobile */
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="hidden"]):not([type="file"]):not([type="image"]),
+  textarea,
+  select {
+    font-size: 16px;
+  }
 }
 
 @layer components {
@@ -577,6 +592,12 @@ body {
 }
 
 /* Shared content width + horizontal inset (homepage, listings, nav, footer) */
+#site-root {
+  overflow-x: clip;
+  width: 100%;
+  min-width: 0;
+}
+
 .site-container {
   width: 100%;
   max-width: 1400px;
