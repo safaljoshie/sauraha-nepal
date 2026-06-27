@@ -1,32 +1,40 @@
-import { SITE_URL } from "@/lib/blog-posts"
-
-const organization = {
+const ORGANIZATION = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Sauraha Nepal",
-  url: SITE_URL,
-  logo: `${SITE_URL}/one.png`,
+  alternateName: "saurahanepal.com",
+  url: "https://www.saurahanepal.com",
+  logo: "https://www.saurahanepal.com/one.png",
   description:
     "Independent local travel directory for Sauraha, Nepal, near Chitwan National Park",
 }
 
-const website = {
+const WEBSITE = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Sauraha Nepal",
-  url: SITE_URL,
+  url: "https://www.saurahanepal.com",
   potentialAction: {
     "@type": "SearchAction",
-    target: `${SITE_URL}/listings?search={search_term_string}`,
+    target: "https://www.saurahanepal.com/listings?search={search_term_string}",
     "query-input": "required name=search_term_string",
   },
 }
 
-export default function SiteJsonLd() {
+function JsonLdScript({ data }: { data: Record<string, unknown> }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify([organization, website]) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
+  )
+}
+
+export default function SiteJsonLd() {
+  return (
+    <>
+      <JsonLdScript data={ORGANIZATION} />
+      <JsonLdScript data={WEBSITE} />
+    </>
   )
 }

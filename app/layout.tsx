@@ -80,8 +80,10 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${nunito.variable} ${poppins.variable} ${inter.variable}`}
     >
-      <body className="font-[family-name:var(--font-inter)] antialiased">
+      <head>
         <SiteJsonLd />
+      </head>
+      <body className="font-[family-name:var(--font-inter)] antialiased">
         <ChatUIProvider>
           {children}
           <ChatWidgetLoader />
