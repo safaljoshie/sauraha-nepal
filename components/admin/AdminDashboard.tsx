@@ -69,7 +69,7 @@ function DetailRow({ label, value }: { label: string; value: string | null | und
   return (
     <div className="border-b border-border-brand py-3 last:border-0">
       <dt className="text-xs font-bold uppercase tracking-wide text-text-light">{label}</dt>
-      <dd className="mt-1 whitespace-pre-wrap text-sm text-text-brand">{value}</dd>
+      <dd className="mt-1 break-words text-sm text-text-brand">{value}</dd>
     </div>
   )
 }
@@ -553,9 +553,9 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
+    <div className="mx-auto w-full min-w-0 max-w-7xl overflow-x-hidden px-4 py-8 md:px-8">
       <header className="mb-8 flex flex-col gap-4 border-b border-border-brand pb-6 md:flex-row md:items-center md:justify-between">
-        <div>
+        <div className="min-w-0">
           <h1 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand md:text-3xl">
             Sauraha Nepal — Admin Dashboard
           </h1>
@@ -563,7 +563,7 @@ export default function AdminDashboard() {
             Manage listings, blog posts, content calendar, and site settings
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/admin/team"
             className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
@@ -611,7 +611,7 @@ export default function AdminDashboard() {
       {adminTab === "settings" && <AdminSiteSettingsSection />}
 
       {adminTab === "listings" && (
-        <>
+        <div className="min-w-0 w-full max-w-full">
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
           { label: "Total listings", value: stats.total },
@@ -701,9 +701,9 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <div className="overflow-hidden rounded-2xl border border-border-brand bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1060px] text-left text-sm">
+      <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-border-brand bg-white shadow-sm">
+        <div className="w-full max-w-full overflow-x-auto">
+          <table className="w-full min-w-[960px] text-left text-sm">
             <thead>
               <tr className="border-b border-border-brand bg-cream/80 text-xs font-bold uppercase tracking-wide text-text-light">
                 <th className="px-4 py-3">
@@ -754,10 +754,10 @@ export default function AdminDashboard() {
                         aria-label={`Select ${listing.business_name}`}
                       />
                     </td>
-                    <td className="px-4 py-3 font-semibold text-text-brand">
+                    <td className="max-w-[12rem] truncate px-4 py-3 font-semibold text-text-brand">
                       {listing.business_name}
                     </td>
-                    <td className="px-4 py-3 text-text-mid">{listing.category}</td>
+                    <td className="max-w-[8rem] truncate px-4 py-3 text-text-mid">{listing.category}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-bold ${planBadgeClass(listing.plan)}`}
@@ -765,12 +765,13 @@ export default function AdminDashboard() {
                         {planLabel(listing.plan)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-text-mid">{listing.owner_name}</td>
-                    <td className="px-4 py-3">
+                    <td className="max-w-[9rem] truncate px-4 py-3 text-text-mid">{listing.owner_name}</td>
+                    <td className="max-w-[11rem] truncate px-4 py-3">
                       {listing.email ? (
                         <a
                           href={`mailto:${listing.email}`}
-                          className="text-green-mid hover:underline"
+                          className="block truncate text-green-mid hover:underline"
+                          title={listing.email}
                         >
                           {listing.email}
                         </a>
@@ -852,7 +853,7 @@ export default function AdminDashboard() {
           aria-modal="true"
           aria-labelledby="listing-detail-title"
         >
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border-brand bg-white p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-lg min-w-0 overflow-x-hidden overflow-y-auto rounded-2xl border border-border-brand bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-start justify-between gap-4">
               <h2
                 id="listing-detail-title"
@@ -918,7 +919,7 @@ export default function AdminDashboard() {
 
       {editForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-border-brand bg-white p-6 shadow-xl">
+          <div className="max-h-[90vh] w-full max-w-3xl min-w-0 overflow-x-hidden overflow-y-auto rounded-2xl border border-border-brand bg-white p-6 shadow-xl">
             <div className="mb-4 flex items-start justify-between gap-4">
               <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
                 Edit listing
@@ -939,7 +940,7 @@ export default function AdminDashboard() {
               </p>
             )}
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid min-w-0 gap-4 md:grid-cols-2">
               <EditField label="Business Name" required>
                 <input
                   value={editForm.business_name}
@@ -1054,7 +1055,9 @@ export default function AdminDashboard() {
                       className="hidden"
                     />
                   </label>
-                  <span className="text-xs text-text-light">JPEG/PNG/WEBP/HEIC, max 15MB each (optimized before upload)</span>
+                  <span className="text-xs text-text-light sm:max-w-none">
+                    JPEG/PNG/WEBP/HEIC, max 15MB each (optimized before upload)
+                  </span>
                 </div>
                 <textarea
                   value={editForm.photo_links}
@@ -1164,14 +1167,14 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
-        </>
+        </div>
       )}
     </div>
   )
 }
 
 const fieldClass =
-  "w-full rounded-[10px] border-[1.5px] border-border-brand bg-cream px-3 py-2 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white"
+  "w-full min-w-0 rounded-[10px] border-[1.5px] border-border-brand bg-cream px-3 py-2 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white"
 
 function EditField({
   label,
@@ -1185,7 +1188,7 @@ function EditField({
   className?: string
 }) {
   return (
-    <div className={className}>
+    <div className={`min-w-0 ${className}`}>
       <label className="mb-1.5 block text-sm font-semibold text-text-mid">
         {label} {required ? "*" : ""}
       </label>
