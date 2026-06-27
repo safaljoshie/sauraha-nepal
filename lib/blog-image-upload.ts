@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto"
 import {
+  ensureListingPhotosBucket,
   getListingPhotosBucket,
   getStoragePublicUrl,
 } from "@/lib/list-business-photos"
@@ -33,6 +34,11 @@ export async function uploadBlogImage(params: {
   }
 
   const supabase = getSupabaseAdmin()
+  const bucketError = await ensureListingPhotosBucket(supabase)
+  if (bucketError) {
+    throw bucketError
+  }
+
   const path = `${blogImageFolder(params.purpose, params.postId)}/${params.filename}`
   const bucket = getListingPhotosBucket()
 

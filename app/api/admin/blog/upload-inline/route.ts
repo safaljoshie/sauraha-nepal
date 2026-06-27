@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { uploadBlogImage } from "@/lib/blog-image-upload"
-import { isAllowedPhotoFile, sanitizePhotoFilename } from "@/lib/list-business-photos"
+import { isAllowedPhotoFile, uniqueStorageFilename } from "@/lib/list-business-photos"
 
 export async function POST(request: Request) {
   const unauthorized = await requireAdminApi()
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const { url } = await uploadBlogImage({
       buffer: Buffer.from(await file.arrayBuffer()),
       contentType: file.type || "image/jpeg",
-      filename: sanitizePhotoFilename(file.name),
+      filename: uniqueStorageFilename(file.name),
       postId,
       purpose: "inline",
     })

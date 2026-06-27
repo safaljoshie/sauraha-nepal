@@ -1,12 +1,14 @@
 import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 import {
+  ensureListingPhotosBucket,
   getListingPhotosBucket,
   getStoragePublicUrl,
   isAllowedPhotoFile,
   MAX_PHOTO_BYTES,
   photoLimitForPlan,
-  sanitizePhotoFilename,
+  storageUploadErrorMessage,
+  uniqueStorageFilename,
 } from "@/lib/list-business-photos"
 import { normalizePlan } from "@/lib/list-business"
 import { getSupabaseAdmin } from "@/lib/supabase"
@@ -70,6 +72,16 @@ export async function POST(request: Request) {
     typeof submissionIdRaw === "string" && submissionIdRaw.trim()
       ? submissionIdRaw.trim().replace(/[^a-zA-Z0-9-]/g, "")
       : randomUUID()
+
+  const bucketError = await ensureListingPhotosBucket(supabase)
+  if (bucketError) {
+    console.error("Listing photos bucket setup error:", bucketError)
+    return NextResponse.json(
+      { error: storageUploadErrorMessage(bucketError) },
+      { status: 500 },
+    )
+  }
+
   const urls: string[] = []
 
   for (const file of files) {
@@ -86,19 +98,25 @@ export async function POST(request: Request) {
       )
     }
 
-    const filename = sanitizePhotoFilename(file.name)
+    const filename = uniqueStorageFilename(file.name)
     const path = `pending/${submissionId}/${filename}`
     const buffer = Buffer.from(await file.arrayBuffer())
+    const contentType =
+      file.type === "image/webp"
+        ? "image/webp"
+        : file.type === "image/png"
+          ? "image/png"
+          : file.type || "image/jpeg"
 
     const { error } = await supabase.storage.from(bucket).upload(path, buffer, {
-      contentType: file.type === "image/webp" ? "image/webp" : file.type || "image/jpeg",
+      contentType,
       upsert: false,
     })
 
     if (error) {
       console.error("Supabase storage upload error:", error)
       return NextResponse.json(
-        { error: "Failed to upload photos. Please try again." },
+        { error: storageUploadErrorMessage(error) },
         { status: 500 },
       )
     }

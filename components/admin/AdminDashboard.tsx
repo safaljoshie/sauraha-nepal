@@ -413,7 +413,7 @@ export default function AdminDashboard() {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to upload image. Please try again."
       setEditErrors(message)
-      showToast("error", "Failed to upload image. Please try again.")
+      showToast("error", message)
     } finally {
       setUploadingPhotos(false)
     }

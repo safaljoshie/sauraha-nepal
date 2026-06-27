@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import {
+  ensureListingPhotosBucket,
   getListingPhotosBucket,
   getStoragePublicUrl,
 } from "@/lib/list-business-photos"
@@ -145,11 +146,6 @@ export const HERO_BUCKET_ALLOWED_MIME = [
  * Listing photo bucket defaults to ~5MB image-only limits. Hero videos need more.
  * Best-effort update via service role before signed uploads.
  */
-export async function ensureHeroStorageBucket(supabase: SupabaseClient, bucket: string) {
-  const { error } = await supabase.storage.updateBucket(bucket, {
-    public: true,
-    fileSizeLimit: MAX_HERO_VIDEO_BYTES,
-    allowedMimeTypes: [...HERO_BUCKET_ALLOWED_MIME],
-  })
-  return error
+export async function ensureHeroStorageBucket(supabase: SupabaseClient, _bucket?: string) {
+  return ensureListingPhotosBucket(supabase)
 }

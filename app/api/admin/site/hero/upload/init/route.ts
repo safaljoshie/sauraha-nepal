@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
-import { getListingPhotosBucket } from "@/lib/list-business-photos"
+import { ensureListingPhotosBucket, getListingPhotosBucket } from "@/lib/list-business-photos"
 import {
   buildHeroStoragePath,
-  ensureHeroStorageBucket,
   getHeroPublicUrl,
   isAllowedHeroFile,
   resolveHeroContentType,
@@ -79,11 +78,10 @@ export async function POST(request: Request) {
   const path = buildHeroStoragePath(type, filename)
   const bucket = getListingPhotosBucket()
 
-  if (type === "video") {
-    const bucketError = await ensureHeroStorageBucket(supabase, bucket)
-    if (bucketError) {
-      console.warn("Hero bucket settings update:", bucketError.message)
-    }
+  const bucketError = await ensureListingPhotosBucket(supabase)
+  if (bucketError) {
+    console.error("Hero bucket setup error:", bucketError)
+    return NextResponse.json({ error: bucketError.message }, { status: 500 })
   }
 
   const { data, error } = await supabase.storage.from(bucket).createSignedUploadUrl(path)

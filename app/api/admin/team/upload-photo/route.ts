@@ -2,11 +2,13 @@ import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import {
+  ensureListingPhotosBucket,
   getListingPhotosBucket,
   getStoragePublicUrl,
   isAllowedPhotoFile,
   MAX_PHOTO_BYTES,
-  sanitizePhotoFilename,
+  storageUploadErrorMessage,
+  uniqueStorageFilename,
 } from "@/lib/list-business-photos"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
@@ -45,10 +47,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Each photo must be 5 MB or smaller." }, { status: 400 })
   }
 
-  const filename = sanitizePhotoFilename(file.name)
-  const path = `admin/team/${randomUUID()}-${filename}`
+  const filename = uniqueStorageFilename(file.name)
+  const path = `admin/team/${filename}`
   const bucket = getListingPhotosBucket()
   const buffer = Buffer.from(await file.arrayBuffer())
+
+  const bucketError = await ensureListingPhotosBucket(supabase)
+  if (bucketError) {
+    console.error("Team photo bucket setup error:", bucketError)
+    return NextResponse.json({ error: storageUploadErrorMessage(bucketError) }, { status: 500 })
+  }
 
   const { error } = await supabase.storage.from(bucket).upload(path, buffer, {
     contentType: file.type || "image/jpeg",
@@ -57,7 +65,7 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error("Team photo upload error:", error)
-    return NextResponse.json({ error: "Failed to upload image." }, { status: 500 })
+    return NextResponse.json({ error: storageUploadErrorMessage(error) }, { status: 500 })
   }
 
   const url = getStoragePublicUrl(bucket, path, supabaseUrl)

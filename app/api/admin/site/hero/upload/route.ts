@@ -2,12 +2,11 @@ import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import {
   buildHeroStoragePath,
-  ensureHeroStorageBucket,
   getHeroPublicUrl,
   isAllowedHeroFile,
   resolveHeroContentType,
 } from "@/lib/hero-media-upload"
-import { getListingPhotosBucket } from "@/lib/list-business-photos"
+import { ensureListingPhotosBucket, getListingPhotosBucket } from "@/lib/list-business-photos"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 export async function POST(request: Request) {
@@ -72,8 +71,9 @@ export async function POST(request: Request) {
   const path = buildHeroStoragePath(type, file.name)
   const bucket = getListingPhotosBucket()
 
-  if (type === "video") {
-    await ensureHeroStorageBucket(supabase, bucket)
+  const bucketError = await ensureListingPhotosBucket(supabase)
+  if (bucketError) {
+    return NextResponse.json({ error: bucketError.message }, { status: 500 })
   }
 
   const buffer = Buffer.from(await file.arrayBuffer())
