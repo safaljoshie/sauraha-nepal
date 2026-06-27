@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useState, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import type { TeamMember } from "@/lib/team-members"
+import { compressImage } from "@/lib/compress-image"
 
 type TeamFormState = {
   id?: string
@@ -200,8 +201,9 @@ export default function AdminTeamManager() {
     setUploading(true)
     setError("")
     try {
+      const compressed = await compressImage(file)
       const body = new FormData()
-      body.set("file", file)
+      body.set("file", compressed)
 
       const res = await fetch("/api/admin/team/upload-photo", {
         method: "POST",
@@ -220,9 +222,9 @@ export default function AdminTeamManager() {
 
       setForm((prev) => (prev ? { ...prev, image: data.url! } : prev))
       showToast("success", "Photo uploaded successfully.")
-    } catch {
-      setError("Failed to upload photo.")
-      showToast("error", "Failed to upload photo.")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload photo.")
+      showToast("error", err instanceof Error ? err.message : "Failed to upload photo.")
     } finally {
       setUploading(false)
     }

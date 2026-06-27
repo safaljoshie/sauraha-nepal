@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import type { HeroMedia } from "@/lib/site-content"
+import { compressImage } from "@/lib/compress-image"
 import { getSupabasePublic } from "@/lib/supabase"
 
 type Toast = { id: string; type: "success" | "error"; message: string }
@@ -292,7 +293,8 @@ export default function AdminHeroMediaManager() {
     setUploading(true)
     setError("")
     try {
-      const result = await uploadHeroFileDirect(file, "image")
+      const compressed = await compressImage(file)
+      const result = await uploadHeroFileDirect(compressed, "image")
       if ("error" in result) {
         setError(result.error)
         showToast("error", result.error)
@@ -301,9 +303,10 @@ export default function AdminHeroMediaManager() {
 
       setForm((prev) => (prev ? { ...prev, poster_url: result.url } : prev))
       showToast("success", "Poster uploaded. Click Save Media to publish.")
-    } catch {
-      setError("Failed to upload poster.")
-      showToast("error", "Failed to upload poster.")
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to upload poster."
+      setError(message)
+      showToast("error", message)
     } finally {
       setUploading(false)
     }

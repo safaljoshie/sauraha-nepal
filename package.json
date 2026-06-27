@@ -13,7 +13,8 @@
     "generate:og-image": "node scripts/generate-og-image.mjs",
     "setup:mail-dns": "node scripts/setup-mail-receiving.mjs",
     "compress-photos": "tsx scripts/compress-existing-photos.ts",
-    "compress-photos:dry": "tsx scripts/compress-existing-photos.ts --dry-run"
+    "compress-photos:dry": "tsx scripts/compress-existing-photos.ts --dry-run",
+    "check-photo-sizes": "tsx scripts/check-photo-sizes.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

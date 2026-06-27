@@ -253,19 +253,17 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
             }
           }),
         )
-      } catch {
-        setPhotoFiles((prev) =>
-          prev.map((entry) =>
-            entry.id === id
-              ? {
-                  ...entry,
-                  compressing: false,
-                  compressedSizeBytes: entry.file.size,
-                  sizeWarning: "Could not optimize this image — uploading original.",
-                }
-              : entry,
-          ),
-        )
+      } catch (err) {
+        setPhotoFiles((prev) => {
+          const entry = prev.find((p) => p.id === id)
+          if (entry) URL.revokeObjectURL(entry.previewUrl)
+          return prev.filter((p) => p.id !== id)
+        })
+        URL.revokeObjectURL(placeholderPreview)
+        const message =
+          err instanceof Error ? err.message : "Could not optimize this image."
+        setErrorMessage(message)
+        setStatus("error")
       }
     }
   }

@@ -12,7 +12,7 @@ import {
   parsePhotoLinkLines,
 } from "../lib/list-business-photos"
 
-const LISTING_DELAY_MS = 500
+const LISTING_DELAY_MS = 800
 
 type ListingRow = {
   id: string
@@ -67,8 +67,8 @@ function loadEnvLocal() {
 
 export async function compressImageBuffer(buffer: Buffer): Promise<Buffer> {
   return sharp(buffer)
-    .resize(1600, 1600, { fit: "inside", withoutEnlargement: true })
-    .webp({ quality: 80 })
+    .resize(1280, 1280, { fit: "inside", withoutEnlargement: true })
+    .webp({ quality: 75 })
     .toBuffer()
 }
 

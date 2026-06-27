@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState, type ChangeEvent } from "react"
 import { BLOG_TAGS, type BlogPostRow } from "@/lib/blog-db"
 import { slugifyTitle } from "@/lib/blog-slug"
+import { compressImage } from "@/lib/compress-image"
 import { isNextOptimizedImageSrc } from "@/lib/image"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
@@ -126,8 +127,9 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
     setUploadingInline(true)
     setError("")
     try {
+      const compressed = await compressImage(file)
       const formData = new FormData()
-      formData.set("file", file)
+      formData.set("file", compressed)
       if (postId) formData.set("postId", postId)
 
       const res = await fetch("/api/admin/blog/upload-inline", {
@@ -148,8 +150,8 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
         form.title.trim() ||
         "Image"
       insertImageIntoContent(data.url, alt)
-    } catch {
-      setError("Failed to upload image.")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload image.")
     } finally {
       setUploadingInline(false)
     }
@@ -163,8 +165,9 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
     setUploadingCover(true)
     setError("")
     try {
+      const compressed = await compressImage(file)
       const formData = new FormData()
-      formData.set("file", file)
+      formData.set("file", compressed)
       if (postId) formData.set("postId", postId)
 
       const res = await fetch("/api/admin/blog/upload-cover", {
@@ -181,8 +184,8 @@ export default function AdminBlogEditor({ postId }: { postId?: string }) {
         return
       }
       setForm((prev) => ({ ...prev, cover_image: data.url! }))
-    } catch {
-      setError("Failed to upload cover image.")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upload cover image.")
     } finally {
       setUploadingCover(false)
     }
