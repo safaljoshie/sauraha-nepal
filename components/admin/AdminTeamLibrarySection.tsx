@@ -11,6 +11,7 @@ import {
   groupLibraryByCategory,
   isAllowedLibraryFile,
   libraryFileKind,
+  canViewInBrowser,
   type TeamLibraryItemWithDownload,
 } from "@/lib/team-library-shared"
 
@@ -368,10 +369,18 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
                       </div>
 
                       <div className="flex flex-wrap gap-2">
+                        {canViewInBrowser(item.file_type, item.file_name) && (
+                          <a
+                            href={item.view_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
+                          >
+                            View
+                          </a>
+                        )}
                         <a
                           href={item.download_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           download={item.file_name}
                           className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
                         >

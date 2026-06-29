@@ -3,7 +3,7 @@ import { requireAdminApi } from "@/lib/admin-auth"
 import { requireTeamOrAdminApi } from "@/lib/calendar-access"
 import type { TeamLibraryConfig } from "@/lib/team-library-config"
 import {
-  attachLibrarySignedDownloadUrls,
+  attachLibrarySignedUrls,
   createTeamLibraryItem,
   deleteTeamLibraryFile,
   deleteTeamLibraryItem,
@@ -31,7 +31,7 @@ export function createAdminLibraryGET(config: TeamLibraryConfig) {
 
     try {
       const items = await fetchTeamLibraryItems(config)
-      const itemsWithUrls = await attachLibrarySignedDownloadUrls(items)
+      const itemsWithUrls = await attachLibrarySignedUrls(items)
       return NextResponse.json({ resources: itemsWithUrls })
     } catch (error) {
       console.error(`Admin ${config.id} fetch error:`, error)
@@ -143,7 +143,7 @@ export function createTeamLibraryGET(config: TeamLibraryConfig) {
 
     try {
       const items = await fetchTeamLibraryItems(config)
-      const itemsWithUrls = await attachLibrarySignedDownloadUrls(items)
+      const itemsWithUrls = await attachLibrarySignedUrls(items)
       return NextResponse.json({ resources: itemsWithUrls })
     } catch (error) {
       console.error(`Team ${config.id} fetch error:`, error)

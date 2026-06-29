@@ -35,6 +35,7 @@ export type TeamLibraryItem = {
 }
 
 export type TeamLibraryItemWithDownload = TeamLibraryItem & {
+  view_url: string
   download_url: string
 }
 
@@ -171,6 +172,12 @@ export function libraryFileKind(fileType: string, fileName: string): "pdf" | "wo
   if (lower.includes("pdf")) return "pdf"
   if (lower.includes("word") || lower.includes("doc")) return "word"
   return "image"
+}
+
+/** Browsers can preview PDFs and images inline; Word files need download. */
+export function canViewInBrowser(fileType: string, fileName: string) {
+  const kind = libraryFileKind(fileType, fileName)
+  return kind === "pdf" || kind === "image"
 }
 
 export function groupLibraryByCategory<T extends { category: string }>(

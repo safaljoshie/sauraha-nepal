@@ -11,6 +11,7 @@ import {
   formatLibraryFileSize,
   groupLibraryByCategory,
   libraryFileKind,
+  canViewInBrowser,
   type TeamLibraryItemWithDownload,
 } from "@/lib/team-library-shared"
 
@@ -159,15 +160,25 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
                                   </p>
                                 </div>
                               </div>
-                              <a
-                                href={item.download_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                download={item.file_name}
-                                className="btn-primary team-action-btn mt-3 w-full sm:mt-4"
-                              >
-                                Download
-                              </a>
+                              <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row">
+                                {canViewInBrowser(item.file_type, item.file_name) && (
+                                  <a
+                                    href={item.view_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="team-action-btn w-full rounded-xl border border-border-brand bg-white px-4 py-2.5 text-center text-sm font-semibold text-text-brand transition-colors hover:border-green-mid hover:bg-cream sm:flex-1"
+                                  >
+                                    View
+                                  </a>
+                                )}
+                                <a
+                                  href={item.download_url}
+                                  download={item.file_name}
+                                  className="btn-primary team-action-btn w-full sm:flex-1"
+                                >
+                                  Download
+                                </a>
+                              </div>
                             </li>
                           ))}
                         </ul>
