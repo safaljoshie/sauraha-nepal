@@ -6,6 +6,7 @@ import ResourceFileIcon from "@/components/resources/ResourceFileIcon"
 import TeamPageHeader from "@/components/team/TeamPageHeader"
 import TeamShell from "@/components/team/TeamShell"
 import type { TeamLibraryConfig } from "@/lib/team-library-config"
+import { teamLibraryDownloadPath, teamLibraryViewPath } from "@/lib/team-library-serve"
 import {
   formatLibraryDate,
   formatLibraryFileSize,
@@ -160,18 +161,16 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
                                 </div>
                               </div>
                               <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row">
-                                {item.view_url && (
-                                  <a
-                                    href={item.view_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="team-action-btn w-full rounded-xl border border-border-brand bg-white px-4 py-2.5 text-center text-sm font-semibold text-text-brand transition-colors hover:border-green-mid hover:bg-cream sm:flex-1"
-                                  >
-                                    View
-                                  </a>
-                                )}
                                 <a
-                                  href={item.download_url}
+                                  href={teamLibraryViewPath(config, item.id)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="team-action-btn w-full rounded-xl border border-border-brand bg-white px-4 py-2.5 text-center text-sm font-semibold text-text-brand transition-colors hover:border-green-mid hover:bg-cream sm:flex-1"
+                                >
+                                  View
+                                </a>
+                                <a
+                                  href={teamLibraryDownloadPath(config, item.id)}
                                   download={item.file_name}
                                   className="btn-primary team-action-btn w-full sm:flex-1"
                                 >

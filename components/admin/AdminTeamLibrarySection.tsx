@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import ResourceFileIcon from "@/components/resources/ResourceFileIcon"
+import { teamLibraryDownloadPath, teamLibraryViewPath } from "@/lib/team-library-serve"
 import type { TeamLibraryConfig } from "@/lib/team-library-config"
 import {
   MAX_LIBRARY_FILE_BYTES,
@@ -368,18 +369,16 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        {item.view_url && (
-                          <a
-                            href={item.view_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
-                          >
-                            View
-                          </a>
-                        )}
                         <a
-                          href={item.download_url}
+                          href={teamLibraryViewPath(config, item.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
+                        >
+                          View
+                        </a>
+                        <a
+                          href={teamLibraryDownloadPath(config, item.id)}
                           download={item.file_name}
                           className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
                         >

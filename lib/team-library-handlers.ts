@@ -3,7 +3,6 @@ import { requireAdminApi } from "@/lib/admin-auth"
 import { requireTeamOrAdminApi } from "@/lib/calendar-access"
 import type { TeamLibraryConfig } from "@/lib/team-library-config"
 import {
-  attachLibrarySignedUrls,
   createTeamLibraryItem,
   deleteTeamLibraryFile,
   deleteTeamLibraryItem,
@@ -14,9 +13,11 @@ import {
 } from "@/lib/team-library-db"
 import {
   buildLibraryStoragePath,
+  resolveLibraryContentType,
   sanitizeLibraryFilename,
   validateLibraryUploadInput,
 } from "@/lib/team-library-shared"
+import { serveTeamLibraryFile } from "@/lib/team-library-serve"
 
 function bucketHint(message: string) {
   return message.toLowerCase().includes("bucket not found")
@@ -31,8 +32,7 @@ export function createAdminLibraryGET(config: TeamLibraryConfig) {
 
     try {
       const items = await fetchTeamLibraryItems(config)
-      const itemsWithUrls = await attachLibrarySignedUrls(items)
-      return NextResponse.json({ resources: itemsWithUrls })
+      return NextResponse.json({ resources: items })
     } catch (error) {
       console.error(`Admin ${config.id} fetch error:`, error)
       return NextResponse.json({ error: config.loadErrorMessage }, { status: 500 })
@@ -87,7 +87,11 @@ export function createAdminLibraryPOST(config: TeamLibraryConfig) {
 
     try {
       await ensureTeamLibraryBucket()
-      await uploadTeamLibraryFile(storagePath, buffer, file.type || "application/octet-stream")
+      await uploadTeamLibraryFile(
+        storagePath,
+        buffer,
+        resolveLibraryContentType(file.type || "", file.name),
+      )
 
       const resource = await createTeamLibraryItem(config, {
         title: validated.data.title,
@@ -95,7 +99,7 @@ export function createAdminLibraryPOST(config: TeamLibraryConfig) {
         category: validated.data.category,
         file_url: storagePath,
         file_name: file.name,
-        file_type: file.type || "application/octet-stream",
+        file_type: resolveLibraryContentType(file.type || "", file.name),
         file_size_kb: Math.max(1, Math.round(file.size / 1024)),
         uploaded_by: "Admin",
       })
@@ -143,8 +147,7 @@ export function createTeamLibraryGET(config: TeamLibraryConfig) {
 
     try {
       const items = await fetchTeamLibraryItems(config)
-      const itemsWithUrls = await attachLibrarySignedUrls(items)
-      return NextResponse.json({ resources: itemsWithUrls })
+      return NextResponse.json({ resources: items })
     } catch (error) {
       console.error(`Team ${config.id} fetch error:`, error)
       return NextResponse.json({ error: config.loadErrorMessage }, { status: 500 })
@@ -157,5 +160,26 @@ export function createTeamLibraryMethodNotAllowed() {
     const unauthorized = await requireTeamOrAdminApi()
     if (unauthorized) return unauthorized
     return NextResponse.json({ error: "Method not allowed" }, { status: 405 })
+  }
+}
+
+export function createTeamLibraryFileRoute(
+  config: TeamLibraryConfig,
+  disposition: "inline" | "attachment",
+) {
+  return async function GET(
+    _request: Request,
+    context: { params: Promise<{ id: string }> },
+  ) {
+    const unauthorized = await requireTeamOrAdminApi()
+    if (unauthorized) return unauthorized
+
+    const { id } = await context.params
+    try {
+      return await serveTeamLibraryFile(config, id, disposition)
+    } catch (error) {
+      console.error(`Team ${config.id} file serve error:`, error)
+      return new Response("Failed to load file.", { status: 500 })
+    }
   }
 }

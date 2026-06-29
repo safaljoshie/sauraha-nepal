@@ -34,10 +34,7 @@ export type TeamLibraryItem = {
   uploaded_by: string | null
 }
 
-export type TeamLibraryItemWithDownload = TeamLibraryItem & {
-  view_url: string
-  download_url: string
-}
+export type TeamLibraryItemWithDownload = TeamLibraryItem
 
 export type TeamLibraryItemPayload = {
   title: string
@@ -62,6 +59,33 @@ export function getFileExtension(filename: string) {
   const dot = filename.lastIndexOf(".")
   if (dot < 0) return ""
   return filename.slice(dot).toLowerCase()
+}
+
+export type LibraryFileDisposition = "inline" | "attachment"
+
+export function resolveLibraryContentType(fileType: string, fileName: string) {
+  const mime = fileType.trim().toLowerCase()
+  if (mime && mime !== "application/octet-stream") {
+    return fileType.trim()
+  }
+
+  switch (getFileExtension(fileName)) {
+    case ".pdf":
+      return "application/pdf"
+    case ".png":
+      return "image/png"
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg"
+    case ".webp":
+      return "image/webp"
+    case ".doc":
+      return "application/msword"
+    case ".docx":
+      return "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    default:
+      return "application/octet-stream"
+  }
 }
 
 export function isAllowedLibraryFile(file: { name: string; type: string; size: number }) {

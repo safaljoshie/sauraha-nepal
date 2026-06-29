@@ -1,10 +1,8 @@
 import {
-  LIBRARY_SIGNED_URL_TTL_SECONDS,
   TEAM_LIBRARY_BUCKET,
+  MAX_LIBRARY_FILE_BYTES,
   type TeamLibraryItem,
   type TeamLibraryItemPayload,
-  type TeamLibraryItemWithDownload,
-  MAX_LIBRARY_FILE_BYTES,
 } from "@/lib/team-library-shared"
 import type { TeamLibraryConfig } from "@/lib/team-library-config"
 import { getSupabaseAdmin } from "@/lib/supabase"
@@ -111,48 +109,3 @@ export async function deleteTeamLibraryFile(path: string) {
     throw new Error(error.message)
   }
 }
-
-async function createLibrarySignedViewUrl(path: string) {
-  const supabase = getSupabaseAdmin()
-  const { data, error } = await supabase.storage
-    .from(TEAM_LIBRARY_BUCKET)
-    .createSignedUrl(path, LIBRARY_SIGNED_URL_TTL_SECONDS)
-
-  if (error || !data?.signedUrl) {
-    throw new Error(error?.message ?? "Failed to create view link.")
-  }
-
-  return data.signedUrl
-}
-
-async function createLibrarySignedDownloadUrl(path: string, fileName: string) {
-  const supabase = getSupabaseAdmin()
-  const { data, error } = await supabase.storage
-    .from(TEAM_LIBRARY_BUCKET)
-    .createSignedUrl(path, LIBRARY_SIGNED_URL_TTL_SECONDS, { download: fileName })
-
-  if (error || !data?.signedUrl) {
-    throw new Error(error?.message ?? "Failed to create download link.")
-  }
-
-  return data.signedUrl
-}
-
-export async function attachLibrarySignedUrls(items: TeamLibraryItem[]) {
-  return Promise.all(
-    items.map(async (item) => {
-      const [view_url, download_url] = await Promise.all([
-        createLibrarySignedViewUrl(item.file_url),
-        createLibrarySignedDownloadUrl(item.file_url, item.file_name),
-      ])
-      return {
-        ...item,
-        view_url,
-        download_url,
-      }
-    }),
-  ) as Promise<TeamLibraryItemWithDownload[]>
-}
-
-/** @deprecated Use attachLibrarySignedUrls */
-export const attachLibrarySignedDownloadUrls = attachLibrarySignedUrls
