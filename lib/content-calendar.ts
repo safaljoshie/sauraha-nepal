@@ -333,7 +333,7 @@ export function normalizeCalendarPayload(body: Partial<ContentCalendarPayload>) 
   const link = body.link?.trim() || null
 
   if (!scheduled_date || !content_title || !platform || !owner) {
-    return { error: "Scheduled date, content title, platform, and owner are required." }
+    return { error: "Scheduled date, content title, platform, and alloted are required." }
   }
 
   if (!CALENDAR_PLATFORMS.includes(platform as CalendarPlatform)) {

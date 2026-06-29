@@ -18,6 +18,7 @@ import {
   validateLibraryUploadInput,
 } from "@/lib/team-library-shared"
 import { serveTeamLibraryFile } from "@/lib/team-library-serve"
+import { fetchTeamResourcesOnlineFormUrl } from "@/lib/site-settings"
 
 function bucketHint(message: string) {
   return message.toLowerCase().includes("bucket not found")
@@ -147,7 +148,11 @@ export function createTeamLibraryGET(config: TeamLibraryConfig) {
 
     try {
       const items = await fetchTeamLibraryItems(config)
-      return NextResponse.json({ resources: items })
+      const payload: { resources: typeof items; onlineFormUrl?: string } = { resources: items }
+      if (config.id === "resources") {
+        payload.onlineFormUrl = await fetchTeamResourcesOnlineFormUrl()
+      }
+      return NextResponse.json(payload)
     } catch (error) {
       console.error(`Team ${config.id} fetch error:`, error)
       return NextResponse.json({ error: config.loadErrorMessage }, { status: 500 })

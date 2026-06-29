@@ -97,7 +97,7 @@ function SecondaryFilters({
       </label>
 
       <label className="block">
-        <span className="mb-1 block text-xs font-semibold text-text-light">Owner</span>
+        <span className="mb-1 block text-xs font-semibold text-text-light">Alloted</span>
         <select
           className={`${selectClass} w-full`}
           value={owner}

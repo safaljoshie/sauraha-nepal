@@ -40,7 +40,7 @@ export function CalendarEntryDetailBody({
         </span>
       </div>
       <h4 className={titleClass}>{entry.content_title}</h4>
-      <p className={metaClass}>Owner: {entry.owner}</p>
+      <p className={metaClass}>Alloted: {entry.owner}</p>
       {entry.notes && <p className={notesClass}>{entry.notes}</p>}
       {entry.link && (
         <a

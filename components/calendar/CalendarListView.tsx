@@ -282,7 +282,7 @@ export default function CalendarListView({
               <th className="px-4 py-3">Content</th>
               <th className="px-4 py-3">Platform</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Owner</th>
+              <th className="px-4 py-3">Alloted</th>
               {showActions && <th className="px-4 py-3">Actions</th>}
             </tr>
           </thead>

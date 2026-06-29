@@ -109,3 +109,45 @@ export async function upsertSiteSettings(
 
   return fetchSiteSettingsAdmin()
 }
+
+export const TEAM_RESOURCES_ONLINE_FORM_KEY = "team_resources_online_form_url"
+
+export async function fetchTeamResourcesOnlineFormUrl(): Promise<string> {
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("key", TEAM_RESOURCES_ONLINE_FORM_KEY)
+    .maybeSingle()
+
+  if (error) throw error
+  return data?.value?.trim() ?? ""
+}
+
+export async function upsertTeamResourcesOnlineFormUrl(url: string): Promise<string> {
+  const supabase = getSupabaseAdmin()
+  const value = url.trim()
+
+  const { data: existing, error: findError } = await supabase
+    .from("site_settings")
+    .select("id")
+    .eq("key", TEAM_RESOURCES_ONLINE_FORM_KEY)
+    .maybeSingle()
+
+  if (findError) throw findError
+
+  if (existing?.id) {
+    const { error } = await supabase
+      .from("site_settings")
+      .update({ value })
+      .eq("key", TEAM_RESOURCES_ONLINE_FORM_KEY)
+    if (error) throw error
+  } else {
+    const { error } = await supabase
+      .from("site_settings")
+      .insert({ key: TEAM_RESOURCES_ONLINE_FORM_KEY, value })
+    if (error) throw error
+  }
+
+  return value
+}

@@ -445,7 +445,7 @@ export default function AdminCalendarSection() {
               </label>
 
               <label className="block">
-                <span className="mb-1 block text-sm font-semibold text-text-mid">Owner</span>
+                <span className="mb-1 block text-sm font-semibold text-text-mid">Alloted</span>
                 <input
                   type="text"
                   className={fieldClass}

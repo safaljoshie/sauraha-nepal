@@ -18,6 +18,7 @@ import {
 export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }) {
   const router = useRouter()
   const [items, setItems] = useState<TeamLibraryItemWithDownload[]>([])
+  const [onlineFormUrl, setOnlineFormUrl] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [search, setSearch] = useState("")
@@ -35,6 +36,7 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
 
       const data = (await res.json()) as {
         resources?: TeamLibraryItemWithDownload[]
+        onlineFormUrl?: string
         error?: string
       }
 
@@ -44,6 +46,9 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
       }
 
       setItems(data.resources ?? [])
+      if (config.id === "resources") {
+        setOnlineFormUrl(data.onlineFormUrl?.trim() ?? "")
+      }
     } catch {
       setError(config.loadErrorMessage)
     } finally {
@@ -89,6 +94,19 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
             className="team-input"
           />
         </label>
+
+        {config.id === "resources" && onlineFormUrl && (
+          <div className="mt-4">
+            <a
+              href={onlineFormUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary team-action-btn inline-flex w-full items-center justify-center gap-2 sm:w-auto"
+            >
+              Online Form ↗
+            </a>
+          </div>
+        )}
 
         {error && (
           <p role="alert" className="team-body-text mt-4 font-semibold text-orange-brand">
