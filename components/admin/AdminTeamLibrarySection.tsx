@@ -11,7 +11,6 @@ import {
   groupLibraryByCategory,
   isAllowedLibraryFile,
   libraryFileKind,
-  canViewInBrowser,
   type TeamLibraryItemWithDownload,
 } from "@/lib/team-library-shared"
 
@@ -369,7 +368,7 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        {canViewInBrowser(item.file_type, item.file_name) && (
+                        {item.view_url && (
                           <a
                             href={item.view_url}
                             target="_blank"

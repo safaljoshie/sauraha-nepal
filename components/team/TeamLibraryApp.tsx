@@ -11,7 +11,6 @@ import {
   formatLibraryFileSize,
   groupLibraryByCategory,
   libraryFileKind,
-  canViewInBrowser,
   type TeamLibraryItemWithDownload,
 } from "@/lib/team-library-shared"
 
@@ -161,7 +160,7 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
                                 </div>
                               </div>
                               <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row">
-                                {canViewInBrowser(item.file_type, item.file_name) && (
+                                {item.view_url && (
                                   <a
                                     href={item.view_url}
                                     target="_blank"

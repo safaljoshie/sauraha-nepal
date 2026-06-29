@@ -168,16 +168,28 @@ export function formatLibraryDate(isoDate: string) {
 }
 
 export function libraryFileKind(fileType: string, fileName: string): "pdf" | "word" | "image" {
-  const lower = `${fileType} ${fileName}`.toLowerCase()
-  if (lower.includes("pdf")) return "pdf"
-  if (lower.includes("word") || lower.includes("doc")) return "word"
+  const ext = getFileExtension(fileName)
+  if (ext === ".pdf") return "pdf"
+  if (ext === ".doc" || ext === ".docx") return "word"
+
+  const mime = fileType.toLowerCase()
+  if (mime.includes("pdf")) return "pdf"
+  if (mime.includes("word") || mime.includes("msword")) return "word"
+
   return "image"
 }
 
-/** Browsers can preview PDFs and images inline; Word files need download. */
+/** All team-library uploads can open in a new tab (PDF/image inline; Word may use the system viewer). */
 export function canViewInBrowser(fileType: string, fileName: string) {
+  const ext = getFileExtension(fileName)
+  if (
+    ALLOWED_LIBRARY_EXTENSIONS.includes(ext as (typeof ALLOWED_LIBRARY_EXTENSIONS)[number])
+  ) {
+    return true
+  }
+
   const kind = libraryFileKind(fileType, fileName)
-  return kind === "pdf" || kind === "image"
+  return kind === "pdf" || kind === "word" || kind === "image"
 }
 
 export function groupLibraryByCategory<T extends { category: string }>(
