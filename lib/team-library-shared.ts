@@ -32,6 +32,7 @@ export type TeamLibraryItem = {
   file_type: string
   file_size_kb: number | null
   uploaded_by: string | null
+  online_form_url?: string | null
 }
 
 export type TeamLibraryItemWithDownload = TeamLibraryItem
@@ -45,6 +46,14 @@ export type TeamLibraryItemPayload = {
   file_type: string
   file_size_kb: number
   uploaded_by?: string
+  online_form_url?: string | null
+}
+
+export type TeamLibraryItemUpdatePayload = {
+  title: string
+  description: string | null
+  category: string
+  online_form_url?: string | null
 }
 
 export function categorySlug(category: string) {
@@ -159,6 +168,63 @@ export function validateLibraryUploadInput(
   }
 
   return { data: { title, category, fileName } }
+}
+
+export function normalizeOnlineFormUrl(url: string | null | undefined): string | null {
+  const trimmed = (url ?? "").trim()
+  if (!trimmed) return null
+
+  try {
+    const parsed = new URL(trimmed)
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null
+    }
+    return trimmed
+  } catch {
+    return null
+  }
+}
+
+export function validateLibraryMetadataInput(
+  categories: readonly string[],
+  input: {
+    title?: string
+    category?: string
+    description?: string
+    online_form_url?: string | null
+  },
+  options?: { includeOnlineFormUrl?: boolean },
+) {
+  const title = input.title?.trim() ?? ""
+  const category = input.category?.trim() ?? ""
+  const description = input.description?.trim() ?? ""
+
+  if (!title) {
+    return { error: "Title is required." }
+  }
+
+  if (!categories.includes(category)) {
+    return { error: "Invalid category." }
+  }
+
+  const data: TeamLibraryItemUpdatePayload = {
+    title,
+    category,
+    description: description || null,
+  }
+
+  if (options?.includeOnlineFormUrl) {
+    const onlineFormRaw = input.online_form_url ?? ""
+    const online_form_url = normalizeOnlineFormUrl(
+      typeof onlineFormRaw === "string" ? onlineFormRaw : "",
+    )
+    if (typeof onlineFormRaw === "string" && onlineFormRaw.trim() && online_form_url === null) {
+      return { error: "Enter a valid http or https URL for the online form." }
+    }
+    data.online_form_url = online_form_url
+  }
+
+  return { data }
 }
 
 export function sanitizeLibraryFilename(filename: string) {

@@ -18,7 +18,6 @@ import {
 export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }) {
   const router = useRouter()
   const [items, setItems] = useState<TeamLibraryItemWithDownload[]>([])
-  const [onlineFormUrl, setOnlineFormUrl] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [search, setSearch] = useState("")
@@ -36,7 +35,6 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
 
       const data = (await res.json()) as {
         resources?: TeamLibraryItemWithDownload[]
-        onlineFormUrl?: string
         error?: string
       }
 
@@ -46,9 +44,6 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
       }
 
       setItems(data.resources ?? [])
-      if (config.id === "resources") {
-        setOnlineFormUrl(data.onlineFormUrl?.trim() ?? "")
-      }
     } catch {
       setError(config.loadErrorMessage)
     } finally {
@@ -94,19 +89,6 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
             className="team-input"
           />
         </label>
-
-        {config.id === "resources" && onlineFormUrl && (
-          <div className="mt-4">
-            <a
-              href={onlineFormUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary team-action-btn inline-flex w-full items-center justify-center gap-2 sm:w-auto"
-            >
-              Online Form ↗
-            </a>
-          </div>
-        )}
 
         {error && (
           <p role="alert" className="team-body-text mt-4 font-semibold text-orange-brand">
@@ -178,7 +160,7 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
                                   </p>
                                 </div>
                               </div>
-                              <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row">
+                              <div className="mt-3 flex flex-col gap-2 sm:mt-4 sm:flex-row sm:flex-wrap">
                                 <a
                                   href={teamLibraryViewPath(config, item.id)}
                                   target="_blank"
@@ -187,6 +169,16 @@ export default function TeamLibraryApp({ config }: { config: TeamLibraryConfig }
                                 >
                                   View
                                 </a>
+                                {config.id === "resources" && item.online_form_url && (
+                                  <a
+                                    href={item.online_form_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="team-action-btn w-full rounded-xl border border-green-brand bg-white px-4 py-2.5 text-center text-sm font-semibold text-green-brand transition-colors hover:bg-cream sm:flex-1"
+                                  >
+                                    Online Form ↗
+                                  </a>
+                                )}
                                 <a
                                   href={teamLibraryDownloadPath(config, item.id)}
                                   download={item.file_name}

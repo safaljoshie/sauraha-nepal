@@ -9,16 +9,18 @@ import {
   ensureTeamLibraryBucket,
   fetchTeamLibraryItemById,
   fetchTeamLibraryItems,
+  updateTeamLibraryItem,
   uploadTeamLibraryFile,
 } from "@/lib/team-library-db"
 import {
   buildLibraryStoragePath,
+  normalizeOnlineFormUrl,
   resolveLibraryContentType,
   sanitizeLibraryFilename,
+  validateLibraryMetadataInput,
   validateLibraryUploadInput,
 } from "@/lib/team-library-shared"
 import { serveTeamLibraryFile } from "@/lib/team-library-serve"
-import { fetchTeamResourcesOnlineFormUrl } from "@/lib/site-settings"
 
 function bucketHint(message: string) {
   return message.toLowerCase().includes("bucket not found")
@@ -61,6 +63,8 @@ export function createAdminLibraryPOST(config: TeamLibraryConfig) {
     const title = String(formData.get("title") ?? "")
     const description = String(formData.get("description") ?? "").trim()
     const category = String(formData.get("category") ?? "")
+    const onlineFormRaw =
+      config.id === "resources" ? String(formData.get("online_form_url") ?? "") : ""
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "Please choose a file to upload." }, { status: 400 })
@@ -76,6 +80,17 @@ export function createAdminLibraryPOST(config: TeamLibraryConfig) {
 
     if ("error" in validated) {
       return NextResponse.json({ error: validated.error }, { status: 400 })
+    }
+
+    let online_form_url: string | null = null
+    if (config.id === "resources") {
+      online_form_url = normalizeOnlineFormUrl(onlineFormRaw)
+      if (onlineFormRaw.trim() && online_form_url === null) {
+        return NextResponse.json(
+          { error: "Enter a valid http or https URL for the online form." },
+          { status: 400 },
+        )
+      }
     }
 
     const safeName = sanitizeLibraryFilename(file.name)
@@ -103,6 +118,7 @@ export function createAdminLibraryPOST(config: TeamLibraryConfig) {
         file_type: resolveLibraryContentType(file.type || "", file.name),
         file_size_kb: Math.max(1, Math.round(file.size / 1024)),
         uploaded_by: "Admin",
+        ...(config.id === "resources" ? { online_form_url } : {}),
       })
 
       return NextResponse.json({ success: true, resource })
@@ -141,6 +157,58 @@ export function createAdminLibraryDELETE(config: TeamLibraryConfig) {
   }
 }
 
+export function createAdminLibraryPUT(config: TeamLibraryConfig) {
+  return async function PUT(
+    request: Request,
+    context: { params: Promise<{ id: string }> },
+  ) {
+    const unauthorized = await requireAdminApi()
+    if (unauthorized) return unauthorized
+
+    const { id } = await context.params
+
+    let body: {
+      title?: string
+      description?: string
+      category?: string
+      online_form_url?: string
+    }
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
+    }
+
+    const validated = validateLibraryMetadataInput(
+      config.categories,
+      {
+        title: body.title,
+        description: body.description,
+        category: body.category,
+        online_form_url: body.online_form_url,
+      },
+      { includeOnlineFormUrl: config.id === "resources" },
+    )
+
+    if ("error" in validated) {
+      return NextResponse.json({ error: validated.error }, { status: 400 })
+    }
+
+    try {
+      const existing = await fetchTeamLibraryItemById(config, id)
+      if (!existing) {
+        return NextResponse.json({ error: "File not found." }, { status: 404 })
+      }
+
+      const resource = await updateTeamLibraryItem(config, id, validated.data)
+      return NextResponse.json({ success: true, resource })
+    } catch (error) {
+      console.error(`Admin ${config.id} update error:`, error)
+      return NextResponse.json({ error: "Failed to update file." }, { status: 500 })
+    }
+  }
+}
+
 export function createTeamLibraryGET(config: TeamLibraryConfig) {
   return async function GET() {
     const unauthorized = await requireTeamOrAdminApi()
@@ -148,11 +216,7 @@ export function createTeamLibraryGET(config: TeamLibraryConfig) {
 
     try {
       const items = await fetchTeamLibraryItems(config)
-      const payload: { resources: typeof items; onlineFormUrl?: string } = { resources: items }
-      if (config.id === "resources") {
-        payload.onlineFormUrl = await fetchTeamResourcesOnlineFormUrl()
-      }
-      return NextResponse.json(payload)
+      return NextResponse.json({ resources: items })
     } catch (error) {
       console.error(`Team ${config.id} fetch error:`, error)
       return NextResponse.json({ error: config.loadErrorMessage }, { status: 500 })

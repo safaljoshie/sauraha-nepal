@@ -3,6 +3,7 @@ import {
   MAX_LIBRARY_FILE_BYTES,
   type TeamLibraryItem,
   type TeamLibraryItemPayload,
+  type TeamLibraryItemUpdatePayload,
 } from "@/lib/team-library-shared"
 import type { TeamLibraryConfig } from "@/lib/team-library-config"
 import { getSupabaseAdmin } from "@/lib/supabase"
@@ -70,6 +71,26 @@ export async function createTeamLibraryItem(
   const { data, error } = await supabase
     .from(config.table)
     .insert(payload)
+    .select("*")
+    .single()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return data as TeamLibraryItem
+}
+
+export async function updateTeamLibraryItem(
+  config: Pick<TeamLibraryConfig, "table">,
+  id: string,
+  payload: TeamLibraryItemUpdatePayload,
+) {
+  const supabase = getSupabaseAdmin()
+  const { data, error } = await supabase
+    .from(config.table)
+    .update(payload)
+    .eq("id", id)
     .select("*")
     .single()
 

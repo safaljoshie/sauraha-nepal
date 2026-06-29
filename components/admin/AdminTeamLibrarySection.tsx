@@ -28,11 +28,18 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
   const [error, setError] = useState("")
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [onlineFormUrl, setOnlineFormUrl] = useState("")
   const [category, setCategory] = useState<string>(config.categories[0])
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editTitle, setEditTitle] = useState("")
+  const [editDescription, setEditDescription] = useState("")
+  const [editOnlineFormUrl, setEditOnlineFormUrl] = useState("")
+  const [editCategory, setEditCategory] = useState<string>(config.categories[0])
+  const [savingEdit, setSavingEdit] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
 
   const showToast = useCallback((type: Toast["type"], message: string) => {
@@ -78,12 +85,29 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
   function resetForm() {
     setTitle("")
     setDescription("")
+    setOnlineFormUrl("")
     setCategory(config.categories[0])
     setSelectedFile(null)
     setUploadProgress(0)
     if (fileInputRef.current) {
       fileInputRef.current.value = ""
     }
+  }
+
+  function startEdit(item: TeamLibraryItemWithDownload) {
+    setEditingId(item.id)
+    setEditTitle(item.title)
+    setEditDescription(item.description ?? "")
+    setEditCategory(item.category)
+    setEditOnlineFormUrl(item.online_form_url ?? "")
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditTitle("")
+    setEditDescription("")
+    setEditOnlineFormUrl("")
+    setEditCategory(config.categories[0])
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -153,6 +177,9 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
     formData.append("title", title.trim())
     formData.append("description", description.trim())
     formData.append("category", category)
+    if (config.id === "resources") {
+      formData.append("online_form_url", onlineFormUrl.trim())
+    }
 
     setUploading(true)
     setUploadProgress(0)
@@ -211,6 +238,44 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
       showToast("error", "Failed to delete file.")
     } finally {
       setBusyId(null)
+    }
+  }
+
+  async function handleSaveEdit(event: React.FormEvent) {
+    event.preventDefault()
+    if (!editingId) return
+
+    setSavingEdit(true)
+    try {
+      const res = await fetch(`${config.adminApiBase}/${editingId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editTitle.trim(),
+          description: editDescription.trim(),
+          category: editCategory,
+          ...(config.id === "resources" ? { online_form_url: editOnlineFormUrl.trim() } : {}),
+        }),
+      })
+
+      if (res.status === 401) {
+        router.push("/admin")
+        return
+      }
+
+      const data = (await res.json()) as { error?: string }
+      if (!res.ok) {
+        showToast("error", data.error ?? "Failed to update file.")
+        return
+      }
+
+      showToast("success", "File updated successfully.")
+      cancelEdit()
+      await loadItems()
+    } catch {
+      showToast("error", "Failed to update file.")
+    } finally {
+      setSavingEdit(false)
     }
   }
 
@@ -289,6 +354,25 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
               disabled={uploading}
             />
           </label>
+
+          {config.id === "resources" && (
+            <label className="block md:col-span-2">
+              <span className="mb-1 block text-sm font-semibold text-text-mid">
+                Online form URL (optional)
+              </span>
+              <input
+                type="url"
+                className={fieldClass}
+                value={onlineFormUrl}
+                onChange={(e) => setOnlineFormUrl(e.target.value)}
+                placeholder="https://docs.google.com/forms/d/e/…/viewform"
+                disabled={uploading}
+              />
+              <p className="mt-1 text-xs text-text-light">
+                Google Form link shown on this file&apos;s card for the team.
+              </p>
+            </label>
+          )}
         </div>
 
         {uploading && (
@@ -344,55 +428,160 @@ export default function AdminTeamLibrarySection({ config }: { config: TeamLibrar
                   {group.items.map((item) => (
                     <article
                       key={item.id}
-                      className="flex flex-col gap-4 rounded-2xl border border-border-brand bg-white p-4 md:flex-row md:items-center md:justify-between"
+                      className="rounded-2xl border border-border-brand bg-white p-4"
                     >
-                      <div className="flex min-w-0 items-start gap-3">
-                        <ResourceFileIcon
-                          kind={libraryFileKind(item.file_type, item.file_name)}
-                          className="text-green-brand"
-                        />
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h5 className="font-semibold text-text-brand">{item.title}</h5>
-                            <span className="rounded-full bg-cream px-2.5 py-0.5 text-xs font-semibold text-text-mid">
-                              {item.category}
-                            </span>
+                      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <ResourceFileIcon
+                            kind={libraryFileKind(item.file_type, item.file_name)}
+                            className="text-green-brand"
+                          />
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <h5 className="font-semibold text-text-brand">{item.title}</h5>
+                              <span className="rounded-full bg-cream px-2.5 py-0.5 text-xs font-semibold text-text-mid">
+                                {item.category}
+                              </span>
+                              {config.id === "resources" && item.online_form_url && (
+                                <span className="rounded-full bg-green-brand/10 px-2.5 py-0.5 text-xs font-semibold text-green-brand">
+                                  Online form
+                                </span>
+                              )}
+                            </div>
+                            {item.description && (
+                              <p className="mt-1 text-sm text-text-light">{item.description}</p>
+                            )}
+                            <p className="mt-2 text-xs text-text-light">
+                              {item.file_name} · {formatLibraryFileSize(item.file_size_kb)} ·{" "}
+                              {formatLibraryDate(item.created_at)}
+                            </p>
                           </div>
-                          {item.description && (
-                            <p className="mt-1 text-sm text-text-light">{item.description}</p>
-                          )}
-                          <p className="mt-2 text-xs text-text-light">
-                            {item.file_name} · {formatLibraryFileSize(item.file_size_kb)} ·{" "}
-                            {formatLibraryDate(item.created_at)}
-                          </p>
                         </div>
+
+                        {editingId !== item.id && (
+                          <div className="flex flex-wrap gap-2">
+                            <a
+                              href={teamLibraryViewPath(config, item.id)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
+                            >
+                              View
+                            </a>
+                            <a
+                              href={teamLibraryDownloadPath(config, item.id)}
+                              download={item.file_name}
+                              className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
+                            >
+                              Download
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => startEdit(item)}
+                              disabled={busyId === item.id || savingEdit}
+                              className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand disabled:opacity-60"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item)}
+                              disabled={busyId === item.id}
+                              className="cursor-pointer rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
+                            >
+                              Delete 🗑
+                            </button>
+                          </div>
+                        )}
                       </div>
 
-                      <div className="flex flex-wrap gap-2">
-                        <a
-                          href={teamLibraryViewPath(config, item.id)}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
-                        >
-                          View
-                        </a>
-                        <a
-                          href={teamLibraryDownloadPath(config, item.id)}
-                          download={item.file_name}
-                          className="cursor-pointer rounded-lg border border-border-brand px-3 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand"
-                        >
-                          Download
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(item)}
-                          disabled={busyId === item.id}
-                          className="cursor-pointer rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-60"
-                        >
-                          Delete 🗑
-                        </button>
-                      </div>
+                      {editingId === item.id && (
+                        <form onSubmit={handleSaveEdit} className="mt-4 border-t border-border-brand pt-4">
+                          <h5 className="text-sm font-bold uppercase tracking-wide text-text-light">
+                            Edit file
+                          </h5>
+                          <div className="mt-4 grid gap-4 md:grid-cols-2">
+                            <label className="block md:col-span-2">
+                              <span className="mb-1 block text-sm font-semibold text-text-mid">
+                                Title
+                              </span>
+                              <input
+                                type="text"
+                                className={fieldClass}
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                required
+                                disabled={savingEdit}
+                              />
+                            </label>
+
+                            <label className="block">
+                              <span className="mb-1 block text-sm font-semibold text-text-mid">
+                                Category
+                              </span>
+                              <select
+                                className={fieldClass}
+                                value={editCategory}
+                                onChange={(e) => setEditCategory(e.target.value)}
+                                required
+                                disabled={savingEdit}
+                              >
+                                {config.categories.map((cat) => (
+                                  <option key={cat} value={cat}>
+                                    {cat}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+
+                            <label className="block md:col-span-2">
+                              <span className="mb-1 block text-sm font-semibold text-text-mid">
+                                Description (optional)
+                              </span>
+                              <textarea
+                                className={`${fieldClass} min-h-[90px] resize-y`}
+                                value={editDescription}
+                                onChange={(e) => setEditDescription(e.target.value)}
+                                disabled={savingEdit}
+                              />
+                            </label>
+
+                            {config.id === "resources" && (
+                              <label className="block md:col-span-2">
+                                <span className="mb-1 block text-sm font-semibold text-text-mid">
+                                  Online form URL (optional)
+                                </span>
+                                <input
+                                  type="url"
+                                  className={fieldClass}
+                                  value={editOnlineFormUrl}
+                                  onChange={(e) => setEditOnlineFormUrl(e.target.value)}
+                                  placeholder="https://docs.google.com/forms/d/e/…/viewform"
+                                  disabled={savingEdit}
+                                />
+                              </label>
+                            )}
+                          </div>
+
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <button
+                              type="submit"
+                              disabled={savingEdit}
+                              className="btn-primary cursor-pointer px-4 py-2 text-sm disabled:opacity-60"
+                            >
+                              {savingEdit ? "Saving…" : "Save changes"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={cancelEdit}
+                              disabled={savingEdit}
+                              className="cursor-pointer rounded-lg border border-border-brand px-4 py-2 text-sm font-semibold text-text-mid hover:border-green-mid hover:text-green-brand disabled:opacity-60"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      )}
                     </article>
                   ))}
                 </div>

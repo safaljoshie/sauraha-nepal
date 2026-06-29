@@ -1,6 +1,5 @@
--- Google Form link for Team Resources "Online Form" button (admin-controlled)
+-- Per-file Google Form link on team_resources (Online Form button on each file card)
 -- Run in Supabase SQL Editor
 
-insert into site_settings (key, value)
-values ('team_resources_online_form_url', '')
-on conflict (key) do nothing;
+alter table team_resources
+add column if not exists online_form_url text;

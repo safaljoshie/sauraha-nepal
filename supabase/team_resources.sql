@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS team_resources (
   file_name text NOT NULL,
   file_type text NOT NULL,
   file_size_kb integer,
-  uploaded_by text DEFAULT 'Admin'
+  uploaded_by text DEFAULT 'Admin',
+  online_form_url text
 );
 
 ALTER TABLE team_resources ENABLE ROW LEVEL SECURITY;
