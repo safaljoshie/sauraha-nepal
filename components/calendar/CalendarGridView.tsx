@@ -7,14 +7,11 @@ import {
   formatMonthLabel,
   isToday,
   parseMonthKey,
-  platformBadgeClass,
-  platformIcon,
-  statusBadgeClass,
   statusDotClass,
-  statusLabel,
   toMonthKey,
   type ContentCalendarEntry,
 } from "@/lib/content-calendar"
+import { CalendarEntryDetailBody } from "@/components/calendar/CalendarEntryDetail"
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
@@ -168,34 +165,7 @@ export default function CalendarGridView({
                     key={entry.id}
                     className="rounded-xl border border-border-brand bg-cream/40 p-4"
                   >
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${platformBadgeClass(entry.platform)}`}
-                      >
-                        <span aria-hidden>{platformIcon(entry.platform)}</span>
-                        {entry.platform}
-                      </span>
-                      <span
-                        className={`rounded-full px-2.5 py-1 text-xs font-bold ${statusBadgeClass(entry.status)}`}
-                      >
-                        {statusLabel(entry.status)}
-                      </span>
-                    </div>
-                    <h4 className="mt-2 font-semibold text-text-brand">{entry.content_title}</h4>
-                    <p className="mt-1 text-sm text-text-mid">Owner: {entry.owner}</p>
-                    {entry.notes && (
-                      <p className="mt-2 text-sm text-text-light">{entry.notes}</p>
-                    )}
-                    {entry.link && (
-                      <a
-                        href={entry.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-2 inline-block text-sm font-semibold text-green-brand hover:underline"
-                      >
-                        Open link
-                      </a>
-                    )}
+                    <CalendarEntryDetailBody entry={entry} />
                   </li>
                 ))}
               </ul>

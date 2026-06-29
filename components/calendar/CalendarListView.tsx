@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import CalendarEntryActionsMenu from "@/components/calendar/CalendarEntryActionsMenu"
+import CalendarEntryDetailModal from "@/components/calendar/CalendarEntryDetail"
 import {
   DUPLICATE_INTERVAL_LABELS,
   formatCalendarDate,
@@ -150,6 +151,7 @@ function MobileEntryCard({
   onEdit,
   onDelete,
   onDuplicate,
+  onViewDetails,
   actionBusyId,
   showActions,
   teamLayout = false,
@@ -159,6 +161,7 @@ function MobileEntryCard({
   onEdit?: (entry: ContentCalendarEntry) => void
   onDelete?: (entry: ContentCalendarEntry) => void
   onDuplicate?: (entry: ContentCalendarEntry, interval: DuplicateInterval) => void
+  onViewDetails: (entry: ContentCalendarEntry) => void
   actionBusyId?: string | null
   showActions: boolean
   teamLayout?: boolean
@@ -172,7 +175,10 @@ function MobileEntryCard({
   const notesClass = teamLayout ? "team-body-text mt-2 text-text-light" : "mt-2 text-sm text-text-light"
 
   return (
-    <article className="rounded-2xl border border-border-brand bg-white p-3 shadow-sm sm:p-4">
+    <article
+      className="cursor-pointer rounded-2xl border border-border-brand bg-white p-3 shadow-sm transition-colors hover:border-green-mid/40 sm:p-4"
+      onClick={() => onViewDetails(entry)}
+    >
       <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
           <h3 className={titleClass}>
@@ -184,12 +190,16 @@ function MobileEntryCard({
               target="_blank"
               rel="noopener noreferrer"
               className={linkClass}
+              onClick={(e) => e.stopPropagation()}
             >
               Open link ↗
             </a>
           )}
         </div>
-        <div className="flex shrink-0 items-start gap-2">
+        <div
+          className="flex shrink-0 items-start gap-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           <StatusBadge
             entry={entry}
             onClick={onStatusClick ? () => onStatusClick(entry) : undefined}
@@ -217,7 +227,14 @@ function MobileEntryCard({
         <span className={`${badgeClass} bg-cream text-text-mid`}>{entry.owner}</span>
       </div>
 
-      {entry.notes && <p className={notesClass}>{entry.notes}</p>}
+      {entry.notes && (
+        <p className={`${notesClass} line-clamp-2`}>{entry.notes}</p>
+      )}
+      <p
+        className={`${teamLayout ? "team-meta" : "text-xs"} mt-2 font-semibold text-green-brand md:hidden`}
+      >
+        Tap for full details
+      </p>
     </article>
   )
 }
@@ -243,6 +260,7 @@ export default function CalendarListView({
 }: CalendarListViewProps) {
   const showActions = Boolean(onEdit || onDelete || onDuplicate)
   const groupedEntries = groupEntriesByDate(entries)
+  const [selectedEntry, setSelectedEntry] = useState<ContentCalendarEntry | null>(null)
 
   if (entries.length === 0) {
     return (
@@ -270,12 +288,18 @@ export default function CalendarListView({
           </thead>
           <tbody>
             {entries.map((entry) => (
-              <tr key={entry.id} className="border-b border-border-brand/70 last:border-0">
+              <tr
+                key={entry.id}
+                className="cursor-pointer border-b border-border-brand/70 transition-colors last:border-0 hover:bg-cream/50"
+                onClick={() => setSelectedEntry(entry)}
+              >
                 <td className="whitespace-nowrap px-4 py-3 text-text-mid">
                   {formatCalendarDate(entry.scheduled_date)}
                 </td>
                 <td className="px-4 py-3 font-medium text-text-brand">
-                  <EntryTitle entry={entry} />
+                  <span onClick={(e) => entry.link && e.stopPropagation()}>
+                    <EntryTitle entry={entry} />
+                  </span>
                   {entry.notes && (
                     <p className="mt-1 line-clamp-1 text-xs font-normal text-text-light">
                       {entry.notes}
@@ -290,7 +314,7 @@ export default function CalendarListView({
                     {entry.platform}
                   </span>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                   <StatusBadge
                     entry={entry}
                     onClick={onStatusClick ? () => onStatusClick(entry) : undefined}
@@ -299,7 +323,7 @@ export default function CalendarListView({
                 </td>
                 <td className="px-4 py-3 text-text-mid">{entry.owner}</td>
                 {showActions && (
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                     <div className="flex flex-wrap gap-2">
                       {onEdit && (
                         <button
@@ -358,6 +382,7 @@ export default function CalendarListView({
                   onEdit={onEdit}
                   onDelete={onDelete}
                   onDuplicate={onDuplicate}
+                  onViewDetails={setSelectedEntry}
                   actionBusyId={actionBusyId}
                   showActions={showActions}
                   teamLayout={teamLayout}
@@ -367,6 +392,12 @@ export default function CalendarListView({
           </section>
         ))}
       </div>
+
+      <CalendarEntryDetailModal
+        entry={selectedEntry}
+        onClose={() => setSelectedEntry(null)}
+        teamLayout={teamLayout}
+      />
     </>
   )
 }
