@@ -37,6 +37,10 @@ export default function ListingImage({
     setImgSrc(src)
   }, [src])
 
+  const trimmedSrc = imgSrc.trim()
+  const useUnoptimized =
+    !isNextOptimizedImageSrc(trimmedSrc) || trimmedSrc.includes(".supabase.co")
+
   return (
     <Image
       src={imgSrc}
@@ -49,7 +53,7 @@ export default function ListingImage({
       quality={quality}
       priority={priority}
       loading={priority ? undefined : loading}
-      unoptimized={!isNextOptimizedImageSrc(imgSrc)}
+      unoptimized={useUnoptimized}
       onError={() => setImgSrc(PLACEHOLDER)}
     />
   )
