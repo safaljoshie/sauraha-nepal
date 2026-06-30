@@ -145,6 +145,12 @@ function parsePhotoUrls(photoLinks: string) {
     .filter(Boolean)
 }
 
+function removePhotoUrl(photoLinks: string, targetUrl: string) {
+  return parsePhotoUrls(photoLinks)
+    .filter((url) => url !== targetUrl)
+    .join("\n")
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
   const [listings, setListings] = useState<BusinessListing[]>([])
@@ -1128,24 +1134,40 @@ export default function AdminDashboard() {
                       {parsePhotoUrls(editForm.photo_links)
                         .slice(0, 8)
                         .map((url) => (
-                          <a
+                          <div
                             key={url}
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer"
                             className="group relative aspect-square overflow-hidden rounded-lg border border-border-brand bg-cream"
-                            title={url}
                           >
-                            <Image
-                              src={url}
-                              alt=""
-                              fill
-                              className="object-cover transition-transform group-hover:scale-105"
-                              sizes="120px"
-                              loading="lazy"
-                              unoptimized={!isNextOptimizedImageSrc(url)}
-                            />
-                          </a>
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="block h-full w-full"
+                              title={url}
+                            >
+                              <Image
+                                src={url}
+                                alt=""
+                                fill
+                                className="object-cover transition-transform group-hover:scale-105"
+                                sizes="120px"
+                                loading="lazy"
+                                unoptimized={!isNextOptimizedImageSrc(url)}
+                              />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditForm((prev) =>
+                                  prev ? { ...prev, photo_links: removePhotoUrl(prev.photo_links, url) } : prev,
+                                )
+                              }
+                              className="absolute top-1.5 right-1.5 rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white shadow hover:bg-red-700"
+                              title="Remove image from this listing"
+                            >
+                              ✕
+                            </button>
+                          </div>
                         ))}
                     </div>
                     {parsePhotoUrls(editForm.photo_links).length > 8 && (

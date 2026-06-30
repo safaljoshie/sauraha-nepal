@@ -1,4 +1,3 @@
-import { cache } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
 import { sortListingsForDisplay } from "@/lib/listings-catalog"
 import { getSupabaseAdmin } from "@/lib/supabase"
@@ -13,7 +12,7 @@ async function queryApprovedListings() {
 }
 
 /** Fetch approved listings for public directory (server-side). */
-export const fetchApprovedListings = cache(async (): Promise<BusinessListing[]> => {
+export async function fetchApprovedListings(): Promise<BusinessListing[]> {
   let { data, error } = await queryApprovedListings()
 
   if (error) {
@@ -38,9 +37,9 @@ export const fetchApprovedListings = cache(async (): Promise<BusinessListing[]> 
   }
 
   return sortListingsForDisplay(data as BusinessListing[])
-})
+}
 
-export const fetchApprovedListingById = cache(async function fetchApprovedListingById(
+export async function fetchApprovedListingById(
   id: string,
 ): Promise<BusinessListing | null> {
   let data: unknown = null
@@ -78,4 +77,4 @@ export const fetchApprovedListingById = cache(async function fetchApprovedListin
 
   if (error || !data) return null
   return data as BusinessListing
-})
+}
