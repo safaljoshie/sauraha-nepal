@@ -10,7 +10,6 @@ import { DEFAULT_CATEGORY_CATALOG, getActiveCategoryNames } from "@/lib/category
 import {
   MAX_PRE_COMPRESS_BYTES,
 } from "@/lib/compress-image"
-import { isNextOptimizedImageSrc } from "@/lib/image"
 import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import { parseListingCategories, serializeListingCategories } from "@/lib/listing-categories"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
@@ -164,6 +163,39 @@ function movePhotoToFront(photoLinks: string, targetUrl: string) {
   const urls = parsePhotoUrls(photoLinks)
   if (!urls.includes(targetUrl)) return photoLinks
   return [targetUrl, ...urls.filter((url) => url !== targetUrl)].join("\n")
+}
+
+function AdminPhotoPreview({ url }: { url: string }) {
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    setFailed(false)
+  }, [url])
+
+  return (
+    <div
+      className={`relative h-full w-full ${failed ? "ring-2 ring-red-500 ring-inset" : ""}`}
+    >
+      <Image
+        src={url}
+        alt=""
+        fill
+        className={`object-cover transition-transform group-hover:scale-105 ${failed ? "opacity-0" : ""}`}
+        sizes="120px"
+        loading="lazy"
+        unoptimized
+        onError={() => setFailed(true)}
+      />
+      {failed && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-50 px-2 text-center">
+          <span className="text-xs font-bold text-red-700">Failed to load</span>
+          <span className="mt-1 text-[10px] leading-snug text-red-600">
+            Corrupt or missing file in storage
+          </span>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function AdminDashboard() {
@@ -1212,15 +1244,7 @@ export default function AdminDashboard() {
                               className="block h-full w-full"
                               title={url}
                             >
-                              <Image
-                                src={url}
-                                alt=""
-                                fill
-                                className="object-cover transition-transform group-hover:scale-105"
-                                sizes="120px"
-                                loading="lazy"
-                                unoptimized
-                              />
+                              <AdminPhotoPreview url={url} />
                             </a>
                             <button
                               type="button"
