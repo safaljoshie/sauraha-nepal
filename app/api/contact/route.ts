@@ -3,7 +3,7 @@ import { Resend } from "resend"
 
 const FROM =
   process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
-const TO = process.env.CONTACT_TO_EMAIL ?? "safaljoshie@gmail.com"
+const TO = process.env.CONTACT_TO_EMAIL ?? "saurahanepal.com@gmail.com"
 
 type ContactBody = {
   name?: string

@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true })
   }
 
-  const forwardTo = process.env.CONTACT_TO_EMAIL ?? "safaljoshie@gmail.com"
+  const forwardTo = process.env.CONTACT_TO_EMAIL ?? "saurahanepal.com@gmail.com"
   const from = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
 
   const { error } = await resend.emails.receiving.forward({

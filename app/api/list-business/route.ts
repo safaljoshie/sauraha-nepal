@@ -12,7 +12,7 @@ import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM =
   process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
-const ADMIN_TO = process.env.CONTACT_TO_EMAIL ?? "safaljoshie@gmail.com"
+const ADMIN_TO = process.env.CONTACT_TO_EMAIL ?? "saurahanepal.com@gmail.com"
 
 export async function POST(request: Request) {
   const resendKey = process.env.RESEND_API_KEY

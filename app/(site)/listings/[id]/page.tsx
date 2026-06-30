@@ -249,22 +249,18 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   </a>
                 </li>
               )}
-              {listing.facebook && (
-                <li>
-                  <span className="font-semibold text-text-light">Social Media</span>
-                  <br />
-                  <a
-                    href={listing.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="break-all text-green-mid hover:underline"
-                  >
-                    {listing.facebook}
-                  </a>
-                </li>
-              )}
             </ul>
             <div className="mt-6 flex flex-col gap-2">
+              {listing.facebook && (
+                <a
+                  href={listing.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-xl border-[1.5px] border-green-brand py-3 text-center text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand hover:text-white"
+                >
+                  Social Media
+                </a>
+              )}
               {wa && (
                 <a
                   href={wa}
