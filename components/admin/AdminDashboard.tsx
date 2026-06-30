@@ -404,13 +404,14 @@ export default function AdminDashboard() {
         router.push("/admin")
         return
       }
-      const data = (await res.json()) as { error?: string; urls?: string[] }
+      const data = (await res.json()) as { error?: string; urls?: string[]; photo_links?: string }
       if (!res.ok || !data.urls) {
         throw new Error(data.error ?? "Failed to upload image.")
       }
 
-      const merged = mergePhotoLinks(data.urls, editForm.photo_links)
+      const merged = data.photo_links ?? mergePhotoLinks(data.urls, editForm.photo_links)
       setEditForm((prev) => (prev ? { ...prev, photo_links: merged } : prev))
+      updateListingState(editForm.id, (listing) => ({ ...listing, photo_links: merged }))
       showToast("success", `Uploaded ${data.urls.length} image${data.urls.length === 1 ? "" : "s"} successfully`)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to upload image. Please try again."

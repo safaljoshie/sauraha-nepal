@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { Resend } from "resend"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { hasListingContactEmail, type BusinessListing } from "@/lib/business-listing"
@@ -137,6 +138,9 @@ export async function PUT(request: Request) {
       console.error("Supabase update error:", updateError)
       return NextResponse.json({ error: "Failed to update listing." }, { status: 500 })
     }
+
+    revalidatePath("/listings")
+    revalidatePath(`/listings/${id}`)
 
     const record = updated as BusinessListing
     const previous = existing as BusinessListing
