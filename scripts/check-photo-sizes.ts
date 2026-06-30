@@ -11,6 +11,14 @@ type StorageEntry = {
   path: string
   size: number
   ext: string
+  folder: string
+}
+
+type FolderSummary = {
+  folder: string
+  count: number
+  totalBytes: number
+  nonWebp: number
 }
 
 function loadEnvLocal() {
@@ -47,6 +55,11 @@ function formatBytes(bytes: number) {
 
 function isFolder(entry: { id: string | null; metadata: Record<string, unknown> | null }) {
   return entry.id === null || entry.metadata === null
+}
+
+function topLevelFolder(path: string) {
+  const segment = path.split("/")[0]
+  return segment ? `/${segment}/` : "/(root)/"
 }
 
 async function listAllFiles(
@@ -89,6 +102,7 @@ async function listAllFiles(
         path: itemPath,
         size: Number.isFinite(size) ? size : 0,
         ext: extname(item.name).toLowerCase(),
+        folder: topLevelFolder(itemPath),
       })
     }
 
@@ -97,6 +111,57 @@ async function listAllFiles(
   }
 
   return results
+}
+
+function summarizeByFolder(files: StorageEntry[]): FolderSummary[] {
+  const map = new Map<string, FolderSummary>()
+
+  for (const file of files) {
+    const existing = map.get(file.folder) ?? {
+      folder: file.folder,
+      count: 0,
+      totalBytes: 0,
+      nonWebp: 0,
+    }
+    existing.count += 1
+    existing.totalBytes += file.size
+    if (file.ext !== ".webp") existing.nonWebp += 1
+    map.set(file.folder, existing)
+  }
+
+  return [...map.values()].sort((a, b) => b.totalBytes - a.totalBytes)
+}
+
+function printFolderTable(rows: FolderSummary[]) {
+  console.log("\n" + "═".repeat(88))
+  console.log("BY TOP-LEVEL FOLDER")
+  console.log("═".repeat(88))
+
+  const header = [
+    "Folder".padEnd(18),
+    "Files".padStart(8),
+    "Total size".padStart(14),
+    "Avg size".padStart(12),
+    "Non-.webp".padStart(10),
+  ].join(" | ")
+
+  console.log(header)
+  console.log("-".repeat(88))
+
+  for (const row of rows) {
+    const avg = row.count > 0 ? row.totalBytes / row.count : 0
+    console.log(
+      [
+        row.folder.padEnd(18),
+        String(row.count).padStart(8),
+        formatBytes(row.totalBytes).padStart(14),
+        formatBytes(avg).padStart(12),
+        String(row.nonWebp).padStart(10),
+      ].join(" | "),
+    )
+  }
+
+  console.log("═".repeat(88))
 }
 
 async function main() {
@@ -122,6 +187,7 @@ async function main() {
   const totalBytes = files.reduce((sum, file) => sum + file.size, 0)
   const averageBytes = files.length > 0 ? totalBytes / files.length : 0
   const nonWebp = files.filter((file) => file.ext !== ".webp")
+  const folderRows = summarizeByFolder(files)
 
   console.log("═".repeat(72))
   console.log("STORAGE SUMMARY")
@@ -130,6 +196,8 @@ async function main() {
   console.log(`Total storage:      ${formatBytes(totalBytes)} (${totalBytes.toLocaleString()} bytes)`)
   console.log(`Average file size:  ${formatBytes(averageBytes)}`)
   console.log(`Non-.webp files:    ${nonWebp.length} (${files.length ? ((nonWebp.length / files.length) * 100).toFixed(1) : "0"}%)`)
+
+  printFolderTable(folderRows)
 
   const byExt = new Map<string, number>()
   for (const file of files) {

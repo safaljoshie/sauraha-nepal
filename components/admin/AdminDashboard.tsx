@@ -391,7 +391,7 @@ export default function AdminDashboard() {
       }
 
       const formData = new FormData()
-      formData.set("folder", `admin/${editForm.id}`)
+      formData.set("listingId", editForm.id)
       for (const file of compressedFiles) {
         formData.append("files", file)
       }

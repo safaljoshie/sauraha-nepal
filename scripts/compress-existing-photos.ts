@@ -1,16 +1,20 @@
 /**
- * One-time manual tool: compress existing approved listing photos in Supabase.
+ * One-time manual tool: compress existing listing photos in Supabase.
  * NOT part of the Next.js app — run via `npm run compress-photos:dry` or `npm run compress-photos`.
  */
 import { createClient } from "@supabase/supabase-js"
 import { existsSync, readFileSync } from "node:fs"
 import { basename, resolve } from "node:path"
-import sharp from "sharp"
 import {
   getListingPhotosBucket,
-  getStoragePublicUrl,
   parsePhotoLinkLines,
 } from "../lib/list-business-photos"
+import {
+  buildCompressedListingPhotoPath,
+  isAlreadyCompressedListingPhotoUrl,
+  isLegacyUncompressedListingPhotoUrl,
+  uploadListingPhoto,
+} from "../lib/upload-listing-photo"
 
 const LISTING_DELAY_MS = 800
 
@@ -32,7 +36,10 @@ type PhotoResult = {
 
 type ListingSummary = {
   name: string
+  status: string
   photosProcessed: number
+  photosSkipped: number
+  photosFailed: number
   originalBytes: number
   compressedBytes: number
   failed: boolean
@@ -63,13 +70,6 @@ function loadEnvLocal() {
       process.env[key] = value
     }
   }
-}
-
-export async function compressImageBuffer(buffer: Buffer): Promise<Buffer> {
-  return sharp(buffer)
-    .resize(1280, 1280, { fit: "inside", withoutEnlargement: true })
-    .webp({ quality: 75 })
-    .toBuffer()
 }
 
 /** Canonical format is newline-separated; also tolerates comma or JSON arrays. */
@@ -115,16 +115,7 @@ function sleep(ms: number) {
 function compressedStoragePath(listingId: string, sourceUrl: string) {
   const originalName = basename(new URL(sourceUrl).pathname)
   const stem = originalName.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9._-]/g, "_")
-  return `compressed/${listingId}/${stem || "photo"}.webp`
-}
-
-function isAlreadyCompressedUrl(url: string) {
-  try {
-    const path = new URL(url).pathname
-    return path.includes("/compressed/")
-  } catch {
-    return false
-  }
+  return buildCompressedListingPhotoPath(listingId, `${stem || "photo"}.webp`)
 }
 
 function reductionPercent(original: number, compressed: number) {
@@ -144,11 +135,10 @@ async function downloadImage(url: string): Promise<Buffer> {
 async function processPhoto(
   listingId: string,
   photoUrl: string,
-  bucket: string,
   supabaseUrl: string,
   dryRun: boolean,
 ): Promise<PhotoResult> {
-  if (isAlreadyCompressedUrl(photoUrl)) {
+  if (isAlreadyCompressedListingPhotoUrl(photoUrl)) {
     console.log(`    ↷ Skipping already-compressed URL: ${photoUrl}`)
     return {
       url: photoUrl,
@@ -160,58 +150,85 @@ async function processPhoto(
     }
   }
 
+  if (!isLegacyUncompressedListingPhotoUrl(photoUrl)) {
+    console.log(`    ↷ Skipping non-legacy URL (not /pending/ or /admin/): ${photoUrl}`)
+    return {
+      url: photoUrl,
+      originalBytes: 0,
+      compressedBytes: 0,
+      newUrl: photoUrl,
+      skipped: true,
+      skipReason: "not legacy uncompressed path",
+    }
+  }
+
   console.log(`    ↓ Downloading: ${photoUrl}`)
   const originalBuffer = await downloadImage(photoUrl)
   const originalBytes = originalBuffer.byteLength
 
-  const compressedBuffer = await compressImageBuffer(originalBuffer)
-  const compressedBytes = compressedBuffer.byteLength
-
   const storagePath = compressedStoragePath(listingId, photoUrl)
-  const newUrl = getStoragePublicUrl(bucket, storagePath, supabaseUrl)
-
-  console.log(
-    `    ✓ Compressed ${formatBytes(originalBytes)} → ${formatBytes(compressedBytes)} (${reductionPercent(originalBytes, compressedBytes)} smaller)`,
-  )
 
   if (dryRun) {
-    console.log(`    [DRY RUN] Would upload to: ${storagePath}`)
-    console.log(`    [DRY RUN] New public URL: ${newUrl}`)
-    return { url: photoUrl, originalBytes, compressedBytes, newUrl, skipped: false }
+    console.log(
+      `    [DRY RUN] Would compress ${formatBytes(originalBytes)} → upload to ${storagePath}`,
+    )
+    return {
+      url: photoUrl,
+      originalBytes,
+      compressedBytes: Math.round(originalBytes * 0.15),
+      newUrl: `(dry-run) ${storagePath}`,
+      skipped: false,
+    }
   }
 
   const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 
-  const { error } = await supabase.storage.from(bucket).upload(storagePath, compressedBuffer, {
-    contentType: "image/webp",
+  const result = await uploadListingPhoto(originalBuffer, listingId, {
+    supabase,
+    supabaseUrl,
+    originalSize: originalBytes,
+    storagePath,
     upsert: true,
   })
 
-  if (error) {
-    throw new Error(`Upload failed for ${storagePath}: ${error.message}`)
+  if (!result.ok) {
+    throw new Error(result.error)
   }
 
-  console.log(`    ↑ Uploaded: ${newUrl}`)
-  return { url: photoUrl, originalBytes, compressedBytes, newUrl, skipped: false }
+  const compressedSize = result.bytes
+  console.log(
+    `    ✓ Compressed ${formatBytes(originalBytes)} → ${formatBytes(compressedSize)} (${reductionPercent(originalBytes, compressedSize)} smaller)`,
+  )
+  console.log(`    ↑ Uploaded: ${result.url}`)
+
+  return {
+    url: photoUrl,
+    originalBytes,
+    compressedBytes: compressedSize,
+    newUrl: result.url,
+    skipped: false,
+  }
 }
 
 async function processListing(
   listing: ListingRow,
-  bucket: string,
   supabaseUrl: string,
   dryRun: boolean,
 ): Promise<ListingSummary> {
   const photoUrls = parsePhotoLinksField(listing.photo_links)
-  console.log(`\n━━━ ${listing.business_name} (${listing.id}) ━━━`)
+  console.log(`\n━━━ ${listing.business_name} [${listing.status}] (${listing.id}) ━━━`)
   console.log(`  Photos found: ${photoUrls.length}`)
 
   if (photoUrls.length === 0) {
     console.log("  No photos to process.")
     return {
       name: listing.business_name,
+      status: listing.status,
       photosProcessed: 0,
+      photosSkipped: 0,
+      photosFailed: 0,
       originalBytes: 0,
       compressedBytes: 0,
       failed: false,
@@ -222,27 +239,42 @@ async function processListing(
   let originalBytes = 0
   let compressedBytes = 0
   let processedCount = 0
+  let skippedCount = 0
+  let failedCount = 0
 
   for (const photoUrl of photoUrls) {
     try {
-      const result = await processPhoto(listing.id, photoUrl, bucket, supabaseUrl, dryRun)
+      const result = await processPhoto(listing.id, photoUrl, supabaseUrl, dryRun)
       results.push(result)
-      if (!result.skipped) {
+      if (result.skipped) {
+        skippedCount += 1
+      } else {
         originalBytes += result.originalBytes
         compressedBytes += result.compressedBytes
         processedCount += 1
       }
     } catch (error) {
+      failedCount += 1
       const message = error instanceof Error ? error.message : String(error)
       console.error(`    ✗ Photo failed: ${message}`)
-      throw new Error(message)
+      results.push({
+        url: photoUrl,
+        originalBytes: 0,
+        compressedBytes: 0,
+        newUrl: photoUrl,
+        skipped: false,
+      })
     }
   }
 
   const newPhotoLinks = results.map((result) => result.newUrl).join("\n")
+  const listingFailed = failedCount > 0
 
-  if (dryRun) {
-    console.log(`  [DRY RUN] Would update photo_links to:\n${newPhotoLinks}`)
+  if (processedCount === 0) {
+    console.log("  No legacy uncompressed photos to migrate.")
+  } else if (dryRun) {
+    console.log(`  [DRY RUN] Would update photo_links (${processedCount} photo${processedCount === 1 ? "" : "s"})`)
+    console.log(`  [DRY RUN] New photo_links:\n${newPhotoLinks}`)
   } else {
     const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
       auth: { persistSession: false, autoRefreshToken: false },
@@ -252,7 +284,6 @@ async function processListing(
       .from("business_listings")
       .update({ photo_links: newPhotoLinks })
       .eq("id", listing.id)
-      .eq("status", "approved")
 
     if (error) {
       throw new Error(`Database update failed: ${error.message}`)
@@ -263,48 +294,60 @@ async function processListing(
 
   return {
     name: listing.business_name,
+    status: listing.status,
     photosProcessed: processedCount,
+    photosSkipped: skippedCount,
+    photosFailed: failedCount,
     originalBytes,
     compressedBytes,
-    failed: false,
+    failed: listingFailed,
   }
 }
 
 function printSummaryTable(rows: ListingSummary[], dryRun: boolean) {
-  console.log(`\n${"═".repeat(90)}`)
+  console.log(`\n${"═".repeat(100)}`)
   console.log(dryRun ? "DRY RUN SUMMARY" : "COMPRESSION SUMMARY")
-  console.log("═".repeat(90))
+  console.log("═".repeat(100))
 
   const header = [
-    "Listing Name".padEnd(32),
-    "Photos".padStart(8),
+    "Listing Name".padEnd(28),
+    "Status".padEnd(12),
+    "Done".padStart(6),
+    "Skip".padStart(6),
+    "Fail".padStart(6),
     "Original".padStart(12),
     "Compressed".padStart(12),
     "Reduction".padStart(10),
-    "Status".padStart(10),
   ].join(" | ")
 
   console.log(header)
-  console.log("-".repeat(90))
+  console.log("-".repeat(100))
 
   let totalOriginal = 0
   let totalCompressed = 0
   let totalPhotos = 0
+  let totalSkipped = 0
+  let totalFailed = 0
+  let listingsWithWork = 0
 
   for (const row of rows) {
     totalOriginal += row.originalBytes
     totalCompressed += row.compressedBytes
     totalPhotos += row.photosProcessed
+    totalSkipped += row.photosSkipped
+    totalFailed += row.photosFailed
+    if (row.photosProcessed > 0) listingsWithWork += 1
 
-    const status = row.failed ? "FAILED" : row.photosProcessed === 0 ? "SKIPPED" : dryRun ? "DRY RUN" : "OK"
     console.log(
       [
-        row.name.slice(0, 32).padEnd(32),
-        String(row.photosProcessed).padStart(8),
+        row.name.slice(0, 28).padEnd(28),
+        row.status.slice(0, 12).padEnd(12),
+        String(row.photosProcessed).padStart(6),
+        String(row.photosSkipped).padStart(6),
+        String(row.photosFailed).padStart(6),
         formatBytes(row.originalBytes).padStart(12),
         formatBytes(row.compressedBytes).padStart(12),
         reductionPercent(row.originalBytes, row.compressedBytes).padStart(10),
-        status.padStart(10),
       ].join(" | "),
     )
 
@@ -313,18 +356,22 @@ function printSummaryTable(rows: ListingSummary[], dryRun: boolean) {
     }
   }
 
-  console.log("-".repeat(90))
+  console.log("-".repeat(100))
   console.log(
     [
-      "TOTAL".padEnd(32),
-      String(totalPhotos).padStart(8),
+      "TOTAL".padEnd(28),
+      "".padEnd(12),
+      String(totalPhotos).padStart(6),
+      String(totalSkipped).padStart(6),
+      String(totalFailed).padStart(6),
       formatBytes(totalOriginal).padStart(12),
       formatBytes(totalCompressed).padStart(12),
       reductionPercent(totalOriginal, totalCompressed).padStart(10),
-      "".padStart(10),
     ].join(" | "),
   )
-  console.log("═".repeat(90))
+  console.log("═".repeat(100))
+  console.log(`Listings with migrated photos: ${listingsWithWork}`)
+  console.log(`Photo failures: ${totalFailed}`)
 }
 
 async function main() {
@@ -348,12 +395,12 @@ async function main() {
 
   console.log(dryRun ? "=== DRY RUN (no uploads or DB writes) ===" : "=== LIVE RUN ===")
   console.log(`Bucket: ${bucket}`)
+  console.log(`Targets: photo_links pointing to /pending/ or /admin/ (not already /compressed/)`)
   console.log(`photo_links format: newline-separated URLs (also supports comma / JSON arrays)`)
 
   const { data, error } = await supabase
     .from("business_listings")
     .select("id, business_name, photo_links, status")
-    .eq("status", "approved")
     .order("business_name", { ascending: true })
 
   if (error) {
@@ -361,7 +408,7 @@ async function main() {
   }
 
   const listings = (data ?? []) as ListingRow[]
-  console.log(`Found ${listings.length} approved listing${listings.length === 1 ? "" : "s"}.`)
+  console.log(`Found ${listings.length} listing${listings.length === 1 ? "" : "s"} (all statuses).`)
 
   const summaries: ListingSummary[] = []
   const failedListings: string[] = []
@@ -369,15 +416,19 @@ async function main() {
   for (let index = 0; index < listings.length; index += 1) {
     const listing = listings[index]!
     try {
-      const summary = await processListing(listing, bucket, supabaseUrl, dryRun)
+      const summary = await processListing(listing, supabaseUrl, dryRun)
       summaries.push(summary)
+      if (summary.failed) failedListings.push(listing.business_name)
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
       console.error(`\n✗ Listing failed: ${listing.business_name} — ${message}`)
       failedListings.push(listing.business_name)
       summaries.push({
         name: listing.business_name,
+        status: listing.status,
         photosProcessed: 0,
+        photosSkipped: 0,
+        photosFailed: 0,
         originalBytes: 0,
         compressedBytes: 0,
         failed: true,
@@ -393,12 +444,12 @@ async function main() {
   printSummaryTable(summaries, dryRun)
 
   if (failedListings.length > 0) {
-    console.log(`\nFailed listings (${failedListings.length}): ${failedListings.join(", ")}`)
+    console.log(`\nListings with failures (${failedListings.length}): ${failedListings.join(", ")}`)
     process.exitCode = 1
   } else if (dryRun) {
     console.log("\nDry run complete. Run `npm run compress-photos` when ready to apply changes.")
   } else {
-    console.log("\nDone. Original files were left in storage as backup.")
+    console.log("\nDone. Original /pending/ and /admin/ files were left in storage as backup.")
   }
 }
 

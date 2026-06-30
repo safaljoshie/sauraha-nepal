@@ -10,9 +10,20 @@ SUPABASE_LISTING_PHOTOS_BUCKET=Sauraha Nepal Listing uploads
 
 The bucket should allow **public read** so approved listings can display images via `photo_links` URLs.
 
-Uploads use the **service role** from `POST /api/list-business/upload-photos` (server only).
+Uploads use the **service role** from:
 
-If uploads fail with policy errors, ensure the service role can write to this bucket, or add a storage policy for authenticated/service uploads.
+- `POST /api/list-business/upload-photos` (public list-your-business form)
+- `POST /api/admin/upload-listing-photos` (admin listing editor)
+
+All listing photos are compressed server-side to WebP (max 1280px, quality 75) and stored under:
+
+```
+compressed/{listing-or-submission-id}/{timestamp}-{id}.webp
+```
+
+Public submissions use a client `submissionId` UUID as the folder name until the listing row exists in the database. Admin uploads use the listing’s Supabase `id`.
+
+Legacy paths (`pending/`, `admin/`) may still exist in storage from older uploads; use `npm run compress-photos:dry` to migrate them.
 
 ## Homepage hero video
 

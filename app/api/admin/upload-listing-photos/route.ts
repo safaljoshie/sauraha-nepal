@@ -1,16 +1,7 @@
-import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
-import {
-  ensureListingPhotosBucket,
-  getListingPhotosBucket,
-  getStoragePublicUrl,
-  isAllowedPhotoFile,
-  MAX_PHOTO_BYTES,
-  storageUploadErrorMessage,
-  uniqueStorageFilename,
-} from "@/lib/list-business-photos"
-import { getSupabaseAdmin } from "@/lib/supabase"
+import { isAllowedPhotoFile } from "@/lib/list-business-photos"
+import { uploadListingPhoto } from "@/lib/upload-listing-photo"
 
 export async function POST(request: Request) {
   const unauthorized = await requireAdminApi()
@@ -18,13 +9,6 @@ export async function POST(request: Request) {
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!supabaseUrl) {
-    return NextResponse.json({ error: "Storage is not configured." }, { status: 500 })
-  }
-
-  let supabase
-  try {
-    supabase = getSupabaseAdmin()
-  } catch {
     return NextResponse.json({ error: "Storage is not configured." }, { status: 500 })
   }
 
@@ -40,22 +24,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Please choose at least one image." }, { status: 400 })
   }
 
-  const folder = formData.get("folder")
-  const uploadFolder =
-    typeof folder === "string" && folder.trim()
-      ? folder.trim().replace(/[^a-zA-Z0-9/_-]/g, "_")
-      : `admin/${randomUUID()}`
+  const listingIdRaw = formData.get("listingId")
+  const listingId =
+    typeof listingIdRaw === "string" && listingIdRaw.trim()
+      ? listingIdRaw.trim().replace(/[^a-zA-Z0-9-]/g, "")
+      : ""
 
-  const bucketError = await ensureListingPhotosBucket(supabase)
-  if (bucketError) {
-    console.error("Listing photos bucket setup error:", bucketError)
-    return NextResponse.json(
-      { error: storageUploadErrorMessage(bucketError) },
-      { status: 500 },
-    )
+  if (!listingId) {
+    return NextResponse.json({ error: "Listing id is required for photo upload." }, { status: 400 })
   }
 
-  const bucket = getListingPhotosBucket()
   const urls: string[] = []
 
   for (const file of files) {
@@ -65,37 +43,19 @@ export async function POST(request: Request) {
         { status: 400 },
       )
     }
-    if (file.size > MAX_PHOTO_BYTES) {
-      return NextResponse.json(
-        { error: "Each photo must be 15 MB or smaller." },
-        { status: 400 },
-      )
-    }
 
-    const filename = uniqueStorageFilename(file.name)
-    const path = `${uploadFolder}/${filename}`
     const buffer = Buffer.from(await file.arrayBuffer())
-    const contentType =
-      file.type === "image/webp"
-        ? "image/webp"
-        : file.type === "image/png"
-          ? "image/png"
-          : file.type || "image/jpeg"
-
-    const { error } = await supabase.storage.from(bucket).upload(path, buffer, {
-      contentType,
-      upsert: false,
+    const result = await uploadListingPhoto(buffer, listingId, {
+      supabaseUrl,
+      originalSize: file.size,
     })
 
-    if (error) {
-      console.error("Admin image upload error:", error)
-      return NextResponse.json(
-        { error: storageUploadErrorMessage(error) },
-        { status: 500 },
-      )
+    if (!result.ok) {
+      console.error("Admin listing photo upload error:", result.error)
+      return NextResponse.json({ error: result.error }, { status: 500 })
     }
 
-    urls.push(getStoragePublicUrl(bucket, path, supabaseUrl))
+    urls.push(result.url)
   }
 
   return NextResponse.json({ urls })

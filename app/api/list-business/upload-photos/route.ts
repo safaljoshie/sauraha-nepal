@@ -1,31 +1,15 @@
-import { randomUUID } from "crypto"
 import { NextResponse } from "next/server"
 import {
-  ensureListingPhotosBucket,
-  getListingPhotosBucket,
-  getStoragePublicUrl,
   isAllowedPhotoFile,
-  MAX_PHOTO_BYTES,
   photoLimitForPlan,
-  storageUploadErrorMessage,
-  uniqueStorageFilename,
 } from "@/lib/list-business-photos"
 import { normalizePlan } from "@/lib/list-business"
-import { getSupabaseAdmin } from "@/lib/supabase"
+import { uploadListingPhoto } from "@/lib/upload-listing-photo"
+import { randomUUID } from "crypto"
 
 export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   if (!supabaseUrl) {
-    return NextResponse.json(
-      { error: "Storage is not configured." },
-      { status: 500 },
-    )
-  }
-
-  let supabase
-  try {
-    supabase = getSupabaseAdmin()
-  } catch {
     return NextResponse.json(
       { error: "Storage is not configured." },
       { status: 500 },
@@ -66,21 +50,11 @@ export async function POST(request: Request) {
     )
   }
 
-  const bucket = getListingPhotosBucket()
   const submissionIdRaw = formData.get("submissionId")
-  const submissionId =
+  const listingFolderId =
     typeof submissionIdRaw === "string" && submissionIdRaw.trim()
       ? submissionIdRaw.trim().replace(/[^a-zA-Z0-9-]/g, "")
       : randomUUID()
-
-  const bucketError = await ensureListingPhotosBucket(supabase)
-  if (bucketError) {
-    console.error("Listing photos bucket setup error:", bucketError)
-    return NextResponse.json(
-      { error: storageUploadErrorMessage(bucketError) },
-      { status: 500 },
-    )
-  }
 
   const urls: string[] = []
 
@@ -91,37 +65,19 @@ export async function POST(request: Request) {
         { status: 400 },
       )
     }
-    if (file.size > MAX_PHOTO_BYTES) {
-      return NextResponse.json(
-        { error: "Each photo must be 15 MB or smaller." },
-        { status: 400 },
-      )
-    }
 
-    const filename = uniqueStorageFilename(file.name)
-    const path = `pending/${submissionId}/${filename}`
     const buffer = Buffer.from(await file.arrayBuffer())
-    const contentType =
-      file.type === "image/webp"
-        ? "image/webp"
-        : file.type === "image/png"
-          ? "image/png"
-          : file.type || "image/jpeg"
-
-    const { error } = await supabase.storage.from(bucket).upload(path, buffer, {
-      contentType,
-      upsert: false,
+    const result = await uploadListingPhoto(buffer, listingFolderId, {
+      supabaseUrl,
+      originalSize: file.size,
     })
 
-    if (error) {
-      console.error("Supabase storage upload error:", error)
-      return NextResponse.json(
-        { error: storageUploadErrorMessage(error) },
-        { status: 500 },
-      )
+    if (!result.ok) {
+      console.error("Listing photo upload error:", result.error)
+      return NextResponse.json({ error: result.error }, { status: 500 })
     }
 
-    urls.push(getStoragePublicUrl(bucket, path, supabaseUrl))
+    urls.push(result.url)
   }
 
   return NextResponse.json({ urls })
