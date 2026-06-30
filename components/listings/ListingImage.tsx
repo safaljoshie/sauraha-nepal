@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
 
 const PLACEHOLDER = "/images/placeholder-listing.jpg"
@@ -32,6 +32,10 @@ export default function ListingImage({
   quality = DEFAULT_IMAGE_QUALITY,
 }: ListingImageProps) {
   const [imgSrc, setImgSrc] = useState(src)
+
+  useEffect(() => {
+    setImgSrc(src)
+  }, [src])
 
   return (
     <Image

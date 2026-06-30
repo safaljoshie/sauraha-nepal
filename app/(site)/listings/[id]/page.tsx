@@ -12,7 +12,7 @@ import {
   formatWhatsAppDisplay,
   getCategoryDisplay,
   getListingImage,
-  getPhotoUrls,
+  getGalleryPhotoUrls,
   telUrl,
   whatsappUrl,
 } from "@/lib/listings-catalog"
@@ -51,7 +51,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
   ])
   if (!listing) notFound()
 
-  const photos = getPhotoUrls(listing)
+  const photos = getGalleryPhotoUrls(listing)
   const heroImage = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category, catalog)
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""

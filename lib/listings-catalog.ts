@@ -233,6 +233,13 @@ export function getPhotoUrls(listing: BusinessListing) {
     .filter(Boolean)
 }
 
+/** Gallery photos excluding the cover (first) image shown in the hero. */
+export function getGalleryPhotoUrls(listing: BusinessListing) {
+  const photos = getPhotoUrls(listing)
+  if (photos.length <= 1) return []
+  return photos.slice(1)
+}
+
 export {
   formatWhatsAppDisplay,
   telUrl,

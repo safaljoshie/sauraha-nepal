@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate, formatSubmittedDateParts, planLabel } from "@/lib/business-listing"
 import { DEFAULT_CATEGORY_CATALOG, getActiveCategoryNames } from "@/lib/category-catalog"
@@ -150,15 +150,14 @@ function removePhotoUrl(photoLinks: string, targetUrl: string) {
     .join("\n")
 }
 
-function appendPhotoUrls(existingLinks: string, uploadedUrls: string[]) {
+function prependPhotoUrls(existingLinks: string, uploadedUrls: string[]) {
   const existing = parsePhotoUrls(existingLinks)
-  const seen = new Set(existing)
-  const result = [...existing]
-  for (const url of uploadedUrls) {
-    if (!seen.has(url)) {
-      result.push(url)
-      seen.add(url)
-    }
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const url of [...uploadedUrls, ...existing]) {
+    if (!url || seen.has(url)) continue
+    seen.add(url)
+    result.push(url)
   }
   return result.join("\n")
 }
@@ -182,6 +181,7 @@ export default function AdminDashboard() {
   const [toasts, setToasts] = useState<Toast[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [uploadingPhotos, setUploadingPhotos] = useState(false)
+  const photoUploadInFlight = useRef(false)
   const [adminTab, setAdminTab] = useState<AdminTab>("listings")
   const [searchInput, setSearchInput] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -388,7 +388,31 @@ export default function AdminDashboard() {
     setEditForm(normalizeEditForm(listing, defaultCategory))
   }
 
+  async function persistListingPhotos(listingId: string, photo_links: string) {
+    const res = await fetch("/api/admin/update-listing-photos", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ listingId, photo_links }),
+    })
+    if (res.status === 401) {
+      router.push("/admin")
+      return null
+    }
+    const data = (await res.json()) as { error?: string; photo_links?: string }
+    if (!res.ok) {
+      throw new Error(data.error ?? "Failed to save photos.")
+    }
+    const saved = data.photo_links ?? photo_links
+    updateListingState(listingId, (listing) => ({ ...listing, photo_links: saved }))
+    return saved
+  }
+
   async function handleAdminPhotoUpload(e: ChangeEvent<HTMLInputElement>) {
+    if (photoUploadInFlight.current || uploadingPhotos) {
+      e.target.value = ""
+      return
+    }
+
     const files = Array.from(e.target.files ?? [])
     e.target.value = ""
     if (!editForm || files.length === 0) return
@@ -400,6 +424,7 @@ export default function AdminDashboard() {
       return
     }
 
+    photoUploadInFlight.current = true
     setUploadingPhotos(true)
     setEditErrors("")
     try {
@@ -433,16 +458,53 @@ export default function AdminDashboard() {
         throw new Error(data.error ?? "Failed to upload image.")
       }
 
-      const merged = data.photo_links ?? appendPhotoUrls(editForm.photo_links, data.urls)
+      const merged =
+        data.photo_links ?? prependPhotoUrls(editForm.photo_links, data.urls)
       setEditForm((prev) => (prev ? { ...prev, photo_links: merged } : prev))
       updateListingState(editForm.id, (listing) => ({ ...listing, photo_links: merged }))
-      showToast("success", `Uploaded ${data.urls.length} image${data.urls.length === 1 ? "" : "s"} successfully`)
+      showToast(
+        "success",
+        `Uploaded ${data.urls.length} image${data.urls.length === 1 ? "" : "s"} — set as cover`,
+      )
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to upload image. Please try again."
       setEditErrors(message)
       showToast("error", message)
     } finally {
+      photoUploadInFlight.current = false
       setUploadingPhotos(false)
+    }
+  }
+
+  async function handleRemovePhoto(url: string) {
+    if (!editForm) return
+    const nextLinks = removePhotoUrl(editForm.photo_links, url)
+    setEditForm((prev) => (prev ? { ...prev, photo_links: nextLinks } : prev))
+    try {
+      const saved = await persistListingPhotos(editForm.id, nextLinks)
+      if (saved !== null) {
+        setEditForm((prev) => (prev ? { ...prev, photo_links: saved } : prev))
+        showToast("success", "Photo removed")
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to remove photo."
+      showToast("error", message)
+    }
+  }
+
+  async function handleSetCoverPhoto(url: string) {
+    if (!editForm) return
+    const nextLinks = movePhotoToFront(editForm.photo_links, url)
+    setEditForm((prev) => (prev ? { ...prev, photo_links: nextLinks } : prev))
+    try {
+      const saved = await persistListingPhotos(editForm.id, nextLinks)
+      if (saved !== null) {
+        setEditForm((prev) => (prev ? { ...prev, photo_links: saved } : prev))
+        showToast("success", "Cover image updated")
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to set cover image."
+      showToast("error", message)
     }
   }
 
@@ -1175,11 +1237,7 @@ export default function AdminDashboard() {
                             </a>
                             <button
                               type="button"
-                              onClick={() =>
-                                setEditForm((prev) =>
-                                  prev ? { ...prev, photo_links: removePhotoUrl(prev.photo_links, url) } : prev,
-                                )
-                              }
+                              onClick={() => handleRemovePhoto(url)}
                               className="absolute top-1.5 right-1.5 rounded-full bg-red-600 px-2 py-0.5 text-xs font-bold text-white shadow hover:bg-red-700"
                               title="Remove image from this listing"
                             >
@@ -1187,11 +1245,7 @@ export default function AdminDashboard() {
                             </button>
                             <button
                               type="button"
-                              onClick={() =>
-                                setEditForm((prev) =>
-                                  prev ? { ...prev, photo_links: movePhotoToFront(prev.photo_links, url) } : prev,
-                                )
-                              }
+                              onClick={() => handleSetCoverPhoto(url)}
                               className="absolute bottom-1.5 left-1.5 rounded bg-black/65 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-black/80"
                               title="Set as cover image"
                             >

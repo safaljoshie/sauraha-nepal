@@ -59,19 +59,50 @@ export function parsePhotoLinkLines(text: string) {
     .filter(Boolean)
 }
 
+/** Stable key for deduping the same storage object across URL variants. */
+export function photoLinkStorageKey(url: string) {
+  const trimmed = url.trim()
+  if (!trimmed) return ""
+  try {
+    const pathname = decodeURIComponent(new URL(trimmed).pathname)
+    const marker = "/object/public/"
+    const idx = pathname.indexOf(marker)
+    if (idx >= 0) {
+      return pathname.slice(idx + marker.length).replace(/^\/+/, "")
+    }
+    return pathname.replace(/^\/+/, "")
+  } catch {
+    return trimmed
+  }
+}
+
+export function dedupePhotoLinkLines(urls: string[]) {
+  const seen = new Set<string>()
+  const deduped: string[] = []
+  for (const url of urls) {
+    const normalized = url.trim()
+    if (!normalized) continue
+    const key = photoLinkStorageKey(normalized)
+    if (seen.has(key)) continue
+    seen.add(key)
+    deduped.push(normalized)
+  }
+  return deduped
+}
+
+export function dedupePhotoLinks(text: string) {
+  return dedupePhotoLinkLines(parsePhotoLinkLines(text)).join("\n")
+}
+
 export function mergePhotoLinks(uploadedUrls: string[], linkText: string) {
   const fromText = parsePhotoLinkLines(linkText)
-  const seen = new Set<string>()
-  const merged: string[] = []
+  return dedupePhotoLinkLines([...uploadedUrls, ...fromText]).join("\n")
+}
 
-  for (const url of [...uploadedUrls, ...fromText]) {
-    const normalized = url.trim()
-    if (!normalized || seen.has(normalized)) continue
-    seen.add(normalized)
-    merged.push(normalized)
-  }
-
-  return merged.join("\n")
+/** New admin uploads become the cover image (first line). */
+export function prependPhotoLinks(existingLinks: string, uploadedUrls: string[]) {
+  const existing = parsePhotoLinkLines(existingLinks)
+  return dedupePhotoLinkLines([...uploadedUrls, ...existing]).join("\n")
 }
 
 export function isAllowedPhotoFile(file: File) {
