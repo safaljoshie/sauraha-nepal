@@ -163,6 +163,12 @@ function appendPhotoUrls(existingLinks: string, uploadedUrls: string[]) {
   return result.join("\n")
 }
 
+function movePhotoToFront(photoLinks: string, targetUrl: string) {
+  const urls = parsePhotoUrls(photoLinks)
+  if (!urls.includes(targetUrl)) return photoLinks
+  return [targetUrl, ...urls.filter((url) => url !== targetUrl)].join("\n")
+}
+
 export default function AdminDashboard() {
   const router = useRouter()
   const [listings, setListings] = useState<BusinessListing[]>([])
@@ -1178,6 +1184,18 @@ export default function AdminDashboard() {
                               title="Remove image from this listing"
                             >
                               ✕
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setEditForm((prev) =>
+                                  prev ? { ...prev, photo_links: movePhotoToFront(prev.photo_links, url) } : prev,
+                                )
+                              }
+                              className="absolute bottom-1.5 left-1.5 rounded bg-black/65 px-2 py-0.5 text-[10px] font-semibold text-white hover:bg-black/80"
+                              title="Set as cover image"
+                            >
+                              Set cover
                             </button>
                           </div>
                         ))}
