@@ -1,18 +1,17 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import ListingImage from "@/components/listings/ListingImage"
+import ListingPhotoGallery from "@/components/listings/ListingPhotoGallery"
 import ListingDetailMapSection from "@/components/listings/ListingDetailMapSection"
 import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import ListingShareButtons from "@/components/listings/ListingShareButtons"
-import ListingVerifiedBadge from "@/components/listings/ListingVerifiedBadge"
 import OpeningHoursDisplay from "@/components/listings/OpeningHoursDisplay"
 import {
   formatListingDate,
   formatWhatsAppDisplay,
   getCategoryDisplay,
   getListingImage,
-  getGalleryPhotoUrls,
+  getPhotoUrls,
   telUrl,
   whatsappUrl,
 } from "@/lib/listings-catalog"
@@ -51,7 +50,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
   ])
   if (!listing) notFound()
 
-  const photos = getGalleryPhotoUrls(listing)
+  const photos = getPhotoUrls(listing)
   const heroImage = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category, catalog)
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""
@@ -124,21 +123,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
       <div className="mx-auto grid max-w-4xl gap-10 px-4 py-10 md:px-8 lg:grid-cols-[1fr_320px]">
         <div className="space-y-8">
-          <div className="relative aspect-square w-full overflow-hidden rounded-2xl">
-            <ListingImage
-              src={heroImage}
-              alt={imageAlt}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 800px"
-              priority
-            />
-            {verified && (
-              <span className="absolute bottom-3 left-3 z-[2] sm:bottom-4 sm:left-4">
-                <ListingVerifiedBadge size="detail" />
-              </span>
-            )}
-          </div>
+          <ListingPhotoGallery
+            photos={photos}
+            alt={imageAlt}
+            verified={verified}
+            priority
+          />
 
           {listing.description && (
             <section className="rounded-2xl border border-border-brand bg-white p-6">
@@ -152,34 +142,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
           )}
 
           {listing.opening_hours && <OpeningHoursDisplay hours={listing.opening_hours} />}
-
-          {photos.length > 0 && (
-            <section className="rounded-2xl border border-border-brand bg-white p-6">
-              <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
-                Photos
-              </h2>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                {photos.map((url) => (
-                  <a
-                    key={url}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative block h-48 overflow-hidden rounded-2xl"
-                  >
-                    <ListingImage
-                      src={url}
-                      alt={imageAlt}
-                      fill
-                      className="object-cover transition-transform hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, 400px"
-                      loading="lazy"
-                    />
-                  </a>
-                ))}
-              </div>
-            </section>
-          )}
 
           <ListingDetailMapSection
             listingId={listing.id}

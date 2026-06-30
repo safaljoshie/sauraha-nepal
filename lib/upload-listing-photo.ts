@@ -43,15 +43,41 @@ export async function assertDecodableImageBuffer(buffer: Buffer) {
   await sharp(buffer).metadata()
 }
 
-/** Verify a public storage URL returns a decodable image after upload. */
-export async function verifyPublicListingPhotoUrl(url: string) {
-  const res = await fetch(url, { cache: "no-store" })
-  if (!res.ok) {
-    throw new Error(`Storage URL returned HTTP ${res.status}`)
+/** Verify uploaded bytes in storage decode (avoids CDN propagation lag on public URLs). */
+export async function verifyStoredListingPhoto(
+  supabase: SupabaseClient,
+  bucket: string,
+  path: string,
+) {
+  const { data, error } = await supabase.storage.from(bucket).download(path)
+  if (error || !data) {
+    throw new Error(error?.message ?? "Could not download uploaded photo from storage")
   }
-  const buffer = Buffer.from(await res.arrayBuffer())
+  const buffer = Buffer.from(await data.arrayBuffer())
   await assertDecodableImageBuffer(buffer)
   return buffer
+}
+
+/** Verify a public storage URL returns a decodable image (integrity checks / external use). */
+export async function verifyPublicListingPhotoUrl(url: string, retries = 4) {
+  let lastError: unknown
+  for (let attempt = 0; attempt < retries; attempt++) {
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 400 * attempt))
+    }
+    try {
+      const res = await fetch(url, { cache: "no-store" })
+      if (!res.ok) {
+        throw new Error(`Storage URL returned HTTP ${res.status}`)
+      }
+      const buffer = Buffer.from(await res.arrayBuffer())
+      await assertDecodableImageBuffer(buffer)
+      return buffer
+    } catch (error) {
+      lastError = error
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error("Photo verification failed")
 }
 
 /** Server-side compression — same settings as client + bulk migration scripts. */
@@ -68,6 +94,11 @@ export async function compressListingPhotoBuffer(buffer: Buffer): Promise<Buffer
 function sanitizeListingFolderId(listingId: string) {
   const trimmed = listingId.trim().replace(/[^a-zA-Z0-9-]/g, "")
   return trimmed || randomUUID()
+}
+
+/** Supabase storage must receive Blob/FormData on serverless — raw Buffer can UTF-8-corrupt. */
+function listingPhotoUploadBody(buffer: Buffer): Blob {
+  return new Blob([Uint8Array.from(buffer)], { type: "image/webp" })
 }
 
 export function buildCompressedListingPhotoPath(listingId: string, fileName?: string) {
@@ -168,10 +199,14 @@ export async function uploadListingPhoto(
     return { ok: false, error: "Listing photos must be stored under compressed/." }
   }
 
-  const { error: uploadError } = await supabase.storage.from(bucket).upload(path, compressed, {
-    contentType: "image/webp",
-    upsert: options.upsert ?? false,
-  })
+  const { error: uploadError } = await supabase.storage.from(bucket).upload(
+    path,
+    listingPhotoUploadBody(compressed),
+    {
+      contentType: "image/webp",
+      upsert: options.upsert ?? false,
+    },
+  )
 
   if (uploadError) {
     return { ok: false, error: storageUploadErrorMessage(uploadError) }
@@ -180,7 +215,7 @@ export async function uploadListingPhoto(
   const url = getStoragePublicUrl(bucket, path, supabaseUrl)
 
   try {
-    await verifyPublicListingPhotoUrl(url)
+    await verifyStoredListingPhoto(supabase, bucket, path)
   } catch (error) {
     console.error("Post-upload photo verification failed:", error)
     await supabase.storage.from(bucket).remove([path]).catch(() => undefined)
