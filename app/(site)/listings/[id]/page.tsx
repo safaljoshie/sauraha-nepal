@@ -23,7 +23,7 @@ import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { buildListingDetailMetadata, listingImageAlt, listingJsonLd } from "@/lib/seo"
 import { SITE_URL } from "@/lib/blog-posts"
 
-export const revalidate = 3600
+export const revalidate = 60
 
 type PageProps = {
   params: Promise<{ id: string }>
