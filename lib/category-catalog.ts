@@ -305,9 +305,10 @@ export function buildSearchCategoryChips(catalog: CategoryCatalog): SearchCatego
     stay: "Hotels",
     activities: "Activities",
     eat: "Restaurants",
+    guides: "Tour Guides",
   }
   const chips: SearchCategoryChip[] = []
-  for (const slug of ["stay", "activities", "eat"]) {
+  for (const slug of ["stay", "activities", "eat", "guides"]) {
     const group = catalog.groups.find((g) => g.slug === slug && g.is_active)
     if (group) {
       chips.push({
@@ -316,7 +317,6 @@ export function buildSearchCategoryChips(catalog: CategoryCatalog): SearchCatego
       })
     }
   }
-  chips.push({ label: "Travel Guides", href: "/blog" })
   return chips
 }
 
