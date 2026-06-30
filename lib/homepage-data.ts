@@ -76,7 +76,7 @@ export function buildHomepageData(
         count,
         countLabel:
           count === 0 ? "Coming soon" : `${count} listing${count === 1 ? "" : "s"}`,
-        href: g.id === "info" ? "/listings?category=info" : `/listings?category=${g.id}`,
+        href: `/listings?category=${g.id}`,
       }
     })
 
@@ -127,7 +127,7 @@ export function buildMapFilterGroups(catalog: CategoryCatalog) {
   return [
     { id: "all" as const, label: "All" },
     ...catalog.builtGroups
-      .filter((g) => g.id !== "all" && g.id !== "info")
+      .filter((g) => g.id !== "all")
       .map((g) => ({ id: g.id as CategoryGroupId, label: g.label })),
     { id: "medical" as const, label: "Medical" },
   ]

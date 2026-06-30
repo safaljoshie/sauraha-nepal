@@ -5,7 +5,6 @@ export const categories = [
   { icon: "car", name: "Transport", count: "12 listings", href: "/listings?category=transport" },
   { icon: "shopping-bag", name: "Shopping", count: "16 listings", href: "/listings?category=shopping" },
   { icon: "compass", name: "Tour Guides", count: "14 listings", href: "/listings?category=guides" },
-  { icon: "info", name: "Travel Info", count: "8 guides", href: "/listings?category=info" },
 ] as const
 
 export const categoryTabs = [
@@ -16,7 +15,6 @@ export const categoryTabs = [
   { label: "Transport", slug: "transport" },
   { label: "Shopping", slug: "shopping" },
   { label: "Tour Guides", slug: "guides" },
-  { label: "Travel Info", slug: "info" },
 ] as const
 
 export type Listing = {

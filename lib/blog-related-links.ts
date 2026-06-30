@@ -26,9 +26,9 @@ const BLOG_RELATED: Record<string, BlogRelatedLink[]> = {
       description: "Plan your first visit after you arrive.",
     },
     {
-      href: "/listings?category=info",
-      label: "Travel information listings",
-      description: "Permits, tips and practical local resources.",
+      href: "/blog/park-permits-to-visit-sauraha-community-forest-vs-national-forest-2026-guide",
+      label: "Park permits & travel tips",
+      description: "Community forest vs national park permit details.",
     },
   ],
   "sauraha-nepal-weather-by-month": [

@@ -36,7 +36,6 @@ const CATEGORY_PHRASE_BY_GROUP: Record<string, string> = {
   transport: "transport service in Sauraha",
   shopping: "shop in Sauraha",
   guides: "licensed tour guide in Sauraha",
-  info: "travel resource in Sauraha",
 }
 
 export const LISTINGS_CATEGORY_META: Record<string, { title: string; description: string }> = {
@@ -69,11 +68,6 @@ export const LISTINGS_CATEGORY_META: Record<string, { title: string; description
     title: "Tour Guides in Sauraha, Chitwan National Park",
     description:
       "Hire licensed local tour guides in Sauraha for jungle walks, wildlife spotting, village visits and Chitwan National Park trips.",
-  },
-  info: {
-    title: "Travel Information for Sauraha & Chitwan",
-    description:
-      "Practical travel information, park permits and local tips for visiting Sauraha and Chitwan National Park.",
   },
 }
 

@@ -2,7 +2,7 @@ import { cache } from "react"
 import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
 
 /** URL filter ids: virtual `all` / `info` plus dynamic group slugs from the database. */
-export type CategoryGroupId = "all" | "info" | (string & {})
+export type CategoryGroupId = "all" | (string & {})
 
 export type CategoryGroupRow = {
   id: string
@@ -168,7 +168,6 @@ export function buildCategoryGroups(
         icon: g.icon,
         dbId: g.id,
       })),
-    { id: "info", label: "Travel Info", tabLabel: "Travel Info", matchers: [], icon: "info" },
   ]
 
   return built

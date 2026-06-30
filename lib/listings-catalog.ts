@@ -40,14 +40,14 @@ export function getCategoryGroupId(
 ): CategoryGroupId {
   const groups = resolveGroups(catalog)
   const names = parseListingCategories(category)
-  if (names.length === 0) return "info"
+  if (names.length === 0) return "all"
   for (const name of names) {
     const group = groups.find(
-      (g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(name),
+      (g) => g.id !== "all" && g.matchers.includes(name),
     )
     if (group) return group.id
   }
-  return "info"
+  return "all"
 }
 
 export function getCategoryDisplay(category: string, catalog?: CategoryCatalog) {
@@ -56,7 +56,7 @@ export function getCategoryDisplay(category: string, catalog?: CategoryCatalog) 
   if (names.length === 1) {
     const groups = resolveGroups(catalog)
     const group = groups.find(
-      (g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(names[0]),
+      (g) => g.id !== "all" && g.matchers.includes(names[0]),
     )
     return group?.label ?? names[0]
   }
@@ -102,14 +102,6 @@ export function matchesCategoryGroup(
   const group = groups.find((g) => g.id === groupId)
   if (!group) return false
   const names = parseListingCategories(listing.category)
-  if (groupId === "info") {
-    if (names.length === 0) return true
-    return !names.some((name) =>
-      groups.some(
-        (g) => g.id !== "all" && g.id !== "info" && g.matchers.includes(name),
-      ),
-    )
-  }
   return names.some((name) => group.matchers.includes(name))
 }
 

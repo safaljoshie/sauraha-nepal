@@ -367,7 +367,6 @@ function ListingForm() {
             <option>Transport</option>
             <option>Shopping</option>
             <option>Tour Guides</option>
-            <option>Travel Info</option>
           </select>
         </FormField>
       </div>
