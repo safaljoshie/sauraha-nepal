@@ -1,8 +1,11 @@
 import { cache } from "react"
 import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
 
-/** URL filter ids: virtual `all` / `info` plus dynamic group slugs from the database. */
+/** URL filter ids: virtual `all` plus dynamic group slugs from the database. */
 export type CategoryGroupId = "all" | (string & {})
+
+/** Legacy / deprecated groups that must never appear in public category filters. */
+const DEPRECATED_CATEGORY_GROUP_SLUGS = new Set(["info"])
 
 export type CategoryGroupRow = {
   id: string
@@ -144,7 +147,9 @@ export function buildCategoryGroups(
   options?: { includeInactive?: boolean },
 ): BuiltCategoryGroup[] {
   const includeInactive = options?.includeInactive ?? false
-  const activeGroups = includeInactive ? groups : groups.filter((g) => g.is_active)
+  const activeGroups = (includeInactive ? groups : groups.filter((g) => g.is_active)).filter(
+    (g) => !DEPRECATED_CATEGORY_GROUP_SLUGS.has(g.slug),
+  )
   const activeCategories = includeInactive
     ? categories
     : categories.filter((c) => c.is_active)
