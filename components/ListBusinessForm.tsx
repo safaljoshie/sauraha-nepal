@@ -14,9 +14,7 @@ import {
   photoLimitForPlan,
 } from "@/lib/list-business-photos"
 import {
-  compressImage,
   MAX_PRE_COMPRESS_BYTES,
-  POST_COMPRESS_WARN_BYTES,
 } from "@/lib/compress-image"
 import { formatImageBytes } from "@/lib/image"
 import {
@@ -125,10 +123,7 @@ type PhotoFileEntry = {
   id: string
   file: File
   previewUrl: string
-  compressing?: boolean
   originalSizeBytes?: number
-  compressedSizeBytes?: number
-  sizeWarning?: string
 }
 
 export default function ListBusinessForm({ categories }: { categories: string[] }) {
@@ -218,53 +213,17 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
 
     for (const file of toAdd) {
       const id = crypto.randomUUID()
-      const placeholderPreview = URL.createObjectURL(file)
+      const previewUrl = URL.createObjectURL(file)
 
       setPhotoFiles((prev) => [
         ...prev,
         {
           id,
           file,
-          previewUrl: placeholderPreview,
-          compressing: true,
+          previewUrl,
           originalSizeBytes: file.size,
         },
       ])
-
-      try {
-        const compressed = await compressImage(file)
-        const sizeWarning =
-          compressed.size > POST_COMPRESS_WARN_BYTES
-            ? "Large file after optimization — upload may be slower."
-            : undefined
-
-        setPhotoFiles((prev) =>
-          prev.map((entry) => {
-            if (entry.id !== id) return entry
-            URL.revokeObjectURL(placeholderPreview)
-            const previewUrl = URL.createObjectURL(compressed)
-            return {
-              ...entry,
-              file: compressed,
-              previewUrl,
-              compressing: false,
-              compressedSizeBytes: compressed.size,
-              sizeWarning,
-            }
-          }),
-        )
-      } catch (err) {
-        setPhotoFiles((prev) => {
-          const entry = prev.find((p) => p.id === id)
-          if (entry) URL.revokeObjectURL(entry.previewUrl)
-          return prev.filter((p) => p.id !== id)
-        })
-        URL.revokeObjectURL(placeholderPreview)
-        const message =
-          err instanceof Error ? err.message : "Could not optimize this image."
-        setErrorMessage(message)
-        setStatus("error")
-      }
     }
   }
 
@@ -305,12 +264,6 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setStatus("error")
       setErrorMessage("Please provide a valid email address.")
-      return
-    }
-
-    if (photoFiles.some((entry) => entry.compressing)) {
-      setStatus("error")
-      setErrorMessage("Please wait while your photos finish optimizing.")
       return
     }
 
@@ -599,7 +552,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
             multiple
             className={`${inputClass} cursor-pointer file:mr-4 file:rounded-xl file:border-0 file:bg-green-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white`}
             onChange={handlePhotoFileChange}
-            disabled={isLoading || uploadingPhotos || photoFiles.some((p) => p.compressing) || totalPhotoCount >= photoLimit}
+            disabled={isLoading || uploadingPhotos || totalPhotoCount >= photoLimit}
           />
         </Field>
         {uploadingPhotos && (
@@ -625,19 +578,11 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
                   sizes="120px"
                   unoptimized
                 />
-                <div className="absolute inset-x-0 bottom-0 bg-black/65 px-2 py-1.5 text-[0.65rem] leading-snug text-white">
-                  {entry.compressing ? (
-                    <span>Optimizing image…</span>
-                  ) : entry.originalSizeBytes != null && entry.compressedSizeBytes != null ? (
-                    <span>
-                      {formatImageBytes(entry.originalSizeBytes)} →{" "}
-                      {formatImageBytes(entry.compressedSizeBytes)}
-                    </span>
-                  ) : null}
-                  {entry.sizeWarning ? (
-                    <p className="mt-0.5 text-orange-light">{entry.sizeWarning}</p>
-                  ) : null}
-                </div>
+                {entry.originalSizeBytes != null && (
+                  <div className="absolute inset-x-0 bottom-0 bg-black/65 px-2 py-1.5 text-[0.65rem] leading-snug text-white">
+                    {formatImageBytes(entry.originalSizeBytes)}
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => removePhotoFile(entry.id)}

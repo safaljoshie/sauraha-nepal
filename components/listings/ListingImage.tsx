@@ -2,9 +2,8 @@
 
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import { LISTING_IMAGE_FALLBACK } from "@/lib/listings-catalog"
 import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
-
-const PLACEHOLDER = "/images/placeholder-listing.jpg"
 
 type ListingImageProps = {
   src: string
@@ -19,6 +18,13 @@ type ListingImageProps = {
   quality?: number
 }
 
+function shouldUseUnoptimized(src: string) {
+  const trimmed = src.trim()
+  if (!trimmed) return false
+  if (trimmed.includes(".supabase.co")) return true
+  return !isNextOptimizedImageSrc(trimmed)
+}
+
 export default function ListingImage({
   src,
   alt,
@@ -31,19 +37,20 @@ export default function ListingImage({
   loading = "lazy",
   quality = DEFAULT_IMAGE_QUALITY,
 }: ListingImageProps) {
-  const [imgSrc, setImgSrc] = useState(src)
+  const [failed, setFailed] = useState(false)
 
   useEffect(() => {
-    setImgSrc(src)
+    setFailed(false)
   }, [src])
 
-  const trimmedSrc = imgSrc.trim()
-  const useUnoptimized =
-    !isNextOptimizedImageSrc(trimmedSrc) || trimmedSrc.includes(".supabase.co")
+  const trimmedSrc = src.trim()
+  const displaySrc =
+    failed || !trimmedSrc ? LISTING_IMAGE_FALLBACK : trimmedSrc
 
   return (
     <Image
-      src={imgSrc}
+      key={displaySrc}
+      src={displaySrc}
       alt={alt}
       fill={fill}
       width={width}
@@ -53,8 +60,12 @@ export default function ListingImage({
       quality={quality}
       priority={priority}
       loading={priority ? undefined : loading}
-      unoptimized={useUnoptimized}
-      onError={() => setImgSrc(PLACEHOLDER)}
+      unoptimized={shouldUseUnoptimized(displaySrc)}
+      onError={() => {
+        if (!failed && displaySrc !== LISTING_IMAGE_FALLBACK) {
+          setFailed(true)
+        }
+      }}
     />
   )
 }

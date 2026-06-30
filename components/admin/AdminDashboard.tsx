@@ -8,9 +8,7 @@ import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate, formatSubmittedDateParts, planLabel } from "@/lib/business-listing"
 import { DEFAULT_CATEGORY_CATALOG, getActiveCategoryNames } from "@/lib/category-catalog"
 import {
-  compressImage,
   MAX_PRE_COMPRESS_BYTES,
-  POST_COMPRESS_WARN_BYTES,
 } from "@/lib/compress-image"
 import { isNextOptimizedImageSrc } from "@/lib/image"
 import { matchesAdminListingSearch } from "@/lib/listings-catalog"
@@ -428,20 +426,9 @@ export default function AdminDashboard() {
     setUploadingPhotos(true)
     setEditErrors("")
     try {
-      const compressedFiles: File[] = []
-      for (const file of files) {
-        const compressed = await compressImage(file)
-        if (compressed.size > POST_COMPRESS_WARN_BYTES) {
-          console.warn(
-            `${file.name} is still ${Math.round(compressed.size / (1024 * 1024))}MB after optimization.`,
-          )
-        }
-        compressedFiles.push(compressed)
-      }
-
       const formData = new FormData()
       formData.set("listingId", editForm.id)
-      for (const file of compressedFiles) {
+      for (const file of files) {
         formData.append("files", file)
       }
 
@@ -1199,7 +1186,7 @@ export default function AdminDashboard() {
                     />
                   </label>
                   <span className="text-xs text-text-light sm:max-w-none">
-                    JPEG/PNG/WEBP/HEIC, max 15MB each (optimized before upload)
+                    JPEG/PNG/WEBP/HEIC, max 15MB each (optimized on upload)
                   </span>
                 </div>
                 <textarea

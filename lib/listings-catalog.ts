@@ -27,6 +27,9 @@ const PLAN_ORDER: Record<string, number> = {
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80"
 
+/** Neutral fallback when a listing photo URL fails to load — NOT a wildlife/stock hero image. */
+export const LISTING_IMAGE_FALLBACK = DEFAULT_IMAGE
+
 function resolveGroups(catalog?: CategoryCatalog): BuiltCategoryGroup[] {
   return catalog?.builtGroups ?? DEFAULT_CATEGORY_CATALOG.builtGroups
 }

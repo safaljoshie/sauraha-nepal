@@ -109,6 +109,7 @@ export async function uploadListingPhoto(
   let compressed: Buffer
   try {
     compressed = await compressListingPhotoBuffer(fileBuffer)
+    await sharp(compressed).metadata()
   } catch (error) {
     console.error("Listing photo compression failed:", error)
     return {
