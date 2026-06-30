@@ -12,7 +12,6 @@ import {
   MAX_PRE_COMPRESS_BYTES,
   POST_COMPRESS_WARN_BYTES,
 } from "@/lib/compress-image"
-import { mergePhotoLinks } from "@/lib/list-business-photos"
 import { isNextOptimizedImageSrc } from "@/lib/image"
 import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import { parseListingCategories, serializeListingCategories } from "@/lib/listing-categories"
@@ -149,6 +148,19 @@ function removePhotoUrl(photoLinks: string, targetUrl: string) {
   return parsePhotoUrls(photoLinks)
     .filter((url) => url !== targetUrl)
     .join("\n")
+}
+
+function appendPhotoUrls(existingLinks: string, uploadedUrls: string[]) {
+  const existing = parsePhotoUrls(existingLinks)
+  const seen = new Set(existing)
+  const result = [...existing]
+  for (const url of uploadedUrls) {
+    if (!seen.has(url)) {
+      result.push(url)
+      seen.add(url)
+    }
+  }
+  return result.join("\n")
 }
 
 export default function AdminDashboard() {
@@ -415,7 +427,7 @@ export default function AdminDashboard() {
         throw new Error(data.error ?? "Failed to upload image.")
       }
 
-      const merged = data.photo_links ?? mergePhotoLinks(data.urls, editForm.photo_links)
+      const merged = data.photo_links ?? appendPhotoUrls(editForm.photo_links, data.urls)
       setEditForm((prev) => (prev ? { ...prev, photo_links: merged } : prev))
       updateListingState(editForm.id, (listing) => ({ ...listing, photo_links: merged }))
       showToast("success", `Uploaded ${data.urls.length} image${data.urls.length === 1 ? "" : "s"} successfully`)
@@ -1152,7 +1164,7 @@ export default function AdminDashboard() {
                                 className="object-cover transition-transform group-hover:scale-105"
                                 sizes="120px"
                                 loading="lazy"
-                                unoptimized={!isNextOptimizedImageSrc(url)}
+                                unoptimized
                               />
                             </a>
                             <button

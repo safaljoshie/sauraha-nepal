@@ -1,13 +1,29 @@
 import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
-import { isAllowedPhotoFile, mergePhotoLinks } from "@/lib/list-business-photos"
+import { isAllowedPhotoFile } from "@/lib/list-business-photos"
 import { getSupabaseAdmin } from "@/lib/supabase"
 import { uploadListingPhoto } from "@/lib/upload-listing-photo"
 
 function revalidateListingPages(listingId: string) {
   revalidatePath("/listings")
   revalidatePath(`/listings/${listingId}`)
+}
+
+function appendPhotoLinks(existingLinks: string, uploadedUrls: string[]) {
+  const existing = existingLinks
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const seen = new Set(existing)
+  const appended = [...existing]
+  for (const url of uploadedUrls) {
+    if (!seen.has(url)) {
+      appended.push(url)
+      seen.add(url)
+    }
+  }
+  return appended.join("\n")
 }
 
 export async function POST(request: Request) {
@@ -88,7 +104,7 @@ export async function POST(request: Request) {
     urls.push(result.url)
   }
 
-  const photo_links = mergePhotoLinks(urls, existing.photo_links ?? "")
+  const photo_links = appendPhotoLinks(existing.photo_links ?? "", urls)
 
   const { error: updateError } = await supabase
     .from("business_listings")
