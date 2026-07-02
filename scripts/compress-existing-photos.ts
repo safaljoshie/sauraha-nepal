@@ -8,11 +8,15 @@ import { basename, resolve } from "node:path"
 import {
   getListingPhotosBucket,
   parsePhotoLinkLines,
+  photoLinkStorageKey,
 } from "../lib/list-business-photos"
 import {
   buildCompressedListingPhotoPath,
+  compressListingPhotoBuffer,
   isAlreadyCompressedListingPhotoUrl,
   isLegacyUncompressedListingPhotoUrl,
+  LISTING_PHOTO_MAX_DIMENSION,
+  LISTING_PHOTO_WEBP_QUALITY,
   uploadListingPhoto,
 } from "../lib/upload-listing-photo"
 
@@ -132,12 +136,81 @@ async function downloadImage(url: string): Promise<Buffer> {
   return Buffer.from(arrayBuffer)
 }
 
+function compressedStoragePathFromUrl(photoUrl: string, bucket: string) {
+  const key = photoLinkStorageKey(photoUrl)
+  if (!key.startsWith(`${bucket}/`)) return null
+  return key.slice(bucket.length + 1)
+}
+
 async function processPhoto(
   listingId: string,
   photoUrl: string,
   supabaseUrl: string,
+  bucket: string,
   dryRun: boolean,
+  recompress: boolean,
 ): Promise<PhotoResult> {
+  if (recompress && isAlreadyCompressedListingPhotoUrl(photoUrl)) {
+    const storagePath = compressedStoragePathFromUrl(photoUrl, bucket)
+    if (!storagePath?.startsWith("compressed/")) {
+      console.log(`    ↷ Skipping non-compressed storage path: ${photoUrl}`)
+      return {
+        url: photoUrl,
+        originalBytes: 0,
+        compressedBytes: 0,
+        newUrl: photoUrl,
+        skipped: true,
+        skipReason: "not under compressed/",
+      }
+    }
+
+    console.log(`    ↓ Re-downloading compressed: ${photoUrl}`)
+    const originalBuffer = await downloadImage(photoUrl)
+    const originalBytes = originalBuffer.byteLength
+
+    if (dryRun) {
+      const estimated = await compressListingPhotoBuffer(originalBuffer)
+      console.log(
+        `    [DRY RUN] Would recompress ${formatBytes(originalBytes)} → ${formatBytes(estimated.byteLength)} at ${storagePath}`,
+      )
+      return {
+        url: photoUrl,
+        originalBytes,
+        compressedBytes: estimated.byteLength,
+        newUrl: photoUrl,
+        skipped: false,
+      }
+    }
+
+    const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    })
+
+    const result = await uploadListingPhoto(originalBuffer, listingId, {
+      supabase,
+      supabaseUrl,
+      originalSize: originalBytes,
+      storagePath,
+      upsert: true,
+    })
+
+    if (!result.ok) {
+      throw new Error(result.error)
+    }
+
+    console.log(
+      `    ✓ Recompressed ${formatBytes(originalBytes)} → ${formatBytes(result.bytes)} at ${storagePath}`,
+    )
+
+    return {
+      url: photoUrl,
+      originalBytes,
+      compressedBytes: result.bytes,
+      newUrl: result.url,
+      skipped: false,
+    }
+  }
+
   if (isAlreadyCompressedListingPhotoUrl(photoUrl)) {
     console.log(`    ↷ Skipping already-compressed URL: ${photoUrl}`)
     return {
@@ -215,7 +288,9 @@ async function processPhoto(
 async function processListing(
   listing: ListingRow,
   supabaseUrl: string,
+  bucket: string,
   dryRun: boolean,
+  recompress: boolean,
 ): Promise<ListingSummary> {
   const photoUrls = parsePhotoLinksField(listing.photo_links)
   console.log(`\n━━━ ${listing.business_name} [${listing.status}] (${listing.id}) ━━━`)
@@ -244,7 +319,14 @@ async function processListing(
 
   for (const photoUrl of photoUrls) {
     try {
-      const result = await processPhoto(listing.id, photoUrl, supabaseUrl, dryRun)
+      const result = await processPhoto(
+        listing.id,
+        photoUrl,
+        supabaseUrl,
+        bucket,
+        dryRun,
+        recompress,
+      )
       results.push(result)
       if (result.skipped) {
         skippedCount += 1
@@ -271,11 +353,17 @@ async function processListing(
   const listingFailed = failedCount > 0
 
   if (processedCount === 0) {
-    console.log("  No legacy uncompressed photos to migrate.")
+    console.log(
+      recompress
+        ? "  No compressed photos to recompress."
+        : "  No legacy uncompressed photos to migrate.",
+    )
   } else if (dryRun) {
     console.log(`  [DRY RUN] Would update photo_links (${processedCount} photo${processedCount === 1 ? "" : "s"})`)
-    console.log(`  [DRY RUN] New photo_links:\n${newPhotoLinks}`)
-  } else {
+    if (newPhotoLinks !== (listing.photo_links ?? "").trim()) {
+      console.log(`  [DRY RUN] New photo_links:\n${newPhotoLinks}`)
+    }
+  } else if (newPhotoLinks !== (listing.photo_links ?? "").trim()) {
     const supabase = createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
       auth: { persistSession: false, autoRefreshToken: false },
     })
@@ -290,6 +378,8 @@ async function processListing(
     }
 
     console.log(`  ✓ Updated photo_links (${processedCount} photo${processedCount === 1 ? "" : "s"} compressed)`)
+  } else {
+    console.log(`  ✓ Recompressed ${processedCount} photo${processedCount === 1 ? "" : "s"} (URLs unchanged)`)
   }
 
   return {
@@ -376,6 +466,7 @@ function printSummaryTable(rows: ListingSummary[], dryRun: boolean) {
 
 async function main() {
   const dryRun = process.argv.includes("--dry-run")
+  const recompress = process.argv.includes("--recompress")
 
   loadEnvLocal()
 
@@ -395,7 +486,13 @@ async function main() {
 
   console.log(dryRun ? "=== DRY RUN (no uploads or DB writes) ===" : "=== LIVE RUN ===")
   console.log(`Bucket: ${bucket}`)
-  console.log(`Targets: photo_links pointing to /pending/ or /admin/ (not already /compressed/)`)
+  if (recompress) {
+    console.log(
+      `Mode: recompress existing /compressed/ URLs at ${LISTING_PHOTO_MAX_DIMENSION}px WebP q${LISTING_PHOTO_WEBP_QUALITY}`,
+    )
+  } else {
+    console.log(`Targets: photo_links pointing to /pending/ or /admin/ (not already /compressed/)`)
+  }
   console.log(`photo_links format: newline-separated URLs (also supports comma / JSON arrays)`)
 
   const { data, error } = await supabase
@@ -416,7 +513,7 @@ async function main() {
   for (let index = 0; index < listings.length; index += 1) {
     const listing = listings[index]!
     try {
-      const summary = await processListing(listing, supabaseUrl, dryRun)
+      const summary = await processListing(listing, supabaseUrl, bucket, dryRun, recompress)
       summaries.push(summary)
       if (summary.failed) failedListings.push(listing.business_name)
     } catch (error) {
@@ -447,7 +544,9 @@ async function main() {
     console.log(`\nListings with failures (${failedListings.length}): ${failedListings.join(", ")}`)
     process.exitCode = 1
   } else if (dryRun) {
-    console.log("\nDry run complete. Run `npm run compress-photos` when ready to apply changes.")
+    console.log("\nDry run complete. Run `npm run compress-photos -- --recompress` when ready to apply changes.")
+  } else if (recompress) {
+    console.log("\nDone. Recompressed files were upserted in place under compressed/.")
   } else {
     console.log("\nDone. Original /pending/ and /admin/ files were left in storage as backup.")
   }

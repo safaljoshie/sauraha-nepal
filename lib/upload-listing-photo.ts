@@ -10,8 +10,8 @@ import {
 } from "@/lib/list-business-photos"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
-export const LISTING_PHOTO_MAX_DIMENSION = 1280
-export const LISTING_PHOTO_WEBP_QUALITY = 75
+export const LISTING_PHOTO_MAX_DIMENSION = 1920
+export const LISTING_PHOTO_WEBP_QUALITY = 88
 
 const UTF8_REPLACEMENT_BYTE = 0xef
 
@@ -87,7 +87,11 @@ export async function compressListingPhotoBuffer(buffer: Buffer): Promise<Buffer
       fit: "inside",
       withoutEnlargement: true,
     })
-    .webp({ quality: LISTING_PHOTO_WEBP_QUALITY })
+    .webp({
+      quality: LISTING_PHOTO_WEBP_QUALITY,
+      effort: 4,
+      smartSubsample: false,
+    })
     .toBuffer()
 }
 

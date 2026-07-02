@@ -11,6 +11,7 @@ import {
   MAX_PRE_COMPRESS_BYTES,
 } from "@/lib/compress-image"
 import { matchesAdminListingSearch } from "@/lib/listings-catalog"
+import { isListingVerified } from "@/lib/listing-badges"
 import { parseListingCategories, serializeListingCategories } from "@/lib/listing-categories"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminCalendarSection from "@/components/admin/AdminCalendarSection"
@@ -31,6 +32,7 @@ type FilterTab =
   | "basic"
   | "featured"
   | "premium"
+  | "verified"
 
 const FILTER_TABS: { id: FilterTab; label: string }[] = [
   { id: "all", label: "All" },
@@ -40,6 +42,7 @@ const FILTER_TABS: { id: FilterTab; label: string }[] = [
   { id: "basic", label: "Basic" },
   { id: "featured", label: "Featured" },
   { id: "premium", label: "Premium" },
+  { id: "verified", label: "Verified" },
 ]
 
 function planBadgeClass(plan: string) {
@@ -305,9 +308,11 @@ export default function AdminDashboard() {
     const byTab =
       filter === "all"
         ? listings
-        : filter === "pending" || filter === "approved" || filter === "rejected"
-          ? listings.filter((l) => l.status === filter)
-          : listings.filter((l) => l.plan === filter)
+        : filter === "verified"
+          ? listings.filter((l) => isListingVerified(l))
+          : filter === "pending" || filter === "approved" || filter === "rejected"
+            ? listings.filter((l) => l.status === filter)
+            : listings.filter((l) => l.plan === filter)
 
     if (!debouncedSearch.trim()) return byTab
     return byTab.filter((listing) => matchesAdminListingSearch(listing, debouncedSearch))
