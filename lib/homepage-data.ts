@@ -6,6 +6,7 @@ import { HOME_EXPERIENCES } from "@/lib/homepage-constants"
 import {
   countByCategoryGroup,
   filterByCategoryGroup,
+  getCategoryFilterTabs,
   matchesCategoryGroup,
   sortListingsForDisplay,
   type CategoryGroupId,
@@ -123,12 +124,19 @@ export function listingsForMapFilter(
   return filterByCategoryGroup(listings, filter, catalog)
 }
 
-export function buildMapFilterGroups(catalog: CategoryCatalog) {
-  return [
-    { id: "all" as const, label: "All" },
-    ...catalog.builtGroups
-      .filter((g) => g.id !== "all")
-      .map((g) => ({ id: g.id as CategoryGroupId, label: g.label })),
-    { id: "medical" as const, label: "Medical" },
-  ]
+export function buildMapFilterGroups(
+  listings: BusinessListing[],
+  catalog: CategoryCatalog,
+) {
+  const tabs = getCategoryFilterTabs(listings, catalog)
+  const filters = tabs.map((g) => ({
+    id: g.id as CategoryGroupId,
+    label: g.label,
+  }))
+
+  if (listingsForMapFilter(listings, "medical", catalog).length > 0) {
+    filters.push({ id: "medical", label: "Medical" })
+  }
+
+  return filters
 }

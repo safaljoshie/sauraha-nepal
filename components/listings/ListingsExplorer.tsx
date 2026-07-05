@@ -15,6 +15,7 @@ import {
 import {
   countByCategoryGroup,
   filterListings,
+  getCategoryFilterTabs,
   PAGE_SIZE,
   type CategoryGroupId,
   type PlanFilterId,
@@ -118,6 +119,11 @@ export default function ListingsExplorer({
     }
   }, [])
 
+  const categoryFilterTabs = useMemo(
+    () => getCategoryFilterTabs(listings, catalog),
+    [listings, catalog],
+  )
+
   const filtered = useMemo(
     () =>
       filterListings(
@@ -219,7 +225,7 @@ export default function ListingsExplorer({
 
       <div className="site-container pt-8">
         <div className="flex flex-wrap gap-2.5">
-          {catalog.builtGroups.map((tab) => {
+          {categoryFilterTabs.map((tab) => {
             const count = countByCategoryGroup(listings, tab.id, catalog)
             const active = category === tab.id
             return (

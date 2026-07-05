@@ -31,7 +31,10 @@ export default function HomeMapSection({
   mapCoordinates: ListingCoordinateMap
 }) {
   const [filter, setFilter] = useState<MapFilterId>("all")
-  const mapFilters = useMemo(() => buildMapFilterGroups(catalog), [catalog])
+  const mapFilters = useMemo(
+    () => buildMapFilterGroups(listings, catalog),
+    [listings, catalog],
+  )
 
   const filtered = useMemo(
     () => listingsForMapFilter(listings, filter, catalog),

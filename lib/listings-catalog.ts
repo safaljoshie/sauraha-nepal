@@ -198,6 +198,17 @@ export function countByCategoryGroup(
   return listings.filter((l) => matchesCategoryGroup(l, groupId, catalog)).length
 }
 
+/** Public category tabs: always show All; hide groups with zero approved listings. */
+export function getCategoryFilterTabs(
+  listings: BusinessListing[],
+  catalog?: CategoryCatalog,
+): BuiltCategoryGroup[] {
+  return resolveGroups(catalog).filter((group) => {
+    if (group.id === "all") return true
+    return countByCategoryGroup(listings, group.id, catalog) > 0
+  })
+}
+
 export function filterByCategoryGroup(
   listings: BusinessListing[],
   groupId: CategoryGroupId,
