@@ -27,7 +27,19 @@ async function fetchPublishedBlogPostsForIndex(): Promise<BlogPostRow[]> {
   }
 
   try {
-    const rows = await runQuery(getSupabaseAdmin())
+    const supabase = getSupabaseAdmin()
+    const { data: articles, error, count } = await supabase
+      .from("blog_posts")
+      .select("*", { count: "exact" })
+
+    console.log("Blog fetch result:", {
+      articleCount: count,
+      error: error?.message,
+      firstArticle: articles?.[0],
+      statusValues: articles?.map((a) => a.status),
+    })
+
+    const rows = await runQuery(supabase)
     if (process.env.NODE_ENV === "development") {
       console.log(`[blog index] ${rows.length} published posts (admin)`)
     }
@@ -37,7 +49,19 @@ async function fetchPublishedBlogPostsForIndex(): Promise<BlogPostRow[]> {
   }
 
   try {
-    const rows = await runQuery(getSupabasePublic())
+    const supabase = getSupabasePublic()
+    const { data: articles, error, count } = await supabase
+      .from("blog_posts")
+      .select("*", { count: "exact" })
+
+    console.log("Blog fetch result:", {
+      articleCount: count,
+      error: error?.message,
+      firstArticle: articles?.[0],
+      statusValues: articles?.map((a) => a.status),
+    })
+
+    const rows = await runQuery(supabase)
     if (process.env.NODE_ENV === "development") {
       console.log(`[blog index] ${rows.length} published posts (anon)`)
     }
