@@ -97,7 +97,7 @@ export default function BusinessListingCard({
           <h3 className="font-[family-name:var(--font-playfair)] text-lg font-semibold text-text-brand">
             {listing.business_name}
           </h3>
-          {showStatus && listing.opening_hours?.trim() && (
+          {showStatus && (
             <div className="mt-1">
               <OpenNowBadge openingHours={listing.opening_hours} />
             </div>

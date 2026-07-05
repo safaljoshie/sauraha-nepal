@@ -141,7 +141,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             </section>
           )}
 
-          {listing.opening_hours && <OpeningHoursDisplay hours={listing.opening_hours} />}
+          <OpeningHoursDisplay hours={listing.opening_hours} />
 
           <ListingDetailMapSection
             listingId={listing.id}
