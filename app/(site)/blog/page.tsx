@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
-import type { BlogPostRow } from "@/lib/blog-db"
+import { createClient } from "@supabase/supabase-js"
 import { pageMetadata } from "@/lib/seo"
-import { createClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
 
@@ -13,20 +12,19 @@ export const metadata: Metadata = pageMetadata({
   titleAbsolute: true,
 })
 
-async function fetchPublishedBlogPostsForIndex(): Promise<BlogPostRow[]> {
-  const supabase = createClient()
+export default async function BlogIndexPage() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+
   const { data: articles, error } = await supabase
     .from("blog_posts")
-    .select("*")
+    .select("id, title, slug, tag, read_time, published_at")
     .eq("status", "published")
-    .order("created_at", { ascending: false })
+    .order("published_at", { ascending: false })
 
-  if (error) throw error
-  return (articles ?? []) as BlogPostRow[]
-}
-
-export default async function BlogIndexPage() {
-  const articles = await fetchPublishedBlogPostsForIndex()
+  console.log("BLOG ARTICLES:", articles?.length, error?.message)
 
   return (
     <main className="mt-[68px] bg-cream py-12 md:py-16">
