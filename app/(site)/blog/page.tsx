@@ -54,11 +54,13 @@ export default async function BlogIndexPage() {
                     <div className="text-sm text-gray-500 mt-2 flex gap-3">
                       <span>{article.read_time}</span>
                       <span>
-                        {new Date(article.published_at).toLocaleDateString("en-AU", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {article.published_at
+                          ? new Date(article.published_at).toLocaleDateString("en-AU", {
+                              day: "numeric",
+                              month: "long",
+                              year: "numeric",
+                            })
+                          : ""}
                       </span>
                     </div>
                   </div>
