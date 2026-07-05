@@ -2,16 +2,41 @@
 
 import { useState, type FormEvent } from "react"
 
+type SubmitStatus = "idle" | "loading" | "success" | "error"
+
 export default function HomeNewsletter() {
   const [email, setEmail] = useState("")
-  const [status, setStatus] = useState<"idle" | "done">("idle")
+  const [status, setStatus] = useState<SubmitStatus>("idle")
+  const [errorMessage, setErrorMessage] = useState("")
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     const trimmed = email.trim()
     if (!trimmed) return
-    window.location.href = `/contact?subject=Newsletter&email=${encodeURIComponent(trimmed)}`
-    setStatus("done")
+
+    setStatus("loading")
+    setErrorMessage("")
+
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      })
+
+      const data = (await res.json().catch(() => ({}))) as { error?: string }
+
+      if (!res.ok) {
+        setErrorMessage(data.error ?? "Something went wrong. Please try again.")
+        setStatus("error")
+        return
+      }
+
+      setStatus("success")
+    } catch {
+      setErrorMessage("Something went wrong. Please try again.")
+      setStatus("error")
+    }
   }
 
   return (
@@ -30,9 +55,9 @@ export default function HomeNewsletter() {
         <p className="mt-2 text-sm leading-snug text-ink-muted md:mt-4 md:text-base">
           Travel tips, new listings, and Chitwan inspiration — delivered to your inbox.
         </p>
-        {status === "done" ? (
+        {status === "success" ? (
           <p className="mt-4 text-sm font-semibold text-green-brand md:mt-8 md:text-base">
-            Thanks — we&apos;ll be in touch.
+            Thanks! We&apos;ll keep you posted.
           </p>
         ) : (
           <form
@@ -51,14 +76,21 @@ export default function HomeNewsletter() {
               placeholder="Email address"
               className="min-w-0 flex-1 rounded-xl border border-black/15 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-green-brand md:max-w-sm md:px-5 md:py-3.5 md:text-base"
               autoComplete="email"
+              disabled={status === "loading"}
             />
             <button
               type="submit"
-              className="shrink-0 rounded-xl bg-green-brand px-4 py-2.5 text-xs font-bold tracking-wide text-white uppercase hover:bg-green-mid md:px-8 md:py-3.5 md:text-sm"
+              className="shrink-0 rounded-xl bg-green-brand px-4 py-2.5 text-xs font-bold tracking-wide text-white uppercase hover:bg-green-mid md:px-8 md:py-3.5 md:text-sm disabled:opacity-60"
+              disabled={status === "loading"}
             >
               Subscribe
             </button>
           </form>
+        )}
+        {status === "error" && (
+          <p className="mt-3 text-sm font-medium text-red-600" role="alert">
+            {errorMessage}
+          </p>
         )}
       </div>
     </section>
