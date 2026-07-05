@@ -4,6 +4,8 @@ import BlogPostCard from "@/components/blog/BlogPostCard"
 import { pageMetadata } from "@/lib/seo"
 
 export const dynamic = "force-dynamic"
+export const revalidate = 0
+export const fetchCache = "force-no-store"
 
 export const metadata: Metadata = pageMetadata({
   title: "Travel Guides & Tips for Sauraha, Nepal | Sauraha Nepal",
@@ -19,13 +21,13 @@ export default async function BlogIndexPage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 
-  const { data: articles, error } = await supabase
+  const { data: articles } = await supabase
     .from("blog_posts")
     .select("id, title, slug, tag, read_time, published_at, cover_image, excerpt")
     .eq("status", "published")
     .order("published_at", { ascending: false })
 
-  console.log("BLOG ARTICLES:", articles?.length, error?.message)
+  console.log("BLOG ARTICLES:", articles?.length)
 
   return (
     <main className="mt-[68px] bg-cream py-12 md:py-16">
