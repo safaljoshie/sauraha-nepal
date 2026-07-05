@@ -1,8 +1,6 @@
 import type { Metadata } from "next"
-import BlogPostCard from "@/components/blog/BlogPostCard"
-import type { BlogPostRow } from "@/lib/blog-db"
+import { createClient } from "@supabase/supabase-js"
 import { pageMetadata } from "@/lib/seo"
-import { createClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
 
@@ -14,50 +12,31 @@ export const metadata: Metadata = pageMetadata({
   titleAbsolute: true,
 })
 
-async function fetchPublishedBlogPostsForIndex(): Promise<BlogPostRow[]> {
-  const supabase = createClient()
+export default async function BlogPage() {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  )
+
   const { data: articles, error } = await supabase
     .from("blog_posts")
     .select("*")
     .eq("status", "published")
     .order("created_at", { ascending: false })
 
-  if (error) throw error
-  return (articles ?? []) as BlogPostRow[]
-}
-
-export default async function BlogIndexPage() {
-  const posts = await fetchPublishedBlogPostsForIndex()
-
   return (
-    <main className="mt-[68px] bg-cream py-12 md:py-16">
-      <div className="site-container">
-        <p className="section-label">Travel Tips</p>
-        <h1 className="section-title">Sauraha & Chitwan Guides</h1>
-        <p className="mt-4 max-w-2xl text-lg text-text-mid">
-          Practical advice for planning your trip — seasons, transport, park permits, packing lists, and more.
-        </p>
-
-        {posts.length === 0 ? (
-          <div className="mt-12 rounded-2xl border border-border-brand bg-white px-8 py-16 text-center">
-            <p className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
-              Guides coming soon
-            </p>
-            <p className="mt-2 text-text-mid">Check back shortly.</p>
-          </div>
-        ) : (
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post, index) => (
-              <BlogPostCard
-                key={post.id}
-                post={post}
-                priority={index === 0}
-                showReadMore
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </main>
+    <pre style={{ padding: 20, fontSize: 12 }}>
+      {JSON.stringify(
+        {
+          articleCount: articles?.length,
+          error: error?.message,
+          firstArticle: articles?.[0],
+          url: process.env.NEXT_PUBLIC_SUPABASE_URL ? "URL set" : "URL MISSING",
+          key: process.env.SUPABASE_SERVICE_ROLE_KEY ? "KEY set" : "KEY MISSING",
+        },
+        null,
+        2,
+      )}
+    </pre>
   )
 }
