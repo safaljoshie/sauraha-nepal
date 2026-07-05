@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
 import BlogPostCard from "@/components/blog/BlogPostCard"
-import { fetchPublishedBlogPosts } from "@/lib/blog-db"
+import type { BlogPostRow } from "@/lib/blog-db"
 import { pageMetadata } from "@/lib/seo"
+import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
 
-export const revalidate = 60
+export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = pageMetadata({
   title: "Travel Guides & Tips for Sauraha, Nepal | Sauraha Nepal",
@@ -13,8 +14,52 @@ export const metadata: Metadata = pageMetadata({
   titleAbsolute: true,
 })
 
+/** Same query pattern as app/(site)/blog/[slug]/page.tsx → fetchPublishedBlogPostBySlug */
+async function fetchPublishedBlogPostsForIndex(): Promise<BlogPostRow[]> {
+  const runQuery = async (client: ReturnType<typeof getSupabasePublic>) => {
+    const { data, error } = await client
+      .from("blog_posts")
+      .select("*")
+      .eq("status", "published")
+      .order("published_at", { ascending: false, nullsFirst: false })
+    if (error) throw error
+    return (data ?? []) as BlogPostRow[]
+  }
+
+  try {
+    const rows = await runQuery(getSupabaseAdmin())
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[blog index] ${rows.length} published posts (admin)`)
+    }
+    return rows
+  } catch (adminError) {
+    console.error("[blog index] admin fetch failed:", adminError)
+  }
+
+  try {
+    const rows = await runQuery(getSupabasePublic())
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[blog index] ${rows.length} published posts (anon)`)
+    }
+    return rows
+  } catch (publicError) {
+    console.error("[blog index] public fetch failed:", publicError)
+  }
+
+  return []
+}
+
 export default async function BlogIndexPage() {
-  const posts = await fetchPublishedBlogPosts()
+  const posts = await fetchPublishedBlogPostsForIndex()
+
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      "[blog index] rendering",
+      posts.length,
+      "cards:",
+      posts.map((post) => post.slug).join(", ") || "(none)",
+    )
+  }
 
   return (
     <main className="mt-[68px] bg-cream py-12 md:py-16">
