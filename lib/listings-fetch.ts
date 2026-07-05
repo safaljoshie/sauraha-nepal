@@ -2,6 +2,35 @@ import type { BusinessListing } from "@/lib/business-listing"
 import { sortListingsForDisplay } from "@/lib/listings-catalog"
 import { getSupabaseAdmin } from "@/lib/supabase"
 import { getSupabasePublic } from "@/lib/supabase"
+import { cache } from "react"
+
+async function countApprovedWithClient(
+  client: ReturnType<typeof getSupabasePublic>,
+): Promise<number> {
+  const { count, error } = await client
+    .from("business_listings")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "approved")
+  if (error) throw error
+  return count ?? 0
+}
+
+/** Approved listing count for homepage stats (server-only head query). */
+export const fetchApprovedListingsCount = cache(async (): Promise<number> => {
+  try {
+    return await countApprovedWithClient(getSupabaseAdmin())
+  } catch (adminError) {
+    console.error("Approved listings count (admin):", adminError)
+  }
+
+  try {
+    return await countApprovedWithClient(getSupabasePublic())
+  } catch (publicError) {
+    console.error("Approved listings count (public):", publicError)
+  }
+
+  return 0
+})
 
 async function queryApprovedListings() {
   const supabase = getSupabasePublic()

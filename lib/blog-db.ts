@@ -89,6 +89,34 @@ async function fetchPublishedPreviewWithClient(
   return (data ?? []) as BlogPostPreview[]
 }
 
+async function countPublishedWithClient(
+  client: ReturnType<typeof getSupabasePublic>,
+): Promise<number> {
+  const { count, error } = await client
+    .from("blog_posts")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "published")
+  if (error) throw error
+  return count ?? 0
+}
+
+/** Server pages: total published posts for stats/SEO (not limited to preview count). */
+export const fetchPublishedBlogPostCount = cache(async (): Promise<number> => {
+  try {
+    return await countPublishedWithClient(getSupabaseAdmin())
+  } catch (adminError) {
+    console.error("Published blog count (admin):", adminError)
+  }
+
+  try {
+    return await countPublishedWithClient(getSupabasePublic())
+  } catch (publicError) {
+    console.error("Published blog count (public):", publicError)
+  }
+
+  return 0
+})
+
 /** Server pages: prefer service role so published posts show even if anon RLS is missing. */
 export const fetchPublishedBlogPosts = cache(async (): Promise<BlogPostRow[]> => {
   try {

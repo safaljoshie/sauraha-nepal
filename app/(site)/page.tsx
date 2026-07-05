@@ -14,9 +14,9 @@ import HomeScrollToTop from "@/components/home/HomeScrollToTop"
 import HomeTravelGuides from "@/components/home/HomeTravelGuides"
 import HomeTrust from "@/components/home/HomeTrust"
 import HomeWhereToStay from "@/components/home/HomeWhereToStay"
-import { fetchPublishedBlogPostsPreview } from "@/lib/blog-db"
+import { fetchPublishedBlogPostsPreview, fetchPublishedBlogPostCount } from "@/lib/blog-db"
 import { buildHomepageData } from "@/lib/homepage-data"
-import { fetchApprovedListings } from "@/lib/listings-fetch"
+import { fetchApprovedListings, fetchApprovedListingsCount } from "@/lib/listings-fetch"
 import { toHeroSearchListings } from "@/lib/listings-catalog"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { fetchActiveHeroMedia } from "@/lib/site-content"
@@ -60,17 +60,17 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function HomePage() {
-  const [listings, heroMedia, blogPosts, catalog] = await Promise.all([
+  const [listings, heroMedia, blogPosts, catalog, businessCount, guidesCount] = await Promise.all([
     fetchApprovedListings(),
     fetchActiveHeroMedia(),
     fetchPublishedBlogPostsPreview(4),
     fetchCategoryCatalog(),
+    fetchApprovedListingsCount(),
+    fetchPublishedBlogPostCount(),
   ])
   const data = buildHomepageData(listings, catalog)
   const primaryHeroMedia = heroMedia[0] ?? null
   const useBlogFallback = blogPosts.length === 0
-  const businessCount = listings.length
-  const guidesCount = blogPosts.length
 
   return (
     <>
@@ -78,7 +78,7 @@ export default async function HomePage() {
       <HomeScrollToTop />
       <HomeJsonLd
         featuredListings={data.featured}
-        blogCount={blogPosts.length}
+        blogCount={guidesCount}
       />
       <main className="bg-surface">
         <HomeHero
