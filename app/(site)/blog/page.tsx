@@ -1,7 +1,10 @@
 import type { Metadata } from "next"
-import BlogPostCard from "@/components/blog/BlogPostCard"
+import Image from "next/image"
+import Link from "next/link"
 import type { BlogPostRow } from "@/lib/blog-db"
-import { pageMetadata } from "@/lib/seo"
+import { formatBlogDate } from "@/lib/blog-db"
+import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
+import { blogCoverAlt, DEFAULT_OG_IMAGE, pageMetadata } from "@/lib/seo"
 import { createClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
@@ -47,14 +50,53 @@ export default async function BlogIndexPage() {
           </div>
         ) : (
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post, index) => (
-              <BlogPostCard
-                key={post.id}
-                post={post}
-                priority={index === 0}
-                showReadMore
-              />
-            ))}
+            {posts.map((post, index) => {
+              const image = post.cover_image ?? DEFAULT_OG_IMAGE
+
+              return (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="blog-card group flex h-full flex-col overflow-hidden rounded-2xl border border-border-brand bg-white shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <div className="relative h-[3in] w-full shrink-0 overflow-hidden">
+                    <Image
+                      src={image}
+                      alt={blogCoverAlt(post.title)}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px"
+                      quality={DEFAULT_IMAGE_QUALITY}
+                      priority={index === 0}
+                      loading={index === 0 ? undefined : "lazy"}
+                      unoptimized={!isNextOptimizedImageSrc(image)}
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col p-5 md:p-6">
+                    {post.tag && (
+                      <span className="text-xs font-bold tracking-wide text-orange-brand uppercase">
+                        {post.tag}
+                      </span>
+                    )}
+                    <h2 className="mt-2 font-[family-name:var(--font-playfair)] text-lg font-bold leading-snug text-green-brand md:text-xl">
+                      {post.title}
+                    </h2>
+                    <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-light">
+                      {post.read_time && <span>{post.read_time}</span>}
+                      {post.read_time && post.published_at && (
+                        <span aria-hidden="true" className="text-border-brand">
+                          ·
+                        </span>
+                      )}
+                      {post.published_at && <span>{formatBlogDate(post.published_at)}</span>}
+                    </div>
+                    <span className="mt-3 text-sm font-semibold text-green-brand group-hover:text-green-mid">
+                      Read more →
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
           </div>
         )}
       </div>
