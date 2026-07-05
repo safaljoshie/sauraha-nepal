@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { createClient } from "@supabase/supabase-js"
+import BlogPostCard from "@/components/blog/BlogPostCard"
 import { pageMetadata } from "@/lib/seo"
 
 export const dynamic = "force-dynamic"
@@ -20,7 +21,7 @@ export default async function BlogIndexPage() {
 
   const { data: articles, error } = await supabase
     .from("blog_posts")
-    .select("id, title, slug, tag, read_time, published_at")
+    .select("id, title, slug, tag, read_time, published_at, cover_image, excerpt")
     .eq("status", "published")
     .order("published_at", { ascending: false })
 
@@ -36,38 +37,18 @@ export default async function BlogIndexPage() {
         </p>
 
         {articles && articles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {articles.map((article) => (
-              <a key={article.id} href={`/blog/${article.slug}`} className="block group">
-                <div className="border rounded-lg overflow-hidden hover:shadow-md transition">
-                  <div className="p-4">
-                    {article.tag && (
-                      <span className="text-xs uppercase tracking-wide text-green-700 font-semibold">
-                        {article.tag}
-                      </span>
-                    )}
-                    <h2 className="text-lg font-semibold mt-1 group-hover:underline">
-                      {article.title}
-                    </h2>
-                    <div className="text-sm text-gray-500 mt-2 flex gap-3">
-                      <span>{article.read_time}</span>
-                      <span>
-                        {article.published_at
-                          ? new Date(article.published_at).toLocaleDateString("en-AU", {
-                              day: "numeric",
-                              month: "long",
-                              year: "numeric",
-                            })
-                          : ""}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </a>
+          <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {articles.map((article, index) => (
+              <BlogPostCard
+                key={article.id}
+                post={article}
+                priority={index === 0}
+                showReadMore
+              />
             ))}
           </div>
         ) : (
-          <p>Coming soon. New travel guides are on the way. Check back shortly.</p>
+          <p className="mt-12">Coming soon. New travel guides are on the way. Check back shortly.</p>
         )}
       </div>
     </main>
