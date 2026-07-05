@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import BlogPostCard from "@/components/blog/BlogPostCard"
 import type { BlogPostRow } from "@/lib/blog-db"
 import { pageMetadata } from "@/lib/seo"
-import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 
 export const dynamic = "force-dynamic"
 
@@ -14,76 +14,20 @@ export const metadata: Metadata = pageMetadata({
   titleAbsolute: true,
 })
 
-/** Same query pattern as app/(site)/blog/[slug]/page.tsx → fetchPublishedBlogPostBySlug */
 async function fetchPublishedBlogPostsForIndex(): Promise<BlogPostRow[]> {
-  const runQuery = async (client: ReturnType<typeof getSupabasePublic>) => {
-    const { data, error } = await client
-      .from("blog_posts")
-      .select("*")
-      .eq("status", "published")
-      .order("published_at", { ascending: false, nullsFirst: false })
-    if (error) throw error
-    return (data ?? []) as BlogPostRow[]
-  }
+  const supabase = createClient()
+  const { data: articles, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
 
-  try {
-    const supabase = getSupabaseAdmin()
-    const { data: articles, error, count } = await supabase
-      .from("blog_posts")
-      .select("*", { count: "exact" })
-
-    console.log("Blog fetch result:", {
-      articleCount: count,
-      error: error?.message,
-      firstArticle: articles?.[0],
-      statusValues: articles?.map((a) => a.status),
-    })
-
-    const rows = await runQuery(supabase)
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[blog index] ${rows.length} published posts (admin)`)
-    }
-    return rows
-  } catch (adminError) {
-    console.error("[blog index] admin fetch failed:", adminError)
-  }
-
-  try {
-    const supabase = getSupabasePublic()
-    const { data: articles, error, count } = await supabase
-      .from("blog_posts")
-      .select("*", { count: "exact" })
-
-    console.log("Blog fetch result:", {
-      articleCount: count,
-      error: error?.message,
-      firstArticle: articles?.[0],
-      statusValues: articles?.map((a) => a.status),
-    })
-
-    const rows = await runQuery(supabase)
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[blog index] ${rows.length} published posts (anon)`)
-    }
-    return rows
-  } catch (publicError) {
-    console.error("[blog index] public fetch failed:", publicError)
-  }
-
-  return []
+  if (error) throw error
+  return (articles ?? []) as BlogPostRow[]
 }
 
 export default async function BlogIndexPage() {
   const posts = await fetchPublishedBlogPostsForIndex()
-
-  if (process.env.NODE_ENV === "development") {
-    console.log(
-      "[blog index] rendering",
-      posts.length,
-      "cards:",
-      posts.map((post) => post.slug).join(", ") || "(none)",
-    )
-  }
 
   return (
     <main className="mt-[68px] bg-cream py-12 md:py-16">
