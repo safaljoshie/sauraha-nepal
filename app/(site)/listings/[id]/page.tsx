@@ -19,7 +19,7 @@ import { getMapCoordinates, parseCoordinates } from "@/lib/google-maps"
 import { fetchApprovedListingById } from "@/lib/listings-fetch"
 import { isListingVerified } from "@/lib/listing-badges"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
-import { buildListingDetailMetadata, listingImageAlt, listingJsonLd } from "@/lib/seo"
+import { buildListingDetailMetadata, listingImageAlt } from "@/lib/seo"
 import { SITE_URL } from "@/lib/blog-posts"
 
 export const revalidate = 60
@@ -66,27 +66,8 @@ export default async function ListingDetailPage({ params }: PageProps) {
     coords = await getMapCoordinates(mapsLink)
   }
 
-  const jsonLd = listingJsonLd({
-    business_name: listing.business_name,
-    description: listing.description,
-    address: listing.address,
-    phone: listing.phone,
-    website: listing.website,
-    opening_hours: listing.opening_hours,
-    price_range: listing.price_range,
-    image: photos[0] ?? null,
-    lat: coords?.lat,
-    lng: coords?.lng,
-  })
-
   return (
     <>
-      <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </head>
       <main className="pb-20">
       <section className="relative mt-[68px] overflow-hidden bg-gradient-to-br from-green-brand to-[#0d3a18] px-4 py-14 text-white md:px-8">
         <div className="relative z-10 mx-auto max-w-4xl">
@@ -251,6 +232,37 @@ export default async function ListingDetailPage({ params }: PageProps) {
           </p>
         </aside>
       </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "LocalBusiness",
+            name: listing.business_name,
+            description: listing.description?.trim() || undefined,
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: listing.address?.trim() || "Sauraha",
+              addressLocality: "Sauraha",
+              addressRegion: "Bagmati Province",
+              addressCountry: "NP",
+            },
+            ...(listing.phone?.trim() && { telephone: listing.phone.trim() }),
+            ...(listing.website?.trim() && { url: listing.website.trim() }),
+            ...(listing.opening_hours?.trim() && { openingHours: listing.opening_hours.trim() }),
+            ...(listing.price_range?.trim() && { priceRange: listing.price_range.trim() }),
+            ...(photos[0] && { image: photos[0] }),
+            ...(coords?.lat != null &&
+              coords?.lng != null && {
+                geo: {
+                  "@type": "GeoCoordinates",
+                  latitude: coords.lat,
+                  longitude: coords.lng,
+                },
+              }),
+          }),
+        }}
+      />
     </main>
     </>
   )
