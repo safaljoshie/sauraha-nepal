@@ -6,10 +6,11 @@ import { pageMetadata } from "@/lib/seo"
 export const revalidate = 60
 
 export const metadata: Metadata = pageMetadata({
-  title: "Sauraha Nepal Travel Guides & Tips",
+  title: "Travel Guides & Tips for Sauraha, Nepal | Sauraha Nepal",
   description:
-    "Long-tail travel guides for Sauraha and Chitwan — weather by month, getting from Kathmandu, safety tips, itineraries, and free things to do near Chitwan National Park.",
+    "Read our guides on jungle safari, hotels, things to do, and travel tips for Sauraha and Chitwan National Park.",
   path: "/blog",
+  titleAbsolute: true,
 })
 
 export default async function BlogIndexPage() {
@@ -27,16 +28,19 @@ export default async function BlogIndexPage() {
         {posts.length === 0 ? (
           <div className="mt-12 rounded-2xl border border-border-brand bg-white px-8 py-16 text-center">
             <p className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
-              Coming soon
+              Guides coming soon
             </p>
-            <p className="mt-2 text-text-mid">
-              New travel guides are on the way. Check back shortly.
-            </p>
+            <p className="mt-2 text-text-mid">Check back shortly.</p>
           </div>
         ) : (
           <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {posts.map((post, index) => (
-              <BlogPostCard key={post.id} post={post} priority={index === 0} />
+              <BlogPostCard
+                key={post.id}
+                post={post}
+                priority={index === 0}
+                showReadMore
+              />
             ))}
           </div>
         )}

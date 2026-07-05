@@ -1,18 +1,27 @@
 import Image from "next/image"
 import Link from "next/link"
 import type { BlogPostPreview } from "@/lib/blog-db"
-import { formatBlogDate } from "@/lib/blog-db"
+import { formatBlogDate, getBlogPostExcerptPreview } from "@/lib/blog-db"
 import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
 import { blogCoverAlt } from "@/lib/seo"
 import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 
 type BlogPostCardProps = {
-  post: Pick<BlogPostPreview, "slug" | "title" | "excerpt" | "cover_image" | "tag" | "read_time" | "published_at">
+  post: Pick<
+    BlogPostPreview,
+    "slug" | "title" | "excerpt" | "cover_image" | "tag" | "read_time" | "published_at"
+  > & { content?: string | null }
   priority?: boolean
+  showReadMore?: boolean
 }
 
-export default function BlogPostCard({ post, priority = false }: BlogPostCardProps) {
+export default function BlogPostCard({
+  post,
+  priority = false,
+  showReadMore = false,
+}: BlogPostCardProps) {
   const image = post.cover_image ?? DEFAULT_OG_IMAGE
+  const excerpt = getBlogPostExcerptPreview(post.excerpt, post.content)
 
   return (
     <Link
@@ -39,13 +48,17 @@ export default function BlogPostCard({ post, priority = false }: BlogPostCardPro
         <h2 className="mt-2 font-[family-name:var(--font-playfair)] text-lg font-bold leading-snug text-green-brand md:text-xl">
           {post.title}
         </h2>
-        {post.excerpt && (
-          <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-text-mid">{post.excerpt}</p>
+        {excerpt && (
+          <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-text-mid">{excerpt}</p>
         )}
         <p className="mt-3 text-xs text-text-light">
-          {post.read_time ?? "Article"}
-          {post.published_at && <> · {formatBlogDate(post.published_at)}</>}
+          {post.published_at ? formatBlogDate(post.published_at) : (post.read_time ?? "Article")}
         </p>
+        {showReadMore && (
+          <span className="mt-3 text-sm font-semibold text-green-brand group-hover:text-green-mid">
+            Read more →
+          </span>
+        )}
       </div>
     </Link>
   )

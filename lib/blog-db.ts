@@ -206,6 +206,28 @@ export function formatBlogDate(iso: string | null | undefined) {
   })
 }
 
+/** Index card excerpt — strips draft briefs and falls back to plain content text. */
+export function getBlogPostExcerptPreview(
+  excerpt: string | null | undefined,
+  content: string | null | undefined,
+  maxLength = 150,
+) {
+  let text = excerpt?.trim() ?? ""
+  if (text.toLowerCase().startsWith("draft brief:")) {
+    text = text.slice("draft brief:".length).trim()
+  }
+  if (!text && content?.trim()) {
+    text = content
+      .replace(/```[\s\S]*?```/g, " ")
+      .replace(/[#*`_~\[\]()]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+  }
+  if (!text) return ""
+  if (text.length <= maxLength) return text
+  return `${text.slice(0, maxLength).trim()}…`
+}
+
 export function getRelatedPublishedPosts(posts: BlogPostRow[], currentSlug: string, limit = 2) {
   return posts.filter((p) => p.slug !== currentSlug).slice(0, limit)
 }
