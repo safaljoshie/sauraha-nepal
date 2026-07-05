@@ -145,6 +145,8 @@ export function pageMetadata({
   type = "website",
   keywords,
   titleAbsolute = false,
+  socialTitle,
+  skipTruncation = false,
 }: {
   title: string
   description: string
@@ -153,12 +155,17 @@ export function pageMetadata({
   type?: "website" | "article"
   keywords?: string[]
   titleAbsolute?: boolean
+  socialTitle?: string
+  skipTruncation?: boolean
 }): Metadata {
   const url = `${SITE_URL}${path}`
   const ogImage = absoluteImageUrl(image)
-  const safeDescription = truncateMetaDescription(description)
-  const safeTitle = truncateMetaTitle(title)
-  const ogTitle = titleAbsolute ? safeTitle : `${safeTitle} | Sauraha Nepal`
+  const safeDescription = skipTruncation
+    ? description.replace(/\s+/g, " ").trim()
+    : truncateMetaDescription(description)
+  const safeTitle = skipTruncation ? title.replace(/\s+/g, " ").trim() : truncateMetaTitle(title)
+  const ogTitle =
+    socialTitle?.trim() ?? (titleAbsolute ? safeTitle : `${safeTitle} | Sauraha Nepal`)
 
   return {
     title: titleAbsolute ? { absolute: safeTitle } : safeTitle,
@@ -239,19 +246,25 @@ export function buildListingDetailMetadata(
 
 export function buildListingsIndexMetadata(categorySlug?: string | null): Metadata {
   const category = categorySlug?.trim().toLowerCase()
-  const meta = category && LISTINGS_CATEGORY_META[category] ? LISTINGS_CATEGORY_META[category] : {
-    title: "Sauraha Hotels, Restaurants & Tours — Browse Verified Local Listings",
-    description:
-      "Browse hotels, restaurants, jungle safari operators and licensed guides in Sauraha, near Chitwan National Park. Filter by category and price, with real traveller reviews.",
+
+  if (category && LISTINGS_CATEGORY_META[category]) {
+    const meta = LISTINGS_CATEGORY_META[category]
+    return pageMetadata({
+      title: meta.title,
+      description: meta.description,
+      path: `/listings?category=${encodeURIComponent(category)}`,
+      titleAbsolute: true,
+    })
   }
 
-  const path = category ? `/listings?category=${encodeURIComponent(category)}` : "/listings"
-
   return pageMetadata({
-    title: meta.title,
-    description: meta.description,
-    path,
+    title: "Sauraha Hotels, Restaurants & Tours | Browse Verified Local Listings",
+    socialTitle: "Browse Hotels, Restaurants & Tours in Sauraha, Nepal | Sauraha Nepal",
+    description:
+      "Discover 62+ verified hotels, lodges, restaurants, tour operators and activities in Sauraha, gateway to Chitwan National Park.",
+    path: "/listings",
     titleAbsolute: true,
+    skipTruncation: true,
   })
 }
 
