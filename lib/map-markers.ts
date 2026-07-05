@@ -16,19 +16,20 @@ export function listingsToMapMarkers(
   coordinateMap?: ListingCoordinateMap,
 ) {
   const onMap: MapListingMarker[] = []
-  let withoutCoords = 0
+  let withoutLink = 0
+  let unmappedWithLink = 0
 
   for (const listing of listings) {
     const link = listing.google_maps_link?.trim()
     if (!link) {
-      withoutCoords += 1
+      withoutLink += 1
       continue
     }
 
     const cached = coordinateMap?.[listing.id]
     const coords = cached ?? parseCoordinates(link)
     if (!coords) {
-      withoutCoords += 1
+      unmappedWithLink += 1
       continue
     }
 
@@ -42,5 +43,36 @@ export function listingsToMapMarkers(
     })
   }
 
-  return { onMap, withoutCoords }
+  return {
+    onMap,
+    withoutLink,
+    unmappedWithLink,
+    withoutCoords: withoutLink + unmappedWithLink,
+  }
+}
+
+export function formatMapCoverageNote(coverage: {
+  onMap: MapListingMarker[]
+  withoutLink: number
+  unmappedWithLink: number
+}) {
+  const parts = [
+    `${coverage.onMap.length} listing${coverage.onMap.length === 1 ? "" : "s"} shown on map`,
+  ]
+
+  if (coverage.withoutLink > 0) {
+    parts.push(
+      `${coverage.withoutLink} without a Google Maps link`,
+    )
+  }
+
+  if (coverage.unmappedWithLink > 0) {
+    parts.push(
+      `${coverage.unmappedWithLink} have a map link we couldn't place as a pin yet`,
+    )
+  }
+
+  if (parts.length === 1) return parts[0]
+
+  return `${parts[0]} (${parts.slice(1).join("; ")})`
 }

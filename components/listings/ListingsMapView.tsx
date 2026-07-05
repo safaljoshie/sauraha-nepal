@@ -4,7 +4,7 @@ import dynamic from "next/dynamic"
 import { useMemo } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
 import type { ListingCoordinateMap } from "@/lib/map-coordinates"
-import { listingsToMapMarkers } from "@/lib/map-markers"
+import { formatMapCoverageNote, listingsToMapMarkers } from "@/lib/map-markers"
 
 const MapComponent = dynamic(() => import("@/components/Map"), {
   ssr: false,
@@ -22,17 +22,16 @@ export default function ListingsMapView({
   listings: BusinessListing[]
   mapCoordinates: ListingCoordinateMap
 }) {
-  const { onMap, withoutCoords } = useMemo(
+  const mapCoverage = useMemo(
     () => listingsToMapMarkers(listings, mapCoordinates),
     [listings, mapCoordinates],
   )
+  const { onMap } = mapCoverage
 
   return (
     <div>
       <p className="mb-4 text-sm text-text-light">
-        {onMap.length} listing{onMap.length === 1 ? "" : "s"} shown on map
-        {withoutCoords > 0 &&
-          ` (${withoutCoords} need a Google Maps link with coordinates to appear)`}
+        {formatMapCoverageNote(mapCoverage)}
       </p>
       <MapComponent listings={onMap} />
     </div>

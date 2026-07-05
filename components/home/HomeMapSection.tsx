@@ -8,7 +8,7 @@ import type { CategoryCatalog } from "@/lib/category-catalog"
 import { buildMapFilterGroups, listingsForMapFilter } from "@/lib/homepage-data"
 import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import type { CategoryGroupId } from "@/lib/listings-catalog"
-import { listingsToMapMarkers } from "@/lib/map-markers"
+import { formatMapCoverageNote, listingsToMapMarkers } from "@/lib/map-markers"
 
 const MapComponent = dynamic(() => import("@/components/Map"), {
   ssr: false,
@@ -38,10 +38,11 @@ export default function HomeMapSection({
     [listings, filter, catalog],
   )
 
-  const { onMap, withoutCoords } = useMemo(
+  const mapCoverage = useMemo(
     () => listingsToMapMarkers(filtered, mapCoordinates),
     [filtered, mapCoordinates],
   )
+  const { onMap } = mapCoverage
 
   return (
     <section id="map" className="home-section scroll-mt-24">
@@ -80,9 +81,7 @@ export default function HomeMapSection({
           ))}
         </div>
         <p className="mb-2 text-sm text-text-light">
-          {onMap.length} listing{onMap.length === 1 ? "" : "s"} shown on map
-          {withoutCoords > 0 &&
-            ` (${withoutCoords} need a Google Maps link with coordinates to appear)`}
+          {formatMapCoverageNote(mapCoverage)}
         </p>
         <div className="overflow-hidden rounded-2xl border border-black/8 shadow-[0_8px_32px_rgba(26,92,42,0.08)]">
           <MapComponent listings={onMap} embedded />
