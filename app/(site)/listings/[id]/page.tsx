@@ -67,24 +67,27 @@ export default async function ListingDetailPage({ params }: PageProps) {
   }
 
   const jsonLd = listingJsonLd({
-    id: listing.id,
     business_name: listing.business_name,
     description: listing.description,
     address: listing.address,
     phone: listing.phone,
-    email: listing.email,
+    website: listing.website,
+    opening_hours: listing.opening_hours,
     price_range: listing.price_range,
-    image: heroImage,
+    image: photos[0] ?? null,
     lat: coords?.lat,
     lng: coords?.lng,
   })
 
   return (
-    <main className="pb-20">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
+      <main className="pb-20">
       <section className="relative mt-[68px] overflow-hidden bg-gradient-to-br from-green-brand to-[#0d3a18] px-4 py-14 text-white md:px-8">
         <div className="relative z-10 mx-auto max-w-4xl">
           <Link
@@ -249,5 +252,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
         </aside>
       </div>
     </main>
+    </>
   )
 }

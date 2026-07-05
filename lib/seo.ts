@@ -302,43 +302,53 @@ export function articleJsonLd(post: BlogPostRow) {
   }
 }
 
-export function listingJsonLd(
-  listing: {
-    id: string
-    business_name: string
-    description: string | null
-    address: string | null
-    phone: string | null
-    email: string
-    price_range?: string | null
-    image?: string | null
-    lat?: number
-    lng?: number
-    aggregateRating?: { ratingValue: number; reviewCount: number }
-  },
-) {
+export function listingJsonLd(listing: {
+  business_name: string
+  description: string | null
+  address: string | null
+  phone: string | null
+  website?: string | null
+  opening_hours?: string | null
+  price_range?: string | null
+  image?: string | null
+  lat?: number
+  lng?: number
+}) {
   const schema: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: listing.business_name,
-    description: listing.description ?? undefined,
-    telephone: listing.phone ?? undefined,
-    url: `${SITE_URL}/listings/${listing.id}`,
-    priceRange: listing.price_range ?? undefined,
   }
 
-  if (listing.image?.trim()) {
-    schema.image = listing.image.startsWith("http")
-      ? listing.image
-      : `${SITE_URL}${listing.image.startsWith("/") ? listing.image : `/${listing.image}`}`
+  const description = listing.description?.trim()
+  if (description) schema.description = description
+
+  const telephone = listing.phone?.trim()
+  if (telephone) schema.telephone = telephone
+
+  const website = listing.website?.trim()
+  if (website) schema.url = website
+
+  const openingHours = listing.opening_hours?.trim()
+  if (openingHours) schema.openingHours = openingHours
+
+  const priceRange = listing.price_range?.trim()
+  if (priceRange) schema.priceRange = priceRange
+
+  const image = listing.image?.trim()
+  if (image) {
+    schema.image = image.startsWith("http")
+      ? image
+      : `${SITE_URL}${image.startsWith("/") ? image : `/${image}`}`
   }
 
-  if (listing.address?.trim()) {
+  const streetAddress = listing.address?.trim()
+  if (streetAddress) {
     schema.address = {
       "@type": "PostalAddress",
-      streetAddress: listing.address,
+      streetAddress,
       addressLocality: "Sauraha",
-      addressRegion: "Chitwan",
+      addressRegion: "Bagmati",
       addressCountry: "NP",
     }
   }
@@ -348,14 +358,6 @@ export function listingJsonLd(
       "@type": "GeoCoordinates",
       latitude: listing.lat,
       longitude: listing.lng,
-    }
-  }
-
-  if (listing.aggregateRating && listing.aggregateRating.reviewCount > 0) {
-    schema.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue: listing.aggregateRating.ratingValue,
-      reviewCount: listing.aggregateRating.reviewCount,
     }
   }
 
