@@ -27,8 +27,6 @@ export default async function BlogIndexPage() {
     .eq("status", "published")
     .order("published_at", { ascending: false })
 
-  console.log("BLOG ARTICLES:", articles?.length)
-
   return (
     <main className="mt-[68px] bg-cream py-12 md:py-16">
       <div className="site-container">
