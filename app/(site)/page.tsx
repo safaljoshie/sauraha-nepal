@@ -35,13 +35,13 @@ export async function generateMetadata(): Promise<Metadata> {
       absolute: "Sauraha | Nepal - Complete Tour Guide",
     },
     description:
-      "Plan your trip to Sauraha with real local listings, traveller reviews, distances to Chitwan National Park, and practical guides on jungle safaris, getting there, and the best time to visit.",
+      "Your complete guide to Sauraha — gateway to Chitwan National Park. Best stays, food, activities & local experiences.",
     keywords: [...SITE_KEYWORDS],
     alternates: { canonical: "https://www.saurahanepal.com" },
     openGraph: {
       title: "Sauraha | Nepal - Complete Tour Guide",
       description:
-        "Plan your trip to Sauraha with local listings, reviews, and practical guides on jungle safaris and Chitwan National Park.",
+        "Your complete guide to Sauraha — gateway to Chitwan National Park. Best stays, food, activities & local experiences.",
       url: "https://www.saurahanepal.com",
       siteName: "Sauraha Nepal",
       locale: "en_US",
@@ -52,7 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title: "Sauraha | Nepal - Complete Tour Guide",
       description:
-        "Hotels, restaurants, jungle safaris and practical travel tips for Sauraha, Nepal — gateway to Chitwan National Park",
+        "Your complete guide to Sauraha — gateway to Chitwan National Park. Best stays, food, activities & local experiences.",
       images: [ogImage],
     },
   }
