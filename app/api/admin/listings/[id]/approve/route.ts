@@ -3,6 +3,7 @@ import { Resend } from "resend"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { hasListingContactEmail, type BusinessListing } from "@/lib/business-listing"
 import { buildApprovalEmail } from "@/lib/emails/listing-status"
+import { generateUniqueListingSlug } from "@/lib/listing-slug"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM =
@@ -28,9 +29,14 @@ export async function POST(_request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Listing not found." }, { status: 404 })
     }
 
+    const existing = listing as BusinessListing
+    const slug =
+      existing.slug?.trim() ||
+      (await generateUniqueListingSlug(supabase, existing.business_name, existing.id))
+
     const { data: updated, error: updateError } = await supabase
       .from("business_listings")
-      .update({ status: "approved" })
+      .update({ status: "approved", slug })
       .eq("id", id)
       .select("*")
       .single()

@@ -17,6 +17,7 @@ const MapComponent = dynamic(() => import("@/components/Map"), {
 
 type ListingDetailMapSectionProps = {
   listingId: string
+  listingSlug?: string | null
   businessName: string
   category: string
   address: string | null
@@ -26,6 +27,7 @@ type ListingDetailMapSectionProps = {
 
 export default function ListingDetailMapSection({
   listingId,
+  listingSlug = null,
   businessName,
   category,
   address,
@@ -43,6 +45,7 @@ export default function ListingDetailMapSection({
     return [
       {
         id: listingId,
+        slug: listingSlug,
         business_name: businessName,
         category,
         lat: coords.lat,
@@ -50,7 +53,7 @@ export default function ListingDetailMapSection({
         mapsLink: googleMapsLink,
       },
     ]
-  }, [listingId, businessName, category, coords, googleMapsLink])
+  }, [listingId, listingSlug, businessName, category, coords, googleMapsLink])
 
   if (!openUrl && !address?.trim()) return null
 

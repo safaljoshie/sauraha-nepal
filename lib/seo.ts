@@ -5,6 +5,7 @@ import type { BlogPostRow } from "@/lib/blog-db"
 import { SITE_URL } from "@/lib/blog-posts"
 import { getPrimaryListingCategory } from "@/lib/listing-categories"
 import { getCategoryDisplay, getCategoryGroupId, getListingImage } from "@/lib/listings-catalog"
+import { getListingDetailUrl } from "@/lib/listing-url"
 
 export const DEFAULT_OG_IMAGE = "/og-image.jpg"
 
@@ -192,7 +193,6 @@ export function pageMetadata({
 
 export function buildListingDetailMetadata(
   listing: BusinessListing,
-  id: string,
   catalog?: CategoryCatalog,
   coords?: { lat: number; lng: number } | null,
 ): Metadata {
@@ -219,7 +219,7 @@ export function buildListingDetailMetadata(
     listing.address ?? undefined,
   ].filter((value): value is string => Boolean(value?.trim()))
 
-  const url = `${SITE_URL}/listings/${id}`
+  const url = getListingDetailUrl(listing)
 
   return {
     title: { absolute: title },

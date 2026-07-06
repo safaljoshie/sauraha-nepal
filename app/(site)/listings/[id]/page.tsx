@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import type { Metadata } from "next"
 import ListingPhotoGallery from "@/components/listings/ListingPhotoGallery"
 import ListingDetailMapSection from "@/components/listings/ListingDetailMapSection"
@@ -16,11 +16,12 @@ import {
   whatsappUrl,
 } from "@/lib/listings-catalog"
 import { getMapCoordinates, parseCoordinates } from "@/lib/google-maps"
-import { fetchApprovedListingById } from "@/lib/listings-fetch"
+import { fetchApprovedListingBySlugOrId } from "@/lib/listings-fetch"
+import { isListingUuid } from "@/lib/listing-slug"
+import { getListingDetailPath, getListingDetailUrl } from "@/lib/listing-url"
 import { isListingVerified } from "@/lib/listing-badges"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { buildListingDetailMetadata, listingImageAlt } from "@/lib/seo"
-import { SITE_URL } from "@/lib/blog-posts"
 
 export const revalidate = 60
 
@@ -29,9 +30,9 @@ type PageProps = {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params
+  const { id: slugOrId } = await params
   const [listing, catalog] = await Promise.all([
-    fetchApprovedListingById(id),
+    fetchApprovedListingBySlugOrId(slugOrId),
     fetchCategoryCatalog(),
   ])
   if (!listing) {
@@ -39,23 +40,31 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
   const mapsLink = listing.google_maps_link?.trim() ?? ""
   const coords = mapsLink ? parseCoordinates(mapsLink) : null
-  return buildListingDetailMetadata(listing, id, catalog, coords)
+  return buildListingDetailMetadata(listing, catalog, coords)
 }
 
 export default async function ListingDetailPage({ params }: PageProps) {
-  const { id } = await params
+  const { id: slugOrId } = await params
   const [listing, catalog] = await Promise.all([
-    fetchApprovedListingById(id),
+    fetchApprovedListingBySlugOrId(slugOrId),
     fetchCategoryCatalog(),
   ])
   if (!listing) notFound()
+
+  if (
+    isListingUuid(slugOrId) &&
+    listing.slug?.trim() &&
+    slugOrId !== listing.slug.trim()
+  ) {
+    permanentRedirect(getListingDetailPath(listing))
+  }
 
   const photos = getPhotoUrls(listing)
   const heroImage = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category, catalog)
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""
   const callHref = listing.phone?.trim() ? telUrl(listing.phone) : ""
-  const listingUrl = `${SITE_URL}/listings/${id}`
+  const listingUrl = getListingDetailUrl(listing)
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
   const verified = isListingVerified(listing)
@@ -129,6 +138,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
           <ListingDetailMapSection
             listingId={listing.id}
+            listingSlug={listing.slug}
             businessName={listing.business_name}
             category={listing.category}
             address={listing.address}

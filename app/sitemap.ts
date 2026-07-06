@@ -3,6 +3,7 @@ import { fetchPublishedBlogPosts } from "@/lib/blog-db"
 import { SEO_PRIORITY_BLOG_SLUGS } from "@/lib/blog-related-links"
 import { SITE_URL } from "@/lib/blog-posts"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
+import { getListingDetailPath } from "@/lib/listing-url"
 
 export const revalidate = 3600
 
@@ -55,7 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const listingPages: MetadataRoute.Sitemap = listings
       .filter((listing) => listing.id?.trim())
       .map((listing) => ({
-        url: absoluteUrl(`/listings/${listing.id}`),
+        url: absoluteUrl(getListingDetailPath(listing)),
         lastModified: safeLastModified(listing.created_at, now),
         changeFrequency: "weekly" as const,
         priority: listing.plan === "featured" || listing.plan === "premium" ? 0.8 : 0.7,

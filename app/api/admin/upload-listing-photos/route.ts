@@ -2,12 +2,14 @@ import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { dedupePhotoLinks, isAllowedPhotoFile, prependPhotoLinks } from "@/lib/list-business-photos"
+import { getListingDetailPath } from "@/lib/listing-url"
 import { getSupabaseAdmin } from "@/lib/supabase"
 import { uploadListingPhoto } from "@/lib/upload-listing-photo"
 
-function revalidateListingPages(listingId: string) {
+function revalidateListingPages(listing: { id: string; slug: string | null }) {
   revalidatePath("/listings")
-  revalidatePath(`/listings/${listingId}`)
+  revalidatePath(`/listings/${listing.id}`)
+  revalidatePath(getListingDetailPath(listing))
 }
 
 export async function POST(request: Request) {
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
 
   const { data: existing, error: existingError } = await supabase
     .from("business_listings")
-    .select("id, photo_links")
+    .select("id, slug, photo_links")
     .eq("id", listingId)
     .maybeSingle()
 
@@ -109,7 +111,7 @@ export async function POST(request: Request) {
     )
   }
 
-  revalidateListingPages(listingId)
+  revalidateListingPages({ id: existing.id, slug: existing.slug ?? null })
 
   return NextResponse.json({ urls, photo_links })
 }

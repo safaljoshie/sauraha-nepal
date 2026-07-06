@@ -1,6 +1,9 @@
 import type { NextConfig } from "next"
 import { BLOG_SLUG_REDIRECTS } from "./lib/blog-slug-redirects"
 
+// UUID → slug redirects for /listings/:id are handled at request time in
+// app/(site)/listings/[id]/page.tsx via permanentRedirect (301).
+
 const nextConfig: NextConfig = {
   async redirects() {
     const blogRedirects = Object.entries(BLOG_SLUG_REDIRECTS).map(([source, destination]) => ({

@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { dedupePhotoLinks } from "@/lib/list-business-photos"
+import { getListingDetailPath } from "@/lib/listing-url"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 export async function PATCH(request: Request) {
@@ -28,7 +29,7 @@ export async function PATCH(request: Request) {
       .from("business_listings")
       .update({ photo_links: photo_links || null })
       .eq("id", listingId)
-      .select("id, photo_links")
+      .select("id, slug, photo_links")
       .single()
 
     if (error || !data) {
@@ -38,6 +39,7 @@ export async function PATCH(request: Request) {
 
     revalidatePath("/listings")
     revalidatePath(`/listings/${listingId}`)
+    revalidatePath(getListingDetailPath(data))
 
     return NextResponse.json({
       photo_links: data.photo_links ?? "",

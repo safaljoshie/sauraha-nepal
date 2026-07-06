@@ -1,4 +1,5 @@
 import type { BusinessListing } from "@/lib/business-listing"
+import { isListingUuid } from "@/lib/listing-slug"
 import { sortListingsForDisplay } from "@/lib/listings-catalog"
 import { getSupabaseAdmin } from "@/lib/supabase"
 import { getSupabasePublic } from "@/lib/supabase"
@@ -68,42 +69,63 @@ export async function fetchApprovedListings(): Promise<BusinessListing[]> {
   return sortListingsForDisplay(data as BusinessListing[])
 }
 
+async function fetchApprovedListingWithClient(
+  client: ReturnType<typeof getSupabasePublic>,
+  column: "id" | "slug",
+  value: string,
+): Promise<BusinessListing | null> {
+  const { data, error } = await client
+    .from("business_listings")
+    .select("*")
+    .eq(column, value)
+    .eq("status", "approved")
+    .maybeSingle()
+
+  if (error) throw error
+  return (data ?? null) as BusinessListing | null
+}
+
+async function fetchApprovedListingByColumn(
+  column: "id" | "slug",
+  value: string,
+): Promise<BusinessListing | null> {
+  try {
+    const result = await fetchApprovedListingWithClient(getSupabasePublic(), column, value)
+    if (result) return result
+  } catch {
+    // fall through to admin
+  }
+
+  try {
+    return await fetchApprovedListingWithClient(getSupabaseAdmin(), column, value)
+  } catch {
+    return null
+  }
+}
+
 export async function fetchApprovedListingById(
   id: string,
 ): Promise<BusinessListing | null> {
-  let data: unknown = null
-  let error: unknown = null
+  return fetchApprovedListingByColumn("id", id)
+}
 
-  try {
-    const supabase = getSupabasePublic()
-    const result = await supabase
-      .from("business_listings")
-      .select("*")
-      .eq("id", id)
-      .eq("status", "approved")
-      .maybeSingle()
-    data = result.data
-    error = result.error
-  } catch {
-    error = new Error("Supabase public client is not configured.")
+export async function fetchApprovedListingBySlug(
+  slug: string,
+): Promise<BusinessListing | null> {
+  return fetchApprovedListingByColumn("slug", slug)
+}
+
+/** Resolve an approved listing by slug first, then UUID id for backward compatibility. */
+export async function fetchApprovedListingBySlugOrId(
+  slugOrId: string,
+): Promise<BusinessListing | null> {
+  const trimmed = slugOrId.trim()
+  if (!trimmed) return null
+
+  if (!isListingUuid(trimmed)) {
+    const bySlug = await fetchApprovedListingBySlug(trimmed)
+    if (bySlug) return bySlug
   }
 
-  if (error || !data) {
-    try {
-      const admin = getSupabaseAdmin()
-      const result = await admin
-        .from("business_listings")
-        .select("*")
-        .eq("id", id)
-        .eq("status", "approved")
-        .maybeSingle()
-      data = result.data
-      error = result.error
-    } catch {
-      return null
-    }
-  }
-
-  if (error || !data) return null
-  return data as BusinessListing
+  return fetchApprovedListingById(trimmed)
 }

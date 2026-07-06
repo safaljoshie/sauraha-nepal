@@ -112,12 +112,13 @@ export function matchesPlanFilter(listing: BusinessListing, plan: PlanFilterId) 
 
 export type HeroSearchListing = Pick<
   BusinessListing,
-  "id" | "business_name" | "category" | "address" | "description"
+  "id" | "slug" | "business_name" | "category" | "address" | "description"
 >
 
 export function toHeroSearchListings(listings: BusinessListing[]): HeroSearchListing[] {
-  return listings.map(({ id, business_name, category, address, description }) => ({
+  return listings.map(({ id, slug, business_name, category, address, description }) => ({
     id,
+    slug,
     business_name,
     category,
     address,

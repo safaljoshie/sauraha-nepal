@@ -7,6 +7,7 @@ export type BusinessListing = {
   id: string
   created_at: string
   business_name: string
+  slug: string | null
   category: string
   description: string | null
   price_range: string | null

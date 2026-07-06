@@ -4,6 +4,7 @@ import { parseCoordinates } from "@/lib/google-maps"
 
 export type MapListingMarker = {
   id: string
+  slug: string | null
   business_name: string
   category: string
   lat: number
@@ -35,6 +36,7 @@ export function listingsToMapMarkers(
 
     onMap.push({
       id: listing.id,
+      slug: listing.slug,
       business_name: listing.business_name,
       category: listing.category,
       lat: coords.lat,

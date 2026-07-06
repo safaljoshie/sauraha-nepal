@@ -8,6 +8,7 @@ import {
   type ListBusinessPayload,
   validateListBusinessPayload,
 } from "@/lib/list-business"
+import { generateUniqueListingSlug } from "@/lib/listing-slug"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM =
@@ -45,8 +46,11 @@ export async function POST(request: Request) {
     )
   }
 
+  const slug = await generateUniqueListingSlug(supabase, data.business_name)
+
   const { error: dbError } = await supabase.from("business_listings").insert({
     business_name: data.business_name,
+    slug,
     category: data.category,
     description: data.description,
     price_range: data.price_range || null,

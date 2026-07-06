@@ -4,7 +4,7 @@ import Link from "next/link"
 import type { MouseEvent } from "react"
 
 type ListingCardActionsProps = {
-  listingId: string
+  detailHref: string
   callHref?: string
   whatsappHref?: string
   website?: string | null
@@ -16,14 +16,12 @@ function stopCardNavigation(e: MouseEvent) {
 }
 
 export default function ListingCardActions({
-  listingId,
+  detailHref,
   callHref,
   whatsappHref,
   website,
   whatsappHighlighted = false,
 }: ListingCardActionsProps) {
-  const detailHref = `/listings/${listingId}`
-
   return (
     <div
       className="relative z-[1] mt-3 flex flex-wrap gap-2"

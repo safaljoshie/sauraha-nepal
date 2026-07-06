@@ -7,6 +7,7 @@ import OpenNowBadge from "@/components/listings/OpenNowBadge"
 import { listingImageAlt } from "@/lib/seo"
 import type { BusinessListing } from "@/lib/business-listing"
 import { isListingVerified, isNewListing } from "@/lib/listing-badges"
+import { getListingDetailPath } from "@/lib/listing-url"
 import {
   formatListingDate,
   getCategoryDisplay,
@@ -28,7 +29,7 @@ export default function BusinessListingCard({
 }) {
   const image = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category)
-  const detailHref = `/listings/${listing.id}`
+  const detailHref = getListingDetailPath(listing)
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
   const highlighted = isHighlightedPlan(listing.plan)
@@ -120,7 +121,7 @@ export default function BusinessListingCard({
 
       <div className="relative z-[1] px-5 pb-5">
         <ListingCardActions
-          listingId={listing.id}
+          detailHref={detailHref}
           callHref={callHref || undefined}
           whatsappHref={wa || undefined}
           website={listing.website}

@@ -9,6 +9,8 @@ import {
   serializeListingCategories,
 } from "@/lib/listing-categories"
 import { buildApprovalEmail, buildRejectionEmail } from "@/lib/emails/listing-status"
+import { generateUniqueListingSlug } from "@/lib/listing-slug"
+import { getListingDetailPath } from "@/lib/listing-url"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
@@ -107,8 +109,14 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Listing not found." }, { status: 404 })
     }
 
+    const existingRecord = existing as BusinessListing
+    const slug =
+      existingRecord.slug?.trim() ||
+      (await generateUniqueListingSlug(supabase, business_name, id))
+
     const updates = {
       business_name,
+      slug,
       category,
       description: normalizeOptional(payload.description),
       price_range: price_range || null,
@@ -139,11 +147,13 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Failed to update listing." }, { status: 500 })
     }
 
+    const record = updated as BusinessListing
+    const previous = existingRecord
+
     revalidatePath("/listings")
     revalidatePath(`/listings/${id}`)
+    revalidatePath(getListingDetailPath(record))
 
-    const record = updated as BusinessListing
-    const previous = existing as BusinessListing
     const statusChanged = previous.status !== record.status
 
     if (!statusChanged || !hasListingContactEmail(record.email)) {

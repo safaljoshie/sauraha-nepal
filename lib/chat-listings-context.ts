@@ -1,4 +1,5 @@
 import { fetchApprovedListings } from "@/lib/listings-fetch"
+import { getListingDetailPath } from "@/lib/listing-url"
 
 const MAX_LISTINGS = 20
 const DESCRIPTION_SLICE = 100
@@ -20,7 +21,7 @@ export async function buildListingsContext(): Promise<string> {
         l.price_range ? `Price: ${l.price_range}` : null,
         l.address ? `Address: ${l.address}` : null,
         l.phone ? `Phone: ${l.phone}` : null,
-        l.id ? `Listing URL: /listings/${l.id}` : null,
+        l.id ? `Listing URL: ${getListingDetailPath(l)}` : null,
       ].filter(Boolean)
       return parts.join(" | ")
     })
