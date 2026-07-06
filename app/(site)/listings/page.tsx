@@ -13,9 +13,24 @@ type ListingsPageProps = {
   searchParams: Promise<{ search?: string; category?: string; q?: string; view?: string }>
 }
 
-export async function generateMetadata({ searchParams }: ListingsPageProps): Promise<Metadata> {
-  const params = await searchParams
-  return buildListingsIndexMetadata(params.category)
+export const metadata = {
+  title: "Sauraha Hotels, Restaurants & Tours | Browse Verified Local Listings",
+  description: "Discover 76+ verified hotels, lodges, restaurants, tour operators and activities in Sauraha, gateway to Chitwan National Park, Nepal.",
+  openGraph: {
+    title: "Browse Hotels, Restaurants & Tours in Sauraha, Nepal | Sauraha Nepal",
+    description: "Discover 76+ verified hotels, lodges, restaurants, tour operators and activities in Sauraha, gateway to Chitwan National Park, Nepal.",
+    url: "https://www.saurahanepal.com/listings",
+    siteName: "Sauraha Nepal",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Browse Hotels, Restaurants & Tours in Sauraha, Nepal | Sauraha Nepal",
+    description: "Discover 76+ verified hotels, lodges, restaurants, tour operators and activities in Sauraha, gateway to Chitwan National Park, Nepal.",
+  },
+  alternates: {
+    canonical: "https://www.saurahanepal.com/listings",
+  },
 }
 
 export default async function ListingsPage({ searchParams }: ListingsPageProps) {
