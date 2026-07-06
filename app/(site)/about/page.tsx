@@ -4,7 +4,7 @@ import type { Metadata } from "next"
 import SiteIcon from "@/components/icons/SiteIcon"
 import PageHeader from "@/components/PageHeader"
 import { missionCards } from "@/lib/data"
-import { fetchActiveTeamMembers } from "@/lib/team-members"
+import { fetchActiveTeamMembers, FOUNDER_TEAM_MEMBER } from "@/lib/team-members"
 import { pageMetadata } from "@/lib/seo"
 
 export const metadata: Metadata = pageMetadata({
@@ -109,7 +109,9 @@ async function AboutPageContent() {
                       src={member.image}
                       alt={member.name}
                       fill
-                      className="object-cover"
+                      className={`object-cover ${
+                        member.id === FOUNDER_TEAM_MEMBER.id ? "scale-110" : ""
+                      }`}
                     />
                   </div>
                   <h4 className="font-[family-name:var(--font-playfair)] text-lg text-text-brand">
