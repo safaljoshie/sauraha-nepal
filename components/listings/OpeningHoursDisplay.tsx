@@ -1,5 +1,5 @@
-import { Circle, Clock } from "lucide-react"
-import { isOpenNow } from "@/lib/opening-hours"
+import { CheckCircle, Clock, XCircle } from "lucide-react"
+import { getOpenStatus } from "@/lib/opening-hours"
 
 const ICON_SIZE = 12
 
@@ -10,7 +10,7 @@ export default function OpeningHoursDisplay({
 }) {
   const trimmed = hours?.trim() ?? ""
   const hasHours = trimmed.length > 0
-  const open = hasHours ? isOpenNow(trimmed) : null
+  const status = hasHours ? getOpenStatus(trimmed) : null
 
   return (
     <section className="rounded-2xl border border-border-brand bg-white p-6">
@@ -19,24 +19,21 @@ export default function OpeningHoursDisplay({
           Opening Hours
         </h2>
         {!hasHours && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-3 py-1 text-xs font-bold text-ink-muted">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-muted">
             <Clock size={ICON_SIZE} strokeWidth={2.25} aria-hidden />
             Hours not listed
           </span>
         )}
-        {hasHours && open !== null && (
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${
-              open ? "bg-green-mid/15 text-green-brand" : "bg-red-100 text-red-700"
-            }`}
-          >
-            <Circle
-              size={ICON_SIZE}
-              className={open ? "fill-green-brand text-green-brand" : "fill-red-700 text-red-700"}
-              strokeWidth={2.25}
-              aria-hidden
-            />
-            {open ? "Open now" : "Closed"}
+        {hasHours && status === "open" && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-mid/15 px-3 py-1 text-xs font-bold text-green-brand">
+            <CheckCircle size={ICON_SIZE} strokeWidth={2.25} aria-hidden />
+            Open Now
+          </span>
+        )}
+        {hasHours && status === "closed" && (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-600">
+            <XCircle size={ICON_SIZE} strokeWidth={2.25} aria-hidden />
+            Closed
           </span>
         )}
       </div>

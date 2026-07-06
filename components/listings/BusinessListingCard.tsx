@@ -99,9 +99,7 @@ export default function BusinessListingCard({
             {listing.business_name}
           </h3>
           {showStatus && (
-            <div className="mt-1">
-              <OpenNowBadge openingHours={listing.opening_hours} />
-            </div>
+            <OpenNowBadge openingHours={listing.opening_hours} className="mt-1" />
           )}
           <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-text-light">
             {truncateDescription(listing.description)}
