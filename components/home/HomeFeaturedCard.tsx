@@ -7,7 +7,6 @@ import OpenNowBadge from "@/components/listings/OpenNowBadge"
 import { listingImageAlt } from "@/lib/seo"
 import type { BusinessListing } from "@/lib/business-listing"
 import { isListingVerified, isNewListing } from "@/lib/listing-badges"
-import { getListingDetailPath } from "@/lib/listing-url"
 import {
   getCategoryDisplay,
   getListingImage,
@@ -30,7 +29,8 @@ export default function HomeFeaturedCard({
 }) {
   const image = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category)
-  const detailHref = getListingDetailPath(listing)
+  const slug = listing.slug?.trim()
+  const detailHref = slug ? `/listings/${slug}` : `/listings/${listing.id}`
   const isPremium = listing.plan === "premium"
   const isFeatured = listing.plan === "featured"
   const wa = listing.whatsapp ? whatsappUrl(listing.whatsapp) : ""

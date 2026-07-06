@@ -8,7 +8,11 @@ import { googleMapsOpenUrl } from "@/lib/google-maps"
 import { createGreenMapPinIcon } from "@/lib/map-pin"
 import type { MapListingMarker } from "@/lib/map-markers"
 import { getCategoryDisplay } from "@/lib/listings-catalog"
-import { getListingDetailPath } from "@/lib/listing-url"
+
+function mapListingHref(listing: MapListingMarker) {
+  const slug = listing.slug?.trim()
+  return slug ? `/listings/${slug}` : `/listings/${listing.id}`
+}
 import "leaflet/dist/leaflet.css"
 
 const SAURAHA_CENTER: [number, number] = [27.5833, 84.5]
@@ -95,7 +99,7 @@ export default function Map({
                 </p>
                 <div className="mt-3 flex flex-col gap-2">
                   <Link
-                    href={getListingDetailPath(listing)}
+                    href={mapListingHref(listing)}
                     className="inline-flex items-center justify-center rounded-lg bg-green-brand px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-green-mid"
                   >
                     View listing

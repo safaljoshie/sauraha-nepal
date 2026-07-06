@@ -5,6 +5,10 @@ import { getSupabaseAdmin } from "@/lib/supabase"
 import { getSupabasePublic } from "@/lib/supabase"
 import { cache } from "react"
 
+/** Public directory fields — slug is required for human-readable listing URLs. */
+const APPROVED_LISTING_SELECT =
+  "id, created_at, business_name, slug, category, description, price_range, opening_hours, owner_name, email, phone, whatsapp, website, facebook, address, google_maps_link, photo_links, plan, status, agreed_to_terms, verified"
+
 async function countApprovedWithClient(
   client: ReturnType<typeof getSupabasePublic>,
 ): Promise<number> {
@@ -37,7 +41,7 @@ async function queryApprovedListings() {
   const supabase = getSupabasePublic()
   return supabase
     .from("business_listings")
-    .select("*")
+    .select(APPROVED_LISTING_SELECT)
     .eq("status", "approved")
 }
 
@@ -51,7 +55,7 @@ export async function fetchApprovedListings(): Promise<BusinessListing[]> {
       const admin = getSupabaseAdmin()
       const result = await admin
         .from("business_listings")
-        .select("*")
+        .select(APPROVED_LISTING_SELECT)
         .eq("status", "approved")
       data = result.data
       error = result.error
@@ -76,7 +80,7 @@ async function fetchApprovedListingWithClient(
 ): Promise<BusinessListing | null> {
   const { data, error } = await client
     .from("business_listings")
-    .select("*")
+    .select(APPROVED_LISTING_SELECT)
     .eq(column, value)
     .eq("status", "approved")
     .maybeSingle()

@@ -4,8 +4,12 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 import { getCategoryDisplay, searchListings, type HeroSearchListing } from "@/lib/listings-catalog"
-import { getListingDetailPath } from "@/lib/listing-url"
 import { heroSearchButtonCompact, heroSearchInputCompact } from "@/lib/hero-cta-classes"
+
+function heroListingHref(listing: HeroSearchListing) {
+  const slug = listing.slug?.trim()
+  return slug ? `/listings/${slug}` : `/listings/${listing.id}`
+}
 
 type HeroSearchProps = {
   listings: HeroSearchListing[]
@@ -100,7 +104,7 @@ export default function HeroSearch({ listings, variant = "default" }: HeroSearch
               {suggestions.map((listing) => (
                 <li key={listing.id}>
                   <Link
-                    href={getListingDetailPath(listing)}
+                    href={heroListingHref(listing)}
                     onClick={() => setOpen(false)}
                     className="block px-4 py-3 transition-colors hover:bg-green-mid/10"
                   >

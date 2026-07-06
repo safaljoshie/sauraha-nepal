@@ -1,8 +1,12 @@
 import type { BusinessListing } from "@/lib/business-listing"
 import { getListingImage } from "@/lib/listings-catalog"
-import { getListingDetailUrl } from "@/lib/listing-url"
 
 const SITE = "https://www.saurahanepal.com"
+
+function featuredListingUrl(listing: Pick<BusinessListing, "id" | "slug">) {
+  const slug = listing.slug?.trim()
+  return `${SITE}/listings/${slug || listing.id}`
+}
 
 const FAQ = [
   {
@@ -71,7 +75,7 @@ export default function HomeJsonLd({ featuredListings, blogCount }: HomeJsonLdPr
     name: listing.business_name,
     description: listing.description ?? undefined,
     image: getListingImage(listing),
-    url: getListingDetailUrl(listing),
+    url: featuredListingUrl(listing),
     address: listing.address
       ? {
           "@type": "PostalAddress",
