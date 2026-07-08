@@ -2,20 +2,9 @@
 
 import Image from "next/image"
 import { DEFAULT_IMAGE_QUALITY } from "@/lib/image"
-import { getStoragePublicUrl } from "@/lib/list-business-photos"
-import { useEffect, useRef, useState, type VideoHTMLAttributes } from "react"
+import { useEffect, useRef, useState } from "react"
 
-/** hero_start.jpeg — shown immediately; video loads only after user interaction. */
-const DEFAULT_HERO_POSTER = (() => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-  const bucket = "Sauraha Nepal Listing uploads"
-  if (!supabaseUrl) return "/images/sauraha-hero.jpg"
-  return getStoragePublicUrl(
-    bucket,
-    "admin/site/hero/image/78533902-aa3d-4a2e-86b4-94568c477a31/hero_start.jpeg",
-    supabaseUrl,
-  )
-})()
+const HERO_POSTER = "/images/hero_start.jpeg"
 
 const USER_INTERACTION_EVENTS = ["pointerdown", "keydown", "touchstart", "scroll"] as const
 
@@ -24,11 +13,9 @@ type HomeHeroVideoProps = {
   posterUrl: string | null
 }
 
-export default function HomeHeroVideo({ url, posterUrl }: HomeHeroVideoProps) {
+export default function HomeHeroVideo({ url }: HomeHeroVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [videoReady, setVideoReady] = useState(false)
-  const cmsPoster = posterUrl?.trim() || null
-  const displayPoster = cmsPoster ?? DEFAULT_HERO_POSTER
 
   useEffect(() => {
     setVideoReady(false)
@@ -76,7 +63,7 @@ export default function HomeHeroVideo({ url, posterUrl }: HomeHeroVideoProps) {
   return (
     <>
       <Image
-        src={displayPoster}
+        src={HERO_POSTER}
         alt=""
         aria-hidden
         fill
@@ -87,21 +74,29 @@ export default function HomeHeroVideo({ url, posterUrl }: HomeHeroVideoProps) {
           videoReady ? "opacity-0" : "opacity-100"
         }`}
       />
-      <video
-        ref={videoRef}
-        className={`pointer-events-none absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-700 ${
-          videoReady ? "opacity-100" : "opacity-0"
-        }`}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="none"
-        poster={displayPoster}
-        {...({ loading: "lazy" } as VideoHTMLAttributes<HTMLVideoElement>)}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url(${HERO_POSTER})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
       >
-        <source src={url} type="video/mp4" />
-      </video>
+        <video
+          ref={videoRef}
+          className={`h-full w-full object-cover transition-opacity duration-700 ${
+            videoReady ? "opacity-100" : "opacity-0"
+          }`}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster={HERO_POSTER}
+        >
+          <source src={url} type="video/mp4" />
+        </video>
+      </div>
     </>
   )
 }
