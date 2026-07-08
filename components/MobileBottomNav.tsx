@@ -47,11 +47,11 @@ function IconMap() {
   )
 }
 
-function IconSearch() {
+function IconUser() {
   return (
     <svg {...ICON_PROPS} viewBox="0 0 24 24" aria-hidden>
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
     </svg>
   )
 }
@@ -62,7 +62,7 @@ const LISTINGS_MODES = {
   search: "/listings?search=true",
 } as const satisfies Record<ListingsNavMode, string>
 
-type NavItemId = "home" | ListingsNavMode | "dhurbe" | null
+type NavItemId = "home" | ListingsNavMode | "guides" | "dhurbe" | null
 
 function NavIconButton({
   active,
@@ -100,7 +100,7 @@ export default function MobileBottomNav() {
     router.prefetch("/")
     router.prefetch(LISTINGS_MODES.explore)
     router.prefetch(LISTINGS_MODES.map)
-    router.prefetch(LISTINGS_MODES.search)
+    router.prefetch("/guides")
   }, [router])
 
   const activeId: NavItemId = (() => {
@@ -108,6 +108,7 @@ export default function MobileBottomNav() {
     if (open) return "dhurbe"
     if (pathname === "/") return "home"
     if (onListingsIndex && listingsMode) return listingsMode
+    if (pathname === "/guides" || pathname.startsWith("/guides/")) return "guides"
     if (pathname === "/listings" || pathname.startsWith("/listings/")) return "explore"
     return null
   })()
@@ -146,6 +147,13 @@ export default function MobileBottomNav() {
     clearPendingSoon()
   }
 
+  function handleGuides() {
+    setPendingId("guides")
+    closeChatIfOpen()
+    router.push("/guides")
+    clearPendingSoon()
+  }
+
   function handleToggleChat() {
     setPendingId("dhurbe")
     toggleChat()
@@ -177,12 +185,8 @@ export default function MobileBottomNav() {
           </NavIconButton>
         </li>
         <li>
-          <NavIconButton
-            active={activeId === "search"}
-            label="Search"
-            onClick={() => handleListingsMode("search")}
-          >
-            <IconSearch />
+          <NavIconButton active={activeId === "guides"} label="Guides" onClick={handleGuides}>
+            <IconUser />
           </NavIconButton>
         </li>
         <li>

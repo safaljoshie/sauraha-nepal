@@ -13,6 +13,7 @@ import {
 import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import { isListingVerified } from "@/lib/listing-badges"
 import { parseListingCategories, serializeListingCategories } from "@/lib/listing-categories"
+import AdminGuidesSection from "@/components/admin/AdminGuidesSection"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminCalendarSection from "@/components/admin/AdminCalendarSection"
 import AdminListingCategoryPicker, {
@@ -747,6 +748,8 @@ export default function AdminDashboard() {
       </header>
 
       <AdminTabNav active={adminTab} onChange={setAdminTab} />
+
+      {adminTab === "guides" && <AdminGuidesSection />}
 
       {adminTab === "blog" && <AdminBlogSection />}
 

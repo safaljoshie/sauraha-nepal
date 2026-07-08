@@ -10,6 +10,7 @@ import { getStayListingsHref, type CategoryCatalog } from "@/lib/category-catalo
 const baseNavLinks = [
   { href: "/#places", label: "Places" },
   { href: "/#experiences", label: "Things to do" },
+  { href: "/guides", label: "Guides" },
   { href: "/blog", label: "Articles" },
   { href: "/#map", label: "Map" },
 ]

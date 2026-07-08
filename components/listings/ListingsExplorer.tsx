@@ -298,6 +298,15 @@ export default function ListingsExplorer({
           )}
         </div>
 
+        {category === "guides" ? (
+          <div className="mb-6 rounded-2xl border border-green-brand/25 bg-green-mid/10 px-5 py-4 text-sm text-text-brand">
+            Looking for a personal licensed guide? Browse individual guide profiles →{" "}
+            <Link href="/guides" className="font-bold text-green-brand underline hover:text-green-mid">
+              View all guides
+            </Link>
+          </div>
+        ) : null}
+
         {totalApproved === 0 ? (
           <EmptyAll />
         ) : filtered.length === 0 ? (

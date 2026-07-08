@@ -317,7 +317,7 @@ export function buildSearchCategoryChips(catalog: CategoryCatalog): SearchCatego
     if (group) {
       chips.push({
         label: slugLabels[slug] ?? group.label,
-        href: `/listings?category=${slug}`,
+        href: slug === "guides" ? "/guides" : `/listings?category=${slug}`,
       })
     }
   }
@@ -335,6 +335,7 @@ export function buildFooterExploreLinks(catalog: CategoryCatalog): SearchCategor
     const group = catalog.groups.find((g) => g.slug === slug && g.is_active)
     if (group) links.push({ href: `/listings?category=${slug}`, label })
   }
+  links.push({ href: "/guides", label: "Tour Guides" })
   links.push({ href: "/blog", label: "Travel Guides" })
   return links
 }

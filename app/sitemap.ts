@@ -3,6 +3,7 @@ import { fetchPublishedBlogPosts } from "@/lib/blog-db"
 import { SEO_PRIORITY_BLOG_SLUGS } from "@/lib/blog-related-links"
 import { SITE_URL } from "@/lib/blog-posts"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
+import { fetchApprovedGuides, buildGuideProfilePath } from "@/lib/tour-guides"
 import { getListingDetailPath } from "@/lib/listing-url"
 
 export const revalidate = 3600
@@ -19,6 +20,12 @@ function staticPages(now: Date): MetadataRoute.Sitemap {
       url: absoluteUrl("/listings"),
       lastModified: now,
       changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: absoluteUrl("/guides"),
+      lastModified: now,
+      changeFrequency: "weekly",
       priority: 0.9,
     },
     { url: absoluteUrl("/about"), lastModified: now, changeFrequency: "monthly", priority: 0.7 },
@@ -48,9 +55,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const pages = staticPages(now)
 
   try {
-    const [listings, blogPosts] = await Promise.all([
+    const [listings, blogPosts, guides] = await Promise.all([
       fetchApprovedListings(),
       fetchPublishedBlogPosts(),
+      fetchApprovedGuides(),
     ])
 
     const listingPages: MetadataRoute.Sitemap = listings
@@ -71,7 +79,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: SEO_PRIORITY_BLOG_SLUGS.has(post.slug) ? 0.8 : 0.7,
       }))
 
-    return [...pages, ...blogPages, ...listingPages]
+    const guidePages: MetadataRoute.Sitemap = guides
+      .filter((guide) => guide.id?.trim())
+      .map((guide) => ({
+        url: absoluteUrl(buildGuideProfilePath(guide)),
+        lastModified: safeLastModified(guide.updated_at ?? guide.created_at, now),
+        changeFrequency: "weekly" as const,
+        priority: 0.8,
+      }))
+
+    return [...pages, ...blogPages, ...listingPages, ...guidePages]
   } catch (error) {
     console.error("Sitemap: failed to fetch dynamic URLs, returning static pages only:", error)
     return pages
