@@ -182,6 +182,11 @@ export default function AdminGuidesSection() {
     return reviews.filter((r) => r.status === reviewFilter)
   }, [reviews, reviewFilter])
 
+  const pendingCount = useMemo(
+    () => guides.filter((g) => g.status === "pending").length,
+    [guides],
+  )
+
   function openCreate() {
     setForm({ ...EMPTY_FORM, services: [{ name: "", price_npr: 0, description: "" }] })
     setFormOpen(true)
@@ -381,6 +386,35 @@ export default function AdminGuidesSection() {
     }
   }
 
+  async function handleGuideAction(guideId: string, action: "approve" | "reject") {
+    setActionId(guideId)
+    const nextStatus = action === "approve" ? "approved" : "rejected"
+    const previousGuides = guides
+    setGuides((prev) =>
+      prev.map((g) => (g.id === guideId ? { ...g, status: nextStatus } : g)),
+    )
+    try {
+      const res = await fetch(`/api/admin/guides/${guideId}/${action}`, { method: "POST" })
+      if (res.status === 401) {
+        router.push("/admin")
+        return
+      }
+      const data = (await res.json()) as { guide?: TourGuide; error?: string }
+      if (!res.ok || !data.guide) {
+        setGuides(previousGuides)
+        showToast("error", data.error ?? `Failed to ${action} guide.`)
+        return
+      }
+      setGuides((prev) => prev.map((g) => (g.id === guideId ? data.guide! : g)))
+      showToast("success", `Guide ${action}d successfully`)
+    } catch {
+      setGuides(previousGuides)
+      showToast("error", `Failed to ${action} guide. Please try again.`)
+    } finally {
+      setActionId(null)
+    }
+  }
+
   async function updateReviewStatus(review: ReviewRow, status: GuideStatus) {
     setActionId(review.id)
     try {
@@ -428,6 +462,11 @@ export default function AdminGuidesSection() {
         <div>
           <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
             Tour Guides
+            {pendingCount > 0 ? (
+              <span className="ml-2 inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-bold text-yellow-800">
+                {pendingCount} pending
+              </span>
+            ) : null}
           </h2>
           <p className="mt-1 text-sm text-text-light">
             Manage individual licensed guide profiles (separate from business listings)
@@ -519,6 +558,24 @@ export default function AdminGuidesSection() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          title="Approve"
+                          disabled={actionId === guide.id || guide.status === "approved"}
+                          onClick={() => handleGuideAction(guide.id, "approve")}
+                          className="admin-listings-action-btn cursor-pointer rounded-lg bg-green-100 text-green-700 hover:bg-green-200 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          ✓
+                        </button>
+                        <button
+                          type="button"
+                          title="Reject"
+                          disabled={actionId === guide.id || guide.status === "rejected"}
+                          onClick={() => handleGuideAction(guide.id, "reject")}
+                          className="admin-listings-action-btn cursor-pointer rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          ✗
+                        </button>
                         <button
                           type="button"
                           onClick={() => openEdit(guide)}
