@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { MessageCircle } from "lucide-react"
 import GuideAvatar from "@/components/guides/GuideAvatar"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import SiteIcon from "@/components/icons/SiteIcon"
@@ -104,10 +105,11 @@ export default function GuideCard({ guide }: GuideCardProps) {
             href={waUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-xl border border-green-brand px-4 py-2.5 text-sm font-bold text-green-brand transition-colors hover:bg-green-brand/5"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-mid"
             aria-label={`WhatsApp ${guide.full_name}`}
           >
-            <SiteIcon name="message-circle" size={18} strokeWidth={2.25} />
+            <MessageCircle size={18} strokeWidth={2.25} aria-hidden />
+            WhatsApp
           </a>
         ) : null}
       </div>
