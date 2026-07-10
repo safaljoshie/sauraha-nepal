@@ -261,13 +261,20 @@ export default function AdminGuidesSection() {
         router.push("/admin")
         return
       }
-      const data = (await res.json()) as { url?: string; error?: string }
+      const data = (await res.json()) as { url?: string; error?: string; saved?: boolean }
       if (!res.ok || !data.url) {
         showToast("error", data.error ?? "Photo upload failed.")
         return
       }
       setForm((prev) => ({ ...prev, photo_url: data.url!, id: guideId }))
-      showToast("success", "Photo uploaded")
+      if (data.saved) {
+        setGuides((prev) =>
+          prev.map((g) => (g.id === guideId ? { ...g, photo_url: data.url! } : g)),
+        )
+        showToast("success", "Photo uploaded and saved")
+      } else {
+        showToast("success", "Photo uploaded")
+      }
     } catch {
       showToast("error", "Photo upload failed.")
     } finally {

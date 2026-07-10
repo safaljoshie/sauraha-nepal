@@ -38,7 +38,7 @@ const guideSteps = [
 export default function ListYourGuidePage() {
   return (
     <main>
-      <section className="relative mt-[68px] overflow-hidden bg-gradient-to-br from-green-brand to-[#0d3a18] px-8 py-20 text-center">
+      <section className="relative mt-[68px] overflow-hidden bg-gradient-to-br from-green-brand to-[#0d3a18] px-4 py-12 text-center sm:px-6 md:px-8 md:py-20">
         <Image
           src="https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1400&q=80"
           alt=""
@@ -46,31 +46,31 @@ export default function ListYourGuidePage() {
           className="object-cover opacity-20"
         />
         <div className="relative z-10 mx-auto max-w-3xl">
-          <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-white md:text-5xl">
+          <h1 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-white sm:text-3xl md:text-5xl">
             List Yourself as a Licensed Tour Guide in Sauraha
           </h1>
-          <p className="mt-4 text-base text-white/80 md:text-lg">
+          <p className="mt-4 text-sm text-white/80 sm:text-base md:text-lg">
             Reach travellers looking for jungle safaris, birdwatching, and cultural tours in
             Chitwan.
           </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-8">
+          <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 md:mt-10 md:flex md:flex-wrap md:justify-center md:gap-8">
             {heroStats.map((stat) => (
               <div key={stat.label} className="text-white">
-                <strong className="block text-2xl font-bold text-orange-light">
+                <strong className="block text-xl font-bold text-orange-light sm:text-2xl">
                   {stat.value}
                 </strong>
-                <span className="text-sm text-white/75">{stat.label}</span>
+                <span className="text-xs text-white/75 sm:text-sm">{stat.label}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="bg-white px-8 py-16">
+      <section className="bg-white px-4 py-12 sm:px-6 md:px-8 md:py-16">
         <div className="mx-auto max-w-4xl">
           <p className="section-label text-center">How it works</p>
           <h2 className="section-title text-center">Three simple steps</h2>
-          <div className="mt-10 grid gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-6 sm:mt-10 md:grid-cols-3">
             {guideSteps.map((item) => (
               <div key={item.step} className="text-center">
                 <div className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-full bg-green-brand text-xs font-bold text-white">
@@ -84,11 +84,11 @@ export default function ListYourGuidePage() {
         </div>
       </section>
 
-      <section className="bg-cream px-8 pb-20">
+      <section className="bg-cream px-4 pb-28 sm:px-6 md:px-8 md:pb-20">
         <div className="mx-auto max-w-3xl">
           <p className="section-label text-center">Apply Now</p>
           <h2 className="section-title text-center">Submit your guide application</h2>
-          <div className="mt-10">
+          <div className="mt-6 sm:mt-10">
             <ListGuideForm />
           </div>
         </div>

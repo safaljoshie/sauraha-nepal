@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState, type FormEvent } from "react"
-import { MAX_PRE_COMPRESS_BYTES } from "@/lib/compress-image"
+import { MAX_PRE_COMPRESS_BYTES, compressImage } from "@/lib/compress-image"
 import { isAllowedPhotoFile } from "@/lib/list-business-photos"
 import {
   COMMON_EXPERTISE,
@@ -214,7 +214,11 @@ export default function ListGuideForm() {
       if (photoFile) {
         setUploadingPhoto(true)
         try {
-          photo_url = await uploadPhoto(photoFile, submissionId)
+          const compressed = await compressImage(photoFile)
+          photo_url = await uploadPhoto(compressed, submissionId)
+          if (!photo_url) {
+            throw new Error("Photo upload did not return a URL. Please try again.")
+          }
         } finally {
           setUploadingPhoto(false)
         }
@@ -267,7 +271,7 @@ export default function ListGuideForm() {
     return (
       <div
         role="status"
-        className="rounded-2xl border border-green-mid/30 bg-white p-10 text-center shadow-[0_8px_32px_rgba(26,92,42,0.08)]"
+        className="rounded-2xl border border-green-mid/30 bg-white p-5 text-center shadow-[0_8px_32px_rgba(26,92,42,0.08)] sm:p-8 md:p-10"
       >
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-mid/15 text-2xl">
           ✓
@@ -293,7 +297,7 @@ export default function ListGuideForm() {
             setSubmittedName("")
             setEmailWarning("")
           }}
-          className="btn-primary mt-8 cursor-pointer px-8 py-3"
+          className="btn-primary mt-8 w-full cursor-pointer px-8 py-3 sm:w-auto"
         >
           Submit another application
         </button>
@@ -303,7 +307,7 @@ export default function ListGuideForm() {
 
   return (
     <form
-      className="rounded-2xl border border-border-brand bg-white p-10 shadow-[0_8px_32px_rgba(26,92,42,0.08)]"
+      className="scroll-pb-28 rounded-2xl border border-border-brand bg-white p-5 shadow-[0_8px_32px_rgba(26,92,42,0.08)] sm:p-8 md:p-10"
       onSubmit={handleSubmit}
       noValidate
     >
@@ -352,7 +356,7 @@ export default function ListGuideForm() {
           </Field>
         </div>
         <Field label="Profile photo (optional)">
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
             <label
               className={`inline-flex cursor-pointer items-center rounded-full border-2 border-green-brand px-5 py-2.5 text-sm font-semibold text-green-brand transition-colors hover:bg-green-brand/5 ${
                 isLoading || uploadingPhoto ? "pointer-events-none opacity-60" : ""
@@ -496,7 +500,7 @@ export default function ListGuideForm() {
             />
           ))}
         </div>
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <input
             value={customLanguage}
             onChange={(e) => setCustomLanguage(e.target.value)}
@@ -514,7 +518,7 @@ export default function ListGuideForm() {
             type="button"
             onClick={() => addCustomTag("languages", customLanguage)}
             disabled={isLoading}
-            className="shrink-0 cursor-pointer rounded-xl bg-cream px-4 py-3 text-sm font-semibold text-text-brand hover:bg-green-mid/10 disabled:opacity-60"
+            className="w-full shrink-0 cursor-pointer rounded-xl bg-cream px-4 py-3 text-sm font-semibold text-text-brand hover:bg-green-mid/10 disabled:opacity-60 sm:w-auto"
           >
             Add
           </button>
@@ -533,7 +537,7 @@ export default function ListGuideForm() {
             />
           ))}
         </div>
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <input
             value={customExpertise}
             onChange={(e) => setCustomExpertise(e.target.value)}
@@ -551,7 +555,7 @@ export default function ListGuideForm() {
             type="button"
             onClick={() => addCustomTag("expertise", customExpertise)}
             disabled={isLoading}
-            className="shrink-0 cursor-pointer rounded-xl bg-cream px-4 py-3 text-sm font-semibold text-text-brand hover:bg-green-mid/10 disabled:opacity-60"
+            className="w-full shrink-0 cursor-pointer rounded-xl bg-cream px-4 py-3 text-sm font-semibold text-text-brand hover:bg-green-mid/10 disabled:opacity-60 sm:w-auto"
           >
             Add
           </button>
@@ -565,7 +569,7 @@ export default function ListGuideForm() {
         {form.services.map((service, index) => (
           <div
             key={index}
-            className="mb-3 grid gap-3 rounded-xl border border-border-brand bg-cream/50 p-4 md:grid-cols-[1fr_140px_1fr_auto]"
+            className="mb-3 grid gap-3 rounded-xl border border-border-brand bg-cream/50 p-3 sm:p-4 md:grid-cols-[1fr_140px_1fr_auto]"
           >
             <input
               value={service.name}
@@ -596,9 +600,10 @@ export default function ListGuideForm() {
               type="button"
               onClick={() => removeServiceRow(index)}
               disabled={isLoading || form.services.length === 1}
-              className="self-center text-sm font-semibold text-red-700 hover:underline disabled:opacity-40"
+              className="mt-1 w-full rounded-lg border border-red-200 bg-white py-2.5 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:opacity-40 md:mt-0 md:w-auto md:self-center md:border-0 md:bg-transparent md:py-0 md:hover:bg-transparent md:hover:underline"
             >
-              Remove
+              <span className="md:hidden">Remove service</span>
+              <span className="hidden md:inline">Remove</span>
             </button>
           </div>
         ))}
@@ -645,11 +650,18 @@ export default function ListGuideForm() {
         disabled={isLoading}
       >
         {isLoading && <Spinner />}
-        {isLoading
-          ? uploadingPhoto
-            ? "Uploading photo…"
-            : "Submitting…"
-          : "Submit Guide Application"}
+        {isLoading ? (
+          uploadingPhoto ? (
+            "Uploading photo…"
+          ) : (
+            "Submitting…"
+          )
+        ) : (
+          <>
+            <span className="sm:hidden">Submit application</span>
+            <span className="hidden sm:inline">Submit Guide Application</span>
+          </>
+        )}
       </button>
     </form>
   )
@@ -657,8 +669,8 @@ export default function ListGuideForm() {
 
 function FormSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mb-8 border-b border-border-brand pb-8 last:mb-0 last:border-0 last:pb-0">
-      <h3 className="font-[family-name:var(--font-playfair)] text-lg font-bold text-green-brand">
+    <div className="mb-6 border-b border-border-brand pb-6 last:mb-0 last:border-0 last:pb-0 sm:mb-8 sm:pb-8">
+      <h3 className="font-[family-name:var(--font-playfair)] text-base font-bold text-green-brand sm:text-lg">
         {title}
       </h3>
       <div className="mt-4">{children}</div>
@@ -691,7 +703,7 @@ function TagButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+      className={`min-h-[44px] cursor-pointer rounded-full px-3.5 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
         active
           ? "bg-green-brand text-white"
           : "border border-border-brand bg-white text-text-mid hover:border-green-mid"
