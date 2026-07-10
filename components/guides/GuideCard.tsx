@@ -17,8 +17,6 @@ export default function GuideCard({ guide }: GuideCardProps) {
   const startingPrice = getGuideStartingPrice(guide.services)
   const languages = guide.languages.filter(Boolean)
   const expertise = guide.expertise.filter(Boolean)
-  const visibleLanguages = languages.slice(0, 3)
-  const extraLanguages = languages.length - visibleLanguages.length
   const waUrl = guide.whatsapp ? formatGuideWhatsAppUrl(guide.whatsapp) : ""
 
   return (
@@ -56,9 +54,9 @@ export default function GuideCard({ guide }: GuideCardProps) {
         </div>
       </div>
 
-      {visibleLanguages.length > 0 ? (
+      {languages.length > 0 ? (
         <div className="mt-4 flex flex-wrap gap-1.5">
-          {visibleLanguages.map((lang) => (
+          {languages.map((lang) => (
             <span
               key={lang}
               className="rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-text-mid"
@@ -66,11 +64,6 @@ export default function GuideCard({ guide }: GuideCardProps) {
               {lang}
             </span>
           ))}
-          {extraLanguages > 0 ? (
-            <span className="rounded-full bg-cream px-2.5 py-1 text-xs font-semibold text-text-light">
-              +{extraLanguages} more
-            </span>
-          ) : null}
         </div>
       ) : null}
 
