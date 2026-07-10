@@ -18,7 +18,7 @@ export default function ChatAssistantAvatar({
   if (variant === "launcher") {
     return (
       <span
-        className={`relative block h-full w-full overflow-hidden rounded-full bg-black ${className}`}
+        className={`relative block h-full w-full overflow-hidden rounded-full bg-orange-brand ${className}`}
         aria-hidden
       >
         <Image
@@ -38,10 +38,10 @@ export default function ChatAssistantAvatar({
 
   return (
     <span
-      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full ${
+      className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-orange-brand ${
         isBubble
-          ? "bg-black shadow-[0_2px_12px_rgba(232,98,26,0.45)] ring-2 ring-orange-light"
-          : "bg-black ring-2 ring-orange-brand/25"
+          ? "shadow-[0_2px_12px_rgba(232,98,26,0.45)] ring-2 ring-orange-light"
+          : "ring-2 ring-orange-brand/25"
       } ${className}`}
       style={{ width: size, height: size }}
       aria-hidden
