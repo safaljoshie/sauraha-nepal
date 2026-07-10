@@ -19,6 +19,12 @@ export const metadata: Metadata = {
     siteName: "Sauraha Nepal",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tour Guides in Sauraha | Licensed Local Guides | Sauraha Nepal",
+    description:
+      "Find licensed local tour guides in Sauraha for jungle safari, bird watching, Tharu culture tours and more. Contact guides directly — no commission.",
+  },
 }
 
 export default async function GuidesPage() {
