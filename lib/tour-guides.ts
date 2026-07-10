@@ -12,6 +12,7 @@ export type GuideStatus = "pending" | "approved" | "rejected"
 
 export type TourGuide = {
   id: string
+  slug: string | null
   created_at: string
   updated_at: string
   full_name: string
@@ -90,7 +91,7 @@ export const TOUR_TYPE_OPTIONS = [
 ] as const
 
 const GUIDE_SELECT =
-  "id, created_at, updated_at, full_name, nickname, photo_url, bio, years_experience, location, phone, whatsapp, email, facebook_url, instagram_url, website_url, licence_number, licence_verified, is_verified, verified_at, languages, expertise, services, status, avg_rating, review_count, meta_title, meta_description"
+  "id, slug, created_at, updated_at, full_name, nickname, photo_url, bio, years_experience, location, phone, whatsapp, email, facebook_url, instagram_url, website_url, licence_number, licence_verified, is_verified, verified_at, languages, expertise, services, status, avg_rating, review_count, meta_title, meta_description"
 
 export function parseGuideServices(raw: unknown): GuideService[] {
   if (!Array.isArray(raw)) return []
@@ -111,6 +112,7 @@ export function parseGuideServices(raw: unknown): GuideService[] {
 export function normalizeTourGuide(row: Record<string, unknown>): TourGuide {
   return {
     id: String(row.id),
+    slug: typeof row.slug === "string" ? row.slug : null,
     created_at: String(row.created_at ?? ""),
     updated_at: String(row.updated_at ?? ""),
     full_name: String(row.full_name ?? ""),
@@ -253,6 +255,44 @@ export const fetchApprovedGuideById = cache(async (id: string): Promise<TourGuid
   }
 })
 
+/** Resolve an approved guide by slug first, then UUID id for backward compatibility. */
+export const fetchApprovedGuideBySlugOrId = cache(
+  async (slugOrId: string): Promise<TourGuide | null> => {
+    const trimmed = slugOrId.trim()
+    if (!trimmed) return null
+
+    const fetchBy = async (client: SupabaseClient, column: "slug" | "id", value: string) => {
+      const { data, error } = await client
+        .from("tour_guides")
+        .select(GUIDE_SELECT)
+        .eq(column, value)
+        .eq("status", "approved")
+        .maybeSingle()
+      if (error || !data) return null
+      return normalizeTourGuide(data)
+    }
+
+    const fetchWithFallback = async (client: SupabaseClient) => {
+      const bySlug = await fetchBy(client, "slug", trimmed)
+      if (bySlug) return bySlug
+      return fetchBy(client, "id", trimmed)
+    }
+
+    try {
+      const guide = await fetchWithFallback(getSupabaseAdmin())
+      if (guide) return guide
+    } catch {
+      // fallback
+    }
+
+    try {
+      return await fetchWithFallback(getSupabasePublic())
+    } catch {
+      return null
+    }
+  },
+)
+
 export async function fetchAllGuidesAdmin(): Promise<TourGuide[]> {
   const supabase = getSupabaseAdmin()
   const { data, error } = await supabase
@@ -323,8 +363,9 @@ export async function fetchAllGuideReviewsAdmin(): Promise<
   })
 }
 
-export function buildGuideProfilePath(guide: Pick<TourGuide, "id">) {
-  return `/guides/${guide.id}`
+export function buildGuideProfilePath(guide: { id: string; slug?: string | null }) {
+  const slug = guide.slug?.trim()
+  return `/guides/${slug || guide.id}`
 }
 
 export function buildGuideProfileUrl(guide: Pick<TourGuide, "id">) {

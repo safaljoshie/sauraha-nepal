@@ -1,14 +1,16 @@
 import Link from "next/link"
-import { notFound } from "next/navigation"
+import { notFound, permanentRedirect } from "next/navigation"
 import type { Metadata } from "next"
 import GuideAvatar from "@/components/guides/GuideAvatar"
 import { GuideReviewsSection } from "@/components/guides/GuideReviewsSection"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import GuideStickyCta from "@/components/guides/GuideStickyCta"
 import SiteIcon from "@/components/icons/SiteIcon"
+import { isListingUuid } from "@/lib/listing-slug"
 import {
+  buildGuideProfilePath,
   buildGuideProfileUrl,
-  fetchApprovedGuideById,
+  fetchApprovedGuideBySlugOrId,
   fetchApprovedGuideReviews,
   formatGuidePhoneUrl,
   formatGuideWhatsAppUrl,
@@ -46,7 +48,7 @@ function serviceIcon(name: string) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const guide = await fetchApprovedGuideById(id)
+  const guide = await fetchApprovedGuideBySlugOrId(id)
   if (!guide) {
     return { title: { absolute: "Guide Not Found | Sauraha Nepal" } }
   }
@@ -76,11 +78,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function GuideProfilePage({ params }: PageProps) {
   const { id } = await params
-  const [guide, reviews] = await Promise.all([
-    fetchApprovedGuideById(id),
-    fetchApprovedGuideReviews(id),
-  ])
+  const guide = await fetchApprovedGuideBySlugOrId(id)
   if (!guide) notFound()
+
+  if (
+    isListingUuid(id) &&
+    guide.slug?.trim() &&
+    id !== guide.slug.trim()
+  ) {
+    permanentRedirect(buildGuideProfilePath(guide))
+  }
+
+  const reviews = await fetchApprovedGuideReviews(guide.id)
 
   const waUrl = guide.whatsapp ? formatGuideWhatsAppUrl(guide.whatsapp) : ""
   const callUrl = guide.phone ? formatGuidePhoneUrl(guide.phone) : ""

@@ -3,7 +3,6 @@ import GuideAvatar from "@/components/guides/GuideAvatar"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import SiteIcon from "@/components/icons/SiteIcon"
 import {
-  buildGuideProfilePath,
   formatGuideWhatsAppUrl,
   getGuideStartingPrice,
   type TourGuide,
@@ -95,7 +94,7 @@ export default function GuideCard({ guide }: GuideCardProps) {
 
       <div className="mt-auto flex flex-wrap gap-2 pt-5">
         <Link
-          href={buildGuideProfilePath(guide)}
+          href={`/guides/${guide.slug || guide.id}`}
           className="inline-flex flex-1 items-center justify-center rounded-xl bg-green-brand px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-green-mid"
         >
           View Profile
