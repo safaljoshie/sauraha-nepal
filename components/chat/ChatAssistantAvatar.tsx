@@ -9,7 +9,7 @@ type ChatAssistantAvatarProps = {
   variant?: "launcher" | "bubble" | "avatar"
 }
 
-/** Dhurbe avatar — elephant with headphones (desktop + mobile). */
+/** Dhurbe avatar — elephant with headset (desktop + mobile). */
 export default function ChatAssistantAvatar({
   size = 40,
   className = "",
@@ -18,7 +18,7 @@ export default function ChatAssistantAvatar({
   if (variant === "launcher") {
     return (
       <span
-        className={`relative block h-full w-full overflow-hidden rounded-full ${className}`}
+        className={`relative block h-full w-full overflow-hidden rounded-full bg-black ${className}`}
         aria-hidden
       >
         <Image
@@ -26,7 +26,7 @@ export default function ChatAssistantAvatar({
           alt=""
           fill
           unoptimized
-          className="object-cover object-[center_38%] scale-[0.86]"
+          className="object-cover object-center"
           sizes="48px"
           priority
         />
@@ -40,8 +40,8 @@ export default function ChatAssistantAvatar({
     <span
       className={`relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full ${
         isBubble
-          ? "bg-orange-brand shadow-[0_2px_12px_rgba(232,98,26,0.45)] ring-2 ring-orange-light"
-          : "bg-cream ring-2 ring-orange-brand/25"
+          ? "bg-black shadow-[0_2px_12px_rgba(232,98,26,0.45)] ring-2 ring-orange-light"
+          : "bg-black ring-2 ring-orange-brand/25"
       } ${className}`}
       style={{ width: size, height: size }}
       aria-hidden
@@ -52,7 +52,7 @@ export default function ChatAssistantAvatar({
         width={size}
         height={size}
         unoptimized
-        className="h-[82%] w-[82%] object-cover object-[center_42%]"
+        className="h-full w-full object-cover object-center"
         sizes={`${size}px`}
         priority={isBubble}
       />
