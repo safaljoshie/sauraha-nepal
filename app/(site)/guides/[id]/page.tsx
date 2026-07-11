@@ -200,7 +200,11 @@ export default async function GuideProfilePage({ params }: PageProps) {
             <ul className="space-y-3 text-sm">
               {guide.phone ? (
                 <li>
-                  <a href={callUrl} className="font-semibold text-green-brand hover:underline">
+                  <a
+                    href={callUrl}
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
+                  >
+                    <SiteIcon name="phone" size={16} strokeWidth={2.25} className="shrink-0" />
                     Phone: {guide.phone}
                   </a>
                 </li>
@@ -211,15 +215,20 @@ export default async function GuideProfilePage({ params }: PageProps) {
                     href={waUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-semibold text-green-brand hover:underline"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
                   >
+                    <SiteIcon name="message-circle" size={16} strokeWidth={2.25} className="shrink-0" />
                     WhatsApp: {guide.whatsapp}
                   </a>
                 </li>
               ) : null}
               {guide.email ? (
                 <li>
-                  <a href={`mailto:${guide.email}`} className="font-semibold text-green-brand hover:underline">
+                  <a
+                    href={`mailto:${guide.email}`}
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
+                  >
+                    <SiteIcon name="mail" size={16} strokeWidth={2.25} className="shrink-0" />
                     Email: {guide.email}
                   </a>
                 </li>
@@ -230,8 +239,9 @@ export default async function GuideProfilePage({ params }: PageProps) {
                     href={guide.facebook_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-semibold text-green-brand hover:underline"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
                   >
+                    <FacebookIcon />
                     Facebook
                   </a>
                 </li>
@@ -242,8 +252,9 @@ export default async function GuideProfilePage({ params }: PageProps) {
                     href={guide.instagram_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-semibold text-green-brand hover:underline"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
                   >
+                    <InstagramIcon />
                     Instagram
                   </a>
                 </li>
@@ -367,5 +378,32 @@ function ProfileCard({ title, children }: { title: string; children: React.React
       </h2>
       <div className="mt-4">{children}</div>
     </section>
+  )
+}
+
+function FacebookIcon() {
+  return (
+    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden className="shrink-0">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  )
+}
+
+function InstagramIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      aria-hidden
+      className="shrink-0"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
   )
 }
