@@ -96,7 +96,7 @@ export default function HeroSearch({ listings, variant = "default" }: HeroSearch
       </form>
 
       {showDropdown && (
-        <div className="absolute top-full right-0 left-0 z-50 mt-2 overflow-hidden rounded-2xl border border-border-brand bg-white text-left shadow-[0_12px_40px_rgba(0,0,0,0.18)]">
+        <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-[320px] overflow-y-auto rounded-lg border border-border-brand bg-white text-left shadow-[0_4px_20px_rgba(0,0,0,0.15)]">
           {suggestions.length === 0 ? (
             <p className="px-4 py-3 text-sm text-text-light">No results found</p>
           ) : (
@@ -108,8 +108,8 @@ export default function HeroSearch({ listings, variant = "default" }: HeroSearch
                     onClick={() => setOpen(false)}
                     className="block px-4 py-3 transition-colors hover:bg-green-mid/10"
                   >
-                    <p className="font-semibold text-text-brand">{listing.business_name}</p>
-                    <p className="text-xs text-green-mid">
+                    <p className="font-bold text-text-brand">{listing.business_name}</p>
+                    <p className="text-xs text-green-brand">
                       {getCategoryDisplay(listing.category)}
                     </p>
                     <p className="mt-0.5 text-xs text-text-light">

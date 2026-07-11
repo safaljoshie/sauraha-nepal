@@ -22,7 +22,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
   return (
     <section
       aria-label="Discover Sauraha"
-      className="relative flex min-h-[100dvh] flex-col justify-end overflow-x-hidden bg-ink max-md:overflow-y-visible md:overflow-hidden"
+      className="relative flex min-h-[100dvh] flex-col justify-end overflow-x-hidden bg-ink max-md:overflow-y-visible md:overflow-visible"
     >
       {heroVideo ? (
         <HomeHeroVideo url={heroVideo.url} posterUrl={heroVideo.poster_url} />
@@ -71,7 +71,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
           </Link>
         </div>
 
-        <div className="hero-search-wrap mt-10 max-w-2xl">
+        <div className="hero-search-wrap relative z-30 mt-10 max-w-2xl">
           <HomeHeroSearchSlot
             searchListings={searchListings}
             searchCategories={searchCategories}
