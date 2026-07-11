@@ -182,10 +182,13 @@ export default function AdminGuidesSection() {
     return reviews.filter((r) => r.status === reviewFilter)
   }, [reviews, reviewFilter])
 
-  const pendingCount = useMemo(
-    () => guides.filter((g) => g.status === "pending").length,
-    [guides],
-  )
+  const stats = useMemo(() => {
+    const total = guides.length
+    const pending = guides.filter((g) => g.status === "pending").length
+    const approved = guides.filter((g) => g.status === "approved").length
+    const rejected = guides.filter((g) => g.status === "rejected").length
+    return { total, pending, approved, rejected }
+  }, [guides])
 
   function openCreate() {
     setForm({ ...EMPTY_FORM, services: [{ name: "", price_npr: 0, description: "" }] })
@@ -469,9 +472,9 @@ export default function AdminGuidesSection() {
         <div>
           <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
             Tour Guides
-            {pendingCount > 0 ? (
+            {stats.pending > 0 ? (
               <span className="ml-2 inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-bold text-yellow-800">
-                {pendingCount} pending
+                {stats.pending} pending
               </span>
             ) : null}
           </h2>
@@ -486,6 +489,27 @@ export default function AdminGuidesSection() {
         >
           Add guide
         </button>
+      </div>
+
+      <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+        {[
+          { label: "Total guides", value: stats.total },
+          { label: "Pending", value: stats.pending },
+          { label: "Approved", value: stats.approved },
+          { label: "Rejected", value: stats.rejected },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-2xl border border-border-brand bg-white p-5 shadow-sm"
+          >
+            <p className="text-xs font-bold uppercase tracking-wide text-text-light">
+              {stat.label}
+            </p>
+            <p className="mt-1 font-[family-name:var(--font-playfair)] text-3xl font-bold text-green-brand">
+              {stat.value}
+            </p>
+          </div>
+        ))}
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
