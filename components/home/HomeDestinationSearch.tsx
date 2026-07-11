@@ -18,7 +18,7 @@ export default function HomeDestinationSearch({
   const chips = buildSearchCategoryChips(searchCategories)
 
   return (
-    <div id="hero-search" className="w-full scroll-mt-28">
+    <div id="hero-search" className="relative w-full scroll-mt-28 overflow-visible">
       <HeroSearch listings={searchListings} variant="hero" />
       <div
         className="hero-category-chips mt-3 flex flex-nowrap items-stretch gap-1.5 md:flex-wrap md:gap-2"
