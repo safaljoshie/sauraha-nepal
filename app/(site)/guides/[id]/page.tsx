@@ -198,70 +198,82 @@ export default async function GuideProfilePage({ params }: PageProps) {
           </div>
 
           <ProfileCard title="Contact">
-            <div className="flex flex-wrap items-center gap-4">
+            <ul className="space-y-3 text-sm">
               {guide.phone ? (
-                <a
-                  href={callUrl}
-                  aria-label="Phone"
-                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
-                >
-                  <SiteIcon name="phone" size={20} strokeWidth={2.25} className="shrink-0" />
-                </a>
+                <li>
+                  <a
+                    href={callUrl}
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <SiteIcon name="phone" size={20} strokeWidth={2.25} className="shrink-0" />
+                    {guide.phone}
+                  </a>
+                </li>
               ) : null}
               {guide.whatsapp ? (
-                <a
-                  href={waUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="WhatsApp"
-                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
-                >
-                  <SiteIcon name="message-circle" size={20} strokeWidth={2.25} className="shrink-0" />
-                </a>
+                <li>
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <SiteIcon name="message-circle" size={20} strokeWidth={2.25} className="shrink-0" />
+                    {guide.whatsapp}
+                  </a>
+                </li>
               ) : null}
               {guide.email ? (
-                <a
-                  href={`mailto:${guide.email}`}
-                  aria-label="Email"
-                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
-                >
-                  <SiteIcon name="mail" size={20} strokeWidth={2.25} className="shrink-0" />
-                </a>
+                <li>
+                  <a
+                    href={`mailto:${guide.email}`}
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <SiteIcon name="mail" size={20} strokeWidth={2.25} className="shrink-0" />
+                    {guide.email}
+                  </a>
+                </li>
               ) : null}
               {guide.facebook_url ? (
-                <a
-                  href={guide.facebook_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
-                >
-                  <FacebookIcon />
-                </a>
+                <li>
+                  <a
+                    href={guide.facebook_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <FacebookIcon />
+                    Facebook
+                  </a>
+                </li>
               ) : null}
               {guide.instagram_url ? (
-                <a
-                  href={guide.instagram_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
-                >
-                  <InstagramIcon />
-                </a>
+                <li>
+                  <a
+                    href={guide.instagram_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <InstagramIcon />
+                    Instagram
+                  </a>
+                </li>
               ) : null}
               {guide.website_url ? (
-                <a
-                  href={guide.website_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Website"
-                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
-                >
-                  <SiteIcon name="globe" size={20} strokeWidth={2.25} className="shrink-0" />
-                </a>
+                <li>
+                  <a
+                    href={guide.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <SiteIcon name="globe" size={20} strokeWidth={2.25} className="shrink-0" />
+                    Website
+                  </a>
+                </li>
               ) : null}
-            </div>
+            </ul>
           </ProfileCard>
 
           {guide.languages.length > 0 ? (
