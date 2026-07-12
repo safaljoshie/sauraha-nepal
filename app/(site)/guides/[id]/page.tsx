@@ -7,6 +7,7 @@ import GuideStarRating from "@/components/guides/GuideStarRating"
 import GuideStickyCta from "@/components/guides/GuideStickyCta"
 import SiteIcon from "@/components/icons/SiteIcon"
 import { isListingUuid } from "@/lib/listing-slug"
+import { formatInrFromNpr, formatUsdFromNpr } from "@/lib/currency"
 import {
   buildGuideProfilePath,
   buildGuideProfileUrl,
@@ -303,7 +304,7 @@ export default async function GuideProfilePage({ params }: PageProps) {
           ) : null}
 
           {services.length > 0 ? (
-            <ProfileCard title="Services & pricing">
+            <ProfileCard title="Services & pricing starting from">
               <div className="grid gap-4 sm:grid-cols-2">
                 {services.map((service) => (
                   <div
@@ -318,6 +319,9 @@ export default async function GuideProfilePage({ params }: PageProps) {
                         <p className="font-semibold text-text-brand">{service.name}</p>
                         <p className="mt-1 text-lg font-bold text-green-brand">
                           NPR {service.price_npr.toLocaleString()}
+                        </p>
+                        <p className="mt-0.5 text-sm text-text-light">
+                          ≈ {formatUsdFromNpr(service.price_npr)} · {formatInrFromNpr(service.price_npr)}
                         </p>
                         {service.description ? (
                           <p className="mt-2 text-sm text-text-light">{service.description}</p>
