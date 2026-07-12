@@ -198,81 +198,70 @@ export default async function GuideProfilePage({ params }: PageProps) {
           </div>
 
           <ProfileCard title="Contact">
-            <ul className="space-y-3 text-sm">
+            <div className="flex flex-wrap items-center gap-4">
               {guide.phone ? (
-                <li>
-                  <a
-                    href={callUrl}
-                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
-                  >
-                    <SiteIcon name="phone" size={16} strokeWidth={2.25} className="shrink-0" />
-                    Phone: {guide.phone}
-                  </a>
-                </li>
+                <a
+                  href={callUrl}
+                  aria-label="Phone"
+                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
+                >
+                  <SiteIcon name="phone" size={20} strokeWidth={2.25} className="shrink-0" />
+                </a>
               ) : null}
               {guide.whatsapp ? (
-                <li>
-                  <a
-                    href={waUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
-                  >
-                    <SiteIcon name="message-circle" size={16} strokeWidth={2.25} className="shrink-0" />
-                    WhatsApp: {guide.whatsapp}
-                  </a>
-                </li>
+                <a
+                  href={waUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="WhatsApp"
+                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
+                >
+                  <SiteIcon name="message-circle" size={20} strokeWidth={2.25} className="shrink-0" />
+                </a>
               ) : null}
               {guide.email ? (
-                <li>
-                  <a
-                    href={`mailto:${guide.email}`}
-                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
-                  >
-                    <SiteIcon name="mail" size={16} strokeWidth={2.25} className="shrink-0" />
-                    Email: {guide.email}
-                  </a>
-                </li>
+                <a
+                  href={`mailto:${guide.email}`}
+                  aria-label="Email"
+                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
+                >
+                  <SiteIcon name="mail" size={20} strokeWidth={2.25} className="shrink-0" />
+                </a>
               ) : null}
               {guide.facebook_url ? (
-                <li>
-                  <a
-                    href={guide.facebook_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
-                  >
-                    <FacebookIcon />
-                    Facebook
-                  </a>
-                </li>
+                <a
+                  href={guide.facebook_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
+                >
+                  <FacebookIcon />
+                </a>
               ) : null}
               {guide.instagram_url ? (
-                <li>
-                  <a
-                    href={guide.instagram_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 font-semibold text-green-brand hover:underline"
-                  >
-                    <InstagramIcon />
-                    Instagram
-                  </a>
-                </li>
+                <a
+                  href={guide.instagram_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
+                >
+                  <InstagramIcon />
+                </a>
               ) : null}
               {guide.website_url ? (
-                <li>
-                  <a
-                    href={guide.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-green-brand hover:underline"
-                  >
-                    Website
-                  </a>
-                </li>
+                <a
+                  href={guide.website_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Website"
+                  className="inline-flex text-green-brand transition-colors hover:text-green-mid"
+                >
+                  <SiteIcon name="globe" size={20} strokeWidth={2.25} className="shrink-0" />
+                </a>
               ) : null}
-            </ul>
+            </div>
           </ProfileCard>
 
           {guide.languages.length > 0 ? (
@@ -387,7 +376,7 @@ function ProfileCard({ title, children }: { title: string; children: React.React
 
 function FacebookIcon() {
   return (
-    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" aria-hidden className="shrink-0">
+    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden className="shrink-0">
       <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
     </svg>
   )
@@ -396,8 +385,8 @@ function FacebookIcon() {
 function InstagramIcon() {
   return (
     <svg
-      width="16"
-      height="16"
+      width="20"
+      height="20"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
