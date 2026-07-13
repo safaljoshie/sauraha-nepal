@@ -41,7 +41,7 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
           <div className="rounded-xl bg-surface-muted px-2 py-3 text-center md:px-6 md:py-10">
             <p className="font-heading text-base font-bold text-ink md:text-4xl">10k+</p>
             <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-muted md:mt-2 md:text-sm">
-              Visitors served
+              Travellers visit Sauraha yearly
             </p>
           </div>
         </div>
