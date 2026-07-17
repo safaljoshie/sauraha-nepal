@@ -159,7 +159,7 @@ export type GuidesRelatedLink = {
 /** Internal links to existing site pages only. */
 export const GUIDES_RELATED_LINKS: GuidesRelatedLink[] = [
   {
-    href: "/blog/free-things-to-do-in-sauraha",
+    href: "/listings?category=activities",
     label: "Things to do in Sauraha",
     description: "Free walks, riverside time and village experiences to combine with a guided day.",
   },
