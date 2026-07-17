@@ -136,18 +136,6 @@ export default function GuideCard({ guide }: GuideCardProps) {
         >
           View Profile
         </Link>
-        {waUrl ? (
-          <a
-            href={waUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-green-brand px-4 py-2.5 text-sm font-bold text-green-brand transition-colors hover:bg-green-brand/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-brand"
-            aria-label={`WhatsApp ${guide.full_name}`}
-          >
-            <MessageCircle size={18} strokeWidth={2.25} aria-hidden />
-            WhatsApp
-          </a>
-        ) : null}
       </div>
     </article>
   )
