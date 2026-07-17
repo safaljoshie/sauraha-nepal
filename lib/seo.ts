@@ -66,9 +66,9 @@ export const LISTINGS_CATEGORY_META: Record<string, { title: string; description
       "Discover local shops, souvenirs and essentials in Sauraha village near Chitwan National Park.",
   },
   guides: {
-    title: "Tour Guides in Sauraha, Chitwan National Park",
+    title: "Sauraha Jungle Guides | Find Local Chitwan Nature Guides",
     description:
-      "Hire licensed local tour guides in Sauraha for jungle walks, wildlife spotting, village visits and Chitwan National Park trips.",
+      "Find verified Sauraha jungle guides for Chitwan National Park walks, bird watching, jeep safaris and cultural tours. Browse local profiles and contact guides directly.",
   },
 }
 

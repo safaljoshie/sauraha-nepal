@@ -10,6 +10,7 @@ type GuideAvatarProps = {
   photoUrl: string | null
   size?: "card" | "profile"
   className?: string
+  alt?: string
 }
 
 const sizeMap = {
@@ -26,6 +27,7 @@ export default function GuideAvatar({
   photoUrl,
   size = "card",
   className = "",
+  alt,
 }: GuideAvatarProps) {
   const { px, className: sizeClass } = sizeMap[size]
   const src = photoUrl?.trim() ?? ""
@@ -52,8 +54,9 @@ export default function GuideAvatar({
     >
       <Image
         src={src}
-        alt=""
+        alt={alt ?? ""}
         fill
+        loading="lazy"
         className="object-cover"
         sizes={`${px}px`}
         unoptimized={shouldUseUnoptimized(src)}

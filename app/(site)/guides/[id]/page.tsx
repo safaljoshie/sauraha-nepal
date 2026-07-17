@@ -2,12 +2,18 @@ import Link from "next/link"
 import { notFound, permanentRedirect } from "next/navigation"
 import type { Metadata } from "next"
 import GuideAvatar from "@/components/guides/GuideAvatar"
+import GuideProfileBreadcrumbs from "@/components/guides/GuideProfileBreadcrumbs"
+import GuideProfileRelatedLinks from "@/components/guides/GuideProfileRelatedLinks"
 import { GuideReviewsSection } from "@/components/guides/GuideReviewsSection"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import GuideStickyCta from "@/components/guides/GuideStickyCta"
 import SiteIcon from "@/components/icons/SiteIcon"
 import { isListingUuid } from "@/lib/listing-slug"
 import { formatInrFromNpr, formatUsdFromNpr } from "@/lib/currency"
+import {
+  buildGuideProfileJsonLd,
+  buildGuideProfileTitle,
+} from "@/lib/guides-seo"
 import {
   buildGuideProfilePath,
   buildGuideProfileUrl,
@@ -54,25 +60,31 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: { absolute: "Guide Not Found | Sauraha Nepal" } }
   }
 
-  const title =
-    guide.meta_title?.trim() ||
-    `${guide.full_name} — Licensed Tour Guide in Sauraha, Chitwan National Park`
+  const title = buildGuideProfileTitle(guide)
   const languages = guide.languages.filter(Boolean).join(", ")
   const description =
     guide.meta_description?.trim() ||
     `${truncateGuideBio(guide.bio, 120)}${languages ? ` Speaks ${languages}.` : ""} Contact directly — no commission.`
 
+  const profileUrl = buildGuideProfileUrl(guide)
+
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: buildGuideProfileUrl(guide) },
+    alternates: { canonical: profileUrl },
     openGraph: {
       title,
       description,
-      url: buildGuideProfileUrl(guide),
+      url: profileUrl,
       siteName: "Sauraha Nepal",
       type: "profile",
       images: guide.photo_url ? [{ url: guide.photo_url }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: guide.photo_url ? [guide.photo_url] : undefined,
     },
   }
 }
@@ -97,21 +109,7 @@ export default async function GuideProfilePage({ params }: PageProps) {
   const verifiedDate = formatVerifiedDate(guide.verified_at)
   const services = guide.services as GuideService[]
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: guide.full_name,
-    jobTitle: "Licensed Tour Guide",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Sauraha",
-      addressRegion: "Chitwan",
-      addressCountry: "NP",
-    },
-    ...(guide.phone ? { telephone: guide.phone } : {}),
-    url: buildGuideProfileUrl(guide),
-    ...(guide.photo_url ? { image: guide.photo_url } : {}),
-  }
+  const jsonLd = buildGuideProfileJsonLd(guide)
 
   return (
     <>
@@ -131,18 +129,29 @@ export default async function GuideProfilePage({ params }: PageProps) {
 
         <section className="bg-gradient-to-br from-green-brand to-[#0d3a18] px-4 py-12 text-white md:px-8">
           <div className="site-container mx-auto max-w-4xl">
+            <GuideProfileBreadcrumbs guideName={guide.full_name} />
             <Link
               href="/guides"
-              className="mb-6 inline-flex items-center gap-1 text-sm font-semibold text-white/80 hover:text-white"
+              className="mb-6 mt-4 inline-flex items-center gap-1 text-sm font-semibold text-white/80 hover:text-white"
             >
-              ← All guides
+              ← All jungle guides
             </Link>
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-              <GuideAvatar name={guide.full_name} photoUrl={guide.photo_url} size="profile" />
+              <GuideAvatar
+                name={guide.full_name}
+                photoUrl={guide.photo_url}
+                size="profile"
+                alt={
+                  guide.photo_url
+                    ? `${guide.full_name}, jungle guide in Sauraha, Chitwan`
+                    : undefined
+                }
+              />
               <div>
                 <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-bold md:text-4xl">
                   {guide.full_name}
                 </h1>
+                <p className="mt-2 text-sm text-white/85">Jungle guide in Sauraha, Chitwan</p>
                 {guide.nickname ? (
                   <p className="mt-1 text-white/80">&ldquo;{guide.nickname}&rdquo;</p>
                 ) : null}
@@ -292,7 +301,7 @@ export default async function GuideProfilePage({ params }: PageProps) {
           ) : null}
 
           {guide.expertise.length > 0 ? (
-            <ProfileCard title="Expertise">
+            <ProfileCard title="Specialities">
               <ul className="grid gap-2 sm:grid-cols-2">
                 {guide.expertise.map((item) => (
                   <li key={item} className="flex items-center gap-2 text-sm text-text-mid">
@@ -347,6 +356,18 @@ export default async function GuideProfilePage({ params }: PageProps) {
             reviewCount={guide.review_count}
             reviews={reviews}
           />
+
+          <GuideProfileRelatedLinks />
+
+          <aside className="rounded-2xl border border-border-brand bg-cream/60 p-5 text-sm leading-relaxed text-text-mid">
+            <p>
+              <strong className="text-text-brand">Disclaimer:</strong> Sauraha Nepal lists guide
+              profiles for discovery. Verification means we have reviewed submitted identity and
+              licence details — it is not a guarantee of service quality. Prices, permits and park
+              rules can change. Confirm all details directly with {guide.full_name} before your
+              visit.
+            </p>
+          </aside>
 
           <div className="hidden gap-3 md:flex">
             {waUrl ? (

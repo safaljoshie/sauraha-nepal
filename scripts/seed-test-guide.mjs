@@ -61,7 +61,7 @@ const payload = {
     { name: "Tharu village tour", price_npr: 1500 },
   ],
   status: "approved",
-  meta_title: "Ram Bahadur Thapa — Licensed Tour Guide in Sauraha",
+  meta_title: "Ram Bahadur Thapa | Jungle Guide in Sauraha, Chitwan",
   meta_description:
     "Book Ram Bahadur for jungle safaris and cultural tours in Sauraha. Speaks English, Hindi and Nepali. Licensed Chitwan guide.",
 }
