@@ -4,7 +4,7 @@ export default function GuidesIntro() {
       <h2 id="guides-intro-heading" className="section-title text-center">
         Hire a Local Jungle Guide in Sauraha
       </h2>
-      <div className="mx-auto max-w-3xl space-y-4 text-base leading-relaxed text-text-mid">
+      <div className="mx-auto max-w-3xl space-y-4 text-center text-base leading-relaxed text-text-mid">
         <p>
           A knowledgeable <strong className="font-semibold text-text-brand">Sauraha jungle guide</strong>{" "}
           can transform a day near Chitwan National Park — pointing out rhino tracks you might walk

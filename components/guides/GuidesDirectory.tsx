@@ -246,7 +246,7 @@ export default function GuidesDirectory({ guides, intro }: GuidesDirectoryProps)
         </div>
       </form>
 
-      {intro ? <div className="mt-10">{intro}</div> : null}
+      {intro ? <div className="mt-10 text-center">{intro}</div> : null}
 
       <div className="mt-10">
         {guides.length === 0 ? (

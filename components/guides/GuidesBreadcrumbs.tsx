@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default function GuidesBreadcrumbs() {
   return (
-    <nav aria-label="Breadcrumb" className="site-container pt-6">
+    <nav aria-label="Breadcrumb" className="site-container pt-6 text-center">
       <ol className="flex flex-wrap items-center justify-center gap-2 text-sm text-text-light">
         <li>
           <Link href="/" className="font-semibold text-green-brand hover:text-green-mid hover:underline">

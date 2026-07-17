@@ -9,8 +9,8 @@ export default function GuidesHero() {
 
   return (
     <header className="relative mt-[68px] overflow-hidden bg-gradient-to-br from-green-brand to-[#0d3a18] px-6 py-16 text-center text-white md:px-8 md:py-20">
-      <div className="site-container mx-auto max-w-3xl">
-        <p className="section-label text-orange-light">Chitwan National Park</p>
+      <div className="relative z-10 mx-auto max-w-3xl">
+        <p className="section-label text-center text-orange-light">Chitwan National Park</p>
         <h1 className="font-[family-name:var(--font-playfair)] text-4xl font-bold md:text-5xl">
           Find Verified Jungle Guides in Sauraha
         </h1>
