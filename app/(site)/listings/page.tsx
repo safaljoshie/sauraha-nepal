@@ -2,16 +2,9 @@ import type { Metadata } from "next"
 import ListingsExplorer from "@/components/listings/ListingsExplorer"
 import PageHeader from "@/components/PageHeader"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
-import { parseCategoryParam } from "@/lib/listings-catalog"
-import { buildListingCoordinateMap } from "@/lib/map-coordinates"
+import { coordinateMapFromListings } from "@/lib/map-coordinates"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { buildListingsIndexMetadata } from "@/lib/seo"
-
-export const revalidate = 60
-
-type ListingsPageProps = {
-  searchParams: Promise<{ search?: string; category?: string; q?: string; view?: string }>
-}
 
 export const metadata = {
   title: "Sauraha Hotels, Restaurants & Tours | Browse Verified Local Listings",
@@ -33,19 +26,12 @@ export const metadata = {
   },
 }
 
-export default async function ListingsPage({ searchParams }: ListingsPageProps) {
-  const params = await searchParams
+export default async function ListingsPage() {
   const [listings, catalog] = await Promise.all([
     fetchApprovedListings(),
     fetchCategoryCatalog(),
   ])
-  const mapCoordinates = await buildListingCoordinateMap(listings)
-  const searchParam = params.search?.trim() ?? ""
-  const initialSearch =
-    searchParam && searchParam !== "true" ? searchParam : (params.q ?? "").trim()
-  const initialCategory = parseCategoryParam(params.category, catalog)
-  const initialViewMode = params.view === "map" ? "map" : "grid"
-  const focusSearchOnMount = searchParam === "true"
+  const mapCoordinates = coordinateMapFromListings(listings)
 
   return (
     <main>
@@ -62,10 +48,6 @@ export default async function ListingsPage({ searchParams }: ListingsPageProps) 
         listings={listings}
         catalog={catalog}
         mapCoordinates={mapCoordinates}
-        initialSearch={initialSearch}
-        initialCategory={initialCategory}
-        initialViewMode={initialViewMode}
-        focusSearchOnMount={focusSearchOnMount}
       />
     </main>
   )

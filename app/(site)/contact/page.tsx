@@ -5,8 +5,6 @@ import { fetchContactPageContent } from "@/lib/site-content"
 import { fetchSiteSettings } from "@/lib/site-settings"
 import { pageMetadata } from "@/lib/seo"
 
-export const revalidate = 60
-
 export const metadata: Metadata = pageMetadata({
   title: "Contact & List Your Business",
   description:

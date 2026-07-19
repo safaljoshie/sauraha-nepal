@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic"
 import { useMemo } from "react"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import { formatMapCoverageNote, listingsToMapMarkers } from "@/lib/map-markers"
 
@@ -19,7 +19,7 @@ export default function ListingsMapView({
   listings,
   mapCoordinates,
 }: {
-  listings: BusinessListing[]
+  listings: BusinessListingSummary[]
   mapCoordinates: ListingCoordinateMap
 }) {
   const mapCoverage = useMemo(

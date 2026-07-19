@@ -70,7 +70,7 @@ async function fetchPublishedWithClient(
 
 async function fetchPublishedPreviewWithClient(
   client: ReturnType<typeof getSupabasePublic>,
-  limit: number,
+  limit?: number,
   excludeSlug?: string,
 ): Promise<BlogPostPreview[]> {
   let query = client
@@ -78,7 +78,10 @@ async function fetchPublishedPreviewWithClient(
     .select(BLOG_PREVIEW_COLUMNS)
     .eq("status", "published")
     .order("published_at", { ascending: false, nullsFirst: false })
-    .limit(limit)
+
+  if (typeof limit === "number") {
+    query = query.limit(limit)
+  }
 
   if (excludeSlug) {
     query = query.neq("slug", excludeSlug)
@@ -143,8 +146,40 @@ export const fetchPublishedBlogPosts = cache(async (): Promise<BlogPostRow[]> =>
   return []
 })
 
+export type BlogPostSlugEntry = Pick<
+  BlogPostRow,
+  "slug" | "published_at" | "updated_at"
+>
+
+/**
+ * Slugs and timestamps only — for the sitemap and generateStaticParams.
+ * The full fetch pulls every post's `content` (entire markdown body), which is
+ * by far the largest per-call payload in the app.
+ */
+export const fetchPublishedBlogSlugs = cache(
+  async (): Promise<BlogPostSlugEntry[]> => {
+    // Construct clients lazily: getSupabaseAdmin() throws when the service-role
+    // key is absent, and that must not escape past the anon fallback.
+    for (const getClient of [getSupabaseAdmin, getSupabasePublic]) {
+      try {
+        const { data, error } = await getClient()
+          .from("blog_posts")
+          .select("slug, published_at, updated_at")
+          .eq("status", "published")
+          .order("published_at", { ascending: false, nullsFirst: false })
+        if (error) throw error
+        if (data) return data as BlogPostSlugEntry[]
+      } catch (err) {
+        console.error("Published blog slugs:", err)
+      }
+    }
+    return []
+  },
+)
+
+/** Preview columns only — omit `limit` to fetch every published post. */
 export const fetchPublishedBlogPostsPreview = cache(
-  async (limit = 4): Promise<BlogPostPreview[]> => {
+  async (limit?: number): Promise<BlogPostPreview[]> => {
     try {
       return await fetchPublishedPreviewWithClient(getSupabaseAdmin(), limit)
     } catch (adminError) {

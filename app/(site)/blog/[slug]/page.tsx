@@ -9,6 +9,7 @@ import BlogShareBar from "@/components/blog/BlogShareBar"
 import {
   fetchPublishedBlogPosts,
   fetchPublishedBlogPostBySlug,
+  fetchPublishedBlogSlugs,
   fetchRelatedBlogPosts,
   formatBlogDate,
 } from "@/lib/blog-db"
@@ -18,10 +19,14 @@ import { SITE_URL } from "@/lib/blog-posts"
 import { articleJsonLd, blogCoverAlt, buildBlogPostMetadata, DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
 
-export const revalidate = 60
-
 type PageProps = {
   params: Promise<{ slug: string }>
+}
+
+/** Prerender every published post; new posts still render on demand. */
+export async function generateStaticParams() {
+  const posts = await fetchPublishedBlogSlugs()
+  return posts.map((post) => ({ slug: post.slug }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

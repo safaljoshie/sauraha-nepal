@@ -1,12 +1,12 @@
 import Link from "next/link"
 import HomeFeaturedCard from "@/components/home/HomeFeaturedCard"
 import HomeSectionHeader from "@/components/home/HomeSectionHeader"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 
 export default function HomeWhereToStay({
   stayListings,
 }: {
-  stayListings: BusinessListing[]
+  stayListings: BusinessListingSummary[]
 }) {
   return (
     <section id="where-to-stay" className="home-section scroll-mt-24">

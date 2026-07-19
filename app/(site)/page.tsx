@@ -23,8 +23,6 @@ import { fetchActiveHeroMedia } from "@/lib/site-content"
 
 import { DEFAULT_OG_IMAGE, SITE_KEYWORDS } from "@/lib/seo"
 
-export const revalidate = 60
-
 export async function generateMetadata(): Promise<Metadata> {
   const heroMedia = await fetchActiveHeroMedia()
   const primaryVideo = heroMedia[0] ?? null

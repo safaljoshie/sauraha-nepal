@@ -5,7 +5,7 @@ import ListingVerifiedBadge from "@/components/listings/ListingVerifiedBadge"
 import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import OpenNowBadge from "@/components/listings/OpenNowBadge"
 import { listingImageAlt } from "@/lib/seo"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import { isListingVerified, isNewListing } from "@/lib/listing-badges"
 import {
   getCategoryDisplay,
@@ -21,7 +21,7 @@ export default function HomeFeaturedCard({
   compactDesktopImage = false,
   priority = false,
 }: {
-  listing: BusinessListing
+  listing: BusinessListingSummary
   showStatus?: boolean
   /** Desktop image at 65% of square height (e.g. Where to stay preview). */
   compactDesktopImage?: boolean
@@ -112,7 +112,7 @@ export default function HomeFeaturedCard({
             </div>
           )}
           <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-text-light">
-            {truncateDescription(listing.description, 80)}
+            {truncateDescription(listing.description_preview, 80)}
           </p>
           <ListingAddress address={listing.address} />
           <div className="mt-3 flex items-center justify-between border-t border-border-brand pt-3">

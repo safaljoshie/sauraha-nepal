@@ -5,7 +5,7 @@ import ListingVerifiedBadge from "@/components/listings/ListingVerifiedBadge"
 import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import OpenNowBadge from "@/components/listings/OpenNowBadge"
 import { listingImageAlt } from "@/lib/seo"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import { isListingVerified, isNewListing } from "@/lib/listing-badges"
 import { getListingDetailPath } from "@/lib/listing-url"
 import {
@@ -23,7 +23,7 @@ export default function BusinessListingCard({
   showStatus = true,
   priority = false,
 }: {
-  listing: BusinessListing
+  listing: BusinessListingSummary
   showStatus?: boolean
   priority?: boolean
 }) {
@@ -102,7 +102,7 @@ export default function BusinessListingCard({
             <OpenNowBadge openingHours={listing.opening_hours} className="mt-1" />
           )}
           <p className="mt-2 line-clamp-3 flex-1 text-sm leading-relaxed text-text-light">
-            {truncateDescription(listing.description)}
+            {truncateDescription(listing.description_preview)}
           </p>
           <ListingAddress address={listing.address} />
 

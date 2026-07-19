@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 import Link from "next/link"
 import { useMemo, useState } from "react"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import { buildMapFilterGroups, listingsForMapFilter } from "@/lib/homepage-data"
 import type { ListingCoordinateMap } from "@/lib/map-coordinates"
@@ -26,7 +26,7 @@ export default function HomeMapSection({
   catalog,
   mapCoordinates,
 }: {
-  listings: BusinessListing[]
+  listings: BusinessListingSummary[]
   catalog: CategoryCatalog
   mapCoordinates: ListingCoordinateMap
 }) {

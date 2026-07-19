@@ -14,8 +14,6 @@ export const metadata: Metadata = pageMetadata({
   path: "/about",
 })
 
-export const revalidate = 60
-
 const stats = [
   { value: "120+", label: "Businesses Listed" },
   { value: "7", label: "Categories" },

@@ -4,8 +4,6 @@ import Navbar from "@/components/Navbar"
 import SiteFooter from "@/components/SiteFooter"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 
-export const revalidate = 60
-
 function FooterFallback() {
   return <footer className="min-h-[280px] bg-ink" aria-hidden />
 }

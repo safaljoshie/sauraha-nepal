@@ -1,10 +1,22 @@
+import { unstable_cache } from "next/cache"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { getListingDetailPath } from "@/lib/listing-url"
 
 const MAX_LISTINGS = 20
 const DESCRIPTION_SLICE = 100
 
-export async function buildListingsContext(): Promise<string> {
+/**
+ * Cached across requests — this runs on every chat message, and React's
+ * `cache()` only dedupes within a single request. A cold miss is one cheap
+ * query, so an hour-long TTL is a safe trade.
+ */
+export const buildListingsContext = unstable_cache(
+  buildListingsContextUncached,
+  ["chat-listings-context"],
+  { revalidate: 3600, tags: ["listings"] },
+)
+
+async function buildListingsContextUncached(): Promise<string> {
   const listings = await fetchApprovedListings()
   const slice = listings.slice(0, MAX_LISTINGS)
 
@@ -14,7 +26,7 @@ export async function buildListingsContext(): Promise<string> {
 
   return slice
     .map((l) => {
-      const desc = l.description?.trim().slice(0, DESCRIPTION_SLICE) ?? ""
+      const desc = l.description_preview?.trim().slice(0, DESCRIPTION_SLICE) ?? ""
       const parts = [
         `- ${l.business_name} (${l.category})`,
         desc ? desc : null,
