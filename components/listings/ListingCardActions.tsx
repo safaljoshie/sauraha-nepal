@@ -27,8 +27,12 @@ export default function ListingCardActions({
       className="relative z-[1] mt-3 flex flex-wrap gap-2"
       onClick={stopCardNavigation}
     >
+      {/* The card's full-area overlay link already prefetches this exact href
+          (BusinessListingCard), so prefetching again just doubles the RSC
+          requests per card with no UX gain. */}
       <Link
         href={detailHref}
+        prefetch={false}
         className="inline-flex min-h-[44px] items-center rounded-xl bg-green-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-green-mid"
       >
         View Details
