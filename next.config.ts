@@ -17,12 +17,17 @@ const nextConfig: NextConfig = {
     ]
   },
   images: {
-    formats: ["image/avif", "image/webp"],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // WebP only. Adding AVIF doubles the transformation count for ~20% file
+    // size, and Vercel's Hobby plan meters transformations — not worth it for a
+    // photo-heavy directory.
+    formats: ["image/webp"],
+    // Deliberately short lists: every extra width/quality is another billable
+    // transformation per source image.
+    deviceSizes: [640, 828, 1200, 1920],
+    imageSizes: [64, 128, 256, 384],
     // 31 days — reduces repeat fetches from Supabase Storage via the image optimizer
     minimumCacheTTL: 2_678_400,
-    qualities: [75, 80, 90],
+    qualities: [75],
     remotePatterns: [
       {
         protocol: "https",

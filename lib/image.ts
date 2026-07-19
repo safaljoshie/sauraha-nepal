@@ -1,5 +1,8 @@
-/** Default next/image quality — near-lossless at smaller file sizes. */
-export const DEFAULT_IMAGE_QUALITY = 80
+/**
+ * Default next/image quality. Must be listed in `images.qualities` in
+ * next.config.ts — the optimizer 400s on any value not declared there.
+ */
+export const DEFAULT_IMAGE_QUALITY = 75
 
 export function isNextOptimizedImageSrc(src: string) {
   const trimmed = src.trim()
