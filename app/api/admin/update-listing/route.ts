@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server"
-import { revalidatePath } from "next/cache"
 import { Resend } from "resend"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { hasListingContactEmail, type BusinessListing } from "@/lib/business-listing"
@@ -9,8 +8,8 @@ import {
   serializeListingCategories,
 } from "@/lib/listing-categories"
 import { buildApprovalEmail, buildRejectionEmail } from "@/lib/emails/listing-status"
+import { revalidateListingPaths } from "@/lib/listing-revalidate"
 import { generateUniqueListingSlug } from "@/lib/listing-slug"
-import { getListingDetailPath } from "@/lib/listing-url"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
@@ -150,9 +149,7 @@ export async function PUT(request: Request) {
     const record = updated as BusinessListing
     const previous = existingRecord
 
-    revalidatePath("/listings")
-    revalidatePath(`/listings/${id}`)
-    revalidatePath(getListingDetailPath(record))
+    revalidateListingPaths(record)
 
     const statusChanged = previous.status !== record.status
 

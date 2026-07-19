@@ -42,8 +42,9 @@ export async function PUT(request: Request) {
 
   try {
     const settings = await upsertSiteSettings(updates)
+    // Settings feed SiteFooter, which lives in the (site) layout — the
+    // layout-wide purge already cascades to /contact and every other page.
     revalidatePath("/", "layout")
-    revalidatePath("/contact")
     return NextResponse.json({ success: true, settings })
   } catch (error) {
     console.error("Settings save error:", error)

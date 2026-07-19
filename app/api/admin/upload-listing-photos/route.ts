@@ -1,16 +1,9 @@
-import { revalidatePath } from "next/cache"
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { dedupePhotoLinks, isAllowedPhotoFile, prependPhotoLinks } from "@/lib/list-business-photos"
-import { getListingDetailPath } from "@/lib/listing-url"
+import { revalidateListingPaths } from "@/lib/listing-revalidate"
 import { getSupabaseAdmin } from "@/lib/supabase"
 import { uploadListingPhoto } from "@/lib/upload-listing-photo"
-
-function revalidateListingPages(listing: { id: string; slug: string | null }) {
-  revalidatePath("/listings")
-  revalidatePath(`/listings/${listing.id}`)
-  revalidatePath(getListingDetailPath(listing))
-}
 
 export async function POST(request: Request) {
   const unauthorized = await requireAdminApi()
@@ -111,7 +104,7 @@ export async function POST(request: Request) {
     )
   }
 
-  revalidateListingPages({ id: existing.id, slug: existing.slug ?? null })
+  revalidateListingPaths({ id: existing.id, slug: existing.slug ?? null })
 
   return NextResponse.json({ urls, photo_links })
 }

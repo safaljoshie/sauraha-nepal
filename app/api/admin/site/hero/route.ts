@@ -31,8 +31,8 @@ function isValidMediaType(type: string | undefined): type is "video" {
 }
 
 function revalidateHomeHero() {
+  // Hero media is only rendered by the homepage — no need to purge the layout.
   revalidatePath("/")
-  revalidatePath("/", "layout")
 }
 
 export async function GET() {

@@ -3,6 +3,7 @@ import { Resend } from "resend"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { hasListingContactEmail, type BusinessListing } from "@/lib/business-listing"
 import { buildDeletionEmail } from "@/lib/emails/listing-status"
+import { revalidateListingPaths } from "@/lib/listing-revalidate"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
@@ -51,6 +52,10 @@ export async function DELETE(request: Request) {
     }
 
     const record = listing as BusinessListing
+
+    // Remove from the site before emailing — a Resend failure must not leave a
+    // deleted listing still reachable.
+    revalidateListingPaths(record)
 
     if (!hasListingContactEmail(record.email)) {
       return NextResponse.json({ success: true, listing: record, emailSkipped: true })

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
+import { revalidateCategoryCatalog } from "@/lib/listing-revalidate"
 import { SLUG_RE } from "@/lib/category-catalog"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
@@ -89,6 +90,8 @@ export async function POST(request: Request) {
           : "Failed to create category group."
       return NextResponse.json({ error: message }, { status: 500 })
     }
+
+    revalidateCategoryCatalog()
 
     return NextResponse.json({ success: true, group: data })
   } catch {
