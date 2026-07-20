@@ -1,5 +1,5 @@
 import { cache } from "react"
-import { getSupabaseAdmin, getSupabasePublic } from "@/lib/supabase"
+import { getSupabaseAdmin, getSupabasePublic, logAdminFallback } from "@/lib/supabase"
 
 export const BLOG_TAGS = ["Guide", "Transport", "Info", "Tips", "Wildlife", "News"] as const
 export type BlogTag = (typeof BLOG_TAGS)[number]
@@ -108,7 +108,7 @@ export const fetchPublishedBlogPostCount = cache(async (): Promise<number> => {
   try {
     return await countPublishedWithClient(getSupabaseAdmin())
   } catch (adminError) {
-    console.error("Published blog count (admin):", adminError)
+    logAdminFallback("Published blog count (admin):", adminError)
   }
 
   try {
@@ -126,7 +126,7 @@ export const fetchPublishedBlogPosts = cache(async (): Promise<BlogPostRow[]> =>
     const rows = await fetchPublishedWithClient(getSupabaseAdmin())
     if (Array.isArray(rows)) return rows
   } catch (adminError) {
-    console.error("Published blog fetch (admin):", adminError)
+    logAdminFallback("Published blog fetch (admin):", adminError)
   }
 
   try {
@@ -160,7 +160,12 @@ export const fetchPublishedBlogSlugs = cache(
   async (): Promise<BlogPostSlugEntry[]> => {
     // Construct clients lazily: getSupabaseAdmin() throws when the service-role
     // key is absent, and that must not escape past the anon fallback.
-    for (const getClient of [getSupabaseAdmin, getSupabasePublic]) {
+    const attempts = [
+      { getClient: getSupabaseAdmin, isAdmin: true },
+      { getClient: getSupabasePublic, isAdmin: false },
+    ]
+
+    for (const { getClient, isAdmin } of attempts) {
       try {
         const { data, error } = await getClient()
           .from("blog_posts")
@@ -170,7 +175,10 @@ export const fetchPublishedBlogSlugs = cache(
         if (error) throw error
         if (data) return data as BlogPostSlugEntry[]
       } catch (err) {
-        console.error("Published blog slugs:", err)
+        // An anon failure is always worth reporting; an admin failure is only
+        // noteworthy when a service-role key was actually configured.
+        if (isAdmin) logAdminFallback("Published blog slugs (admin):", err)
+        else console.error("Published blog slugs (public):", err)
       }
     }
     return []
@@ -183,7 +191,7 @@ export const fetchPublishedBlogPostsPreview = cache(
     try {
       return await fetchPublishedPreviewWithClient(getSupabaseAdmin(), limit)
     } catch (adminError) {
-      console.error("Published blog preview (admin):", adminError)
+      logAdminFallback("Published blog preview (admin):", adminError)
     }
 
     try {
@@ -202,7 +210,7 @@ export const fetchPublishedBlogPostBySlug = cache(
       const row = await fetchPublishedWithClient(getSupabaseAdmin(), slug)
       if (row && !Array.isArray(row)) return row
     } catch (adminError) {
-      console.error("Blog post by slug (admin):", adminError)
+      logAdminFallback("Blog post by slug (admin):", adminError)
     }
 
     try {
@@ -225,7 +233,7 @@ export const fetchRelatedBlogPosts = cache(
         currentSlug,
       )
     } catch (adminError) {
-      console.error("Related blog posts (admin):", adminError)
+      logAdminFallback("Related blog posts (admin):", adminError)
     }
 
     try {

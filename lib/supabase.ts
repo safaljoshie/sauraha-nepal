@@ -42,6 +42,33 @@ export function getSupabasePublic() {
   return publicClient
 }
 
+/**
+ * Whether a service-role client can actually be built in this environment.
+ *
+ * Read helpers try admin first and fall back to anon. Without this check the
+ * admin attempt throws — and gets logged with a stack trace — on every single
+ * call, which on a Preview deploy (anon key only) means dozens of identical
+ * traces per build drowning out real errors. Missing credentials are a static
+ * property of the environment, not a per-call failure.
+ */
+export function hasSupabaseAdminCredentials() {
+  return (
+    isHttpUrl(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
+  )
+}
+
+/**
+ * Log a failed service-role attempt, unless the cause is simply that this
+ * environment has no service-role key — in which case the anon fallback is the
+ * expected path and there is nothing to report. Genuine admin failures
+ * (network, RLS, malformed key) still log.
+ */
+export function logAdminFallback(label: string, error: unknown) {
+  if (!hasSupabaseAdminCredentials()) return
+  console.error(label, error)
+}
+
 let adminClient: SupabaseClient | null = null
 
 /** Server-only Supabase client (service role key). Never import in client components. */

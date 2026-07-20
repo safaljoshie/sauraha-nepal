@@ -1,7 +1,7 @@
 import type { BusinessListing, BusinessListingSummary } from "@/lib/business-listing"
 import { isListingUuid } from "@/lib/listing-slug"
 import { sortListingsForDisplay } from "@/lib/listings-catalog"
-import { getSupabaseAdmin } from "@/lib/supabase"
+import { getSupabaseAdmin, logAdminFallback } from "@/lib/supabase"
 import { getSupabasePublic } from "@/lib/supabase"
 import { cache } from "react"
 
@@ -34,7 +34,7 @@ export const fetchApprovedListingsCount = cache(async (): Promise<number> => {
   try {
     return await countApprovedWithClient(getSupabaseAdmin())
   } catch (adminError) {
-    console.error("Approved listings count (admin):", adminError)
+    logAdminFallback("Approved listings count (admin):", adminError)
   }
 
   try {
