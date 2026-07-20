@@ -1,10 +1,7 @@
--- Applied to project lagoqhdobkyknefcflsx as migration
--- `business_listings_coordinates_and_summary_columns`.
--- Safe to re-run.
-
 -- Persisted geocoding: coordinates never change, so resolving them per render
 -- (serially, with a 1.1s Nominatim rate-limit sleep) does not belong in a
--- serving path. Filled by scripts/backfill-listing-coordinates.ts.
+-- serving path. Populated by scripts/backfill-listing-coordinates.ts — that is
+-- data rather than schema, so it is deliberately not part of this migration.
 alter table business_listings
   add column if not exists latitude double precision,
   add column if not exists longitude double precision,
