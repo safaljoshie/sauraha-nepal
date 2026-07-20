@@ -1,0 +1,13 @@
+-- chat_logs carried an INSERT policy granting `public` with_check(true), i.e.
+-- anyone holding the anon key — which ships in the client bundle — could write
+-- unlimited arbitrary rows. On the free tier that is a cheap path to exhausting
+-- the 0.5 GB database quota, and it pollutes chat analytics.
+--
+-- Nothing in the app relies on it: app/api/chat/route.ts inserts via
+-- getSupabaseAdmin() (service role), which bypasses RLS. supabase/chat_logs.sql
+-- documents the intended state as "No public policies: inserts from API route
+-- use service role only", so the deployed policy contradicted the repo and was
+-- presumably applied by hand.
+--
+-- The SELECT policy stays: qual(false) already blocks anon reads.
+drop policy if exists "Anyone can insert chat logs" on chat_logs;

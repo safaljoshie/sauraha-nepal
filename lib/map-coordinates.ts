@@ -11,13 +11,48 @@ import {
 
 export type ListingCoordinateMap = Record<string, MapCoordinates>
 
+/** Minimum shape the geocoder needs — keeps this usable from list views. */
+type GeocodableListing = Pick<
+  BusinessListing,
+  "id" | "google_maps_link" | "business_name" | "address"
+>
+
+/** A row that already carries persisted coordinates. */
+type LocatedListing = {
+  id: string
+  latitude?: number | null
+  longitude?: number | null
+}
+
+/**
+ * Build the pin map from coordinates already stored on each row.
+ *
+ * Synchronous and network-free — this is what pages should use.
+ * `buildListingCoordinateMap` below does the actual geocoding and is reserved
+ * for the offline backfill script.
+ */
+export function coordinateMapFromListings(
+  listings: LocatedListing[],
+): ListingCoordinateMap {
+  const map: ListingCoordinateMap = {}
+  for (const listing of listings) {
+    const { latitude, longitude } = listing
+    if (typeof latitude === "number" && typeof longitude === "number") {
+      map[listing.id] = { lat: latitude, lng: longitude }
+    }
+  }
+  return map
+}
+
 const GEOCODE_DELAY_MS = 1100
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-async function geocodeListingFallback(listing: BusinessListing): Promise<MapCoordinates | null> {
+async function geocodeListingFallback(
+  listing: GeocodableListing,
+): Promise<MapCoordinates | null> {
   const link = listing.google_maps_link?.trim()
   const queries: string[] = []
 
@@ -56,12 +91,19 @@ async function geocodeListingFallback(listing: BusinessListing): Promise<MapCoor
   return null
 }
 
-/** Resolve map pins for all listings (parse, short-link resolve, then geocode fallback). */
+/**
+ * Resolve map pins by geocoding (parse, short-link resolve, then fallback).
+ *
+ * OFFLINE USE ONLY — scripts/backfill-listing-coordinates.ts. This makes
+ * serial network calls with a 1.1s sleep between attempts to respect
+ * Nominatim's usage policy, so a full run takes minutes. Pages must read
+ * persisted coordinates via `coordinateMapFromListings` instead.
+ */
 export async function buildListingCoordinateMap(
-  listings: BusinessListing[],
+  listings: GeocodableListing[],
 ): Promise<ListingCoordinateMap> {
   const map: ListingCoordinateMap = {}
-  const needsResolve: BusinessListing[] = []
+  const needsResolve: GeocodableListing[] = []
 
   for (const listing of listings) {
     const link = listing.google_maps_link?.trim()

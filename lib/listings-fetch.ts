@@ -1,13 +1,22 @@
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListing, BusinessListingSummary } from "@/lib/business-listing"
 import { isListingUuid } from "@/lib/listing-slug"
 import { sortListingsForDisplay } from "@/lib/listings-catalog"
-import { getSupabaseAdmin } from "@/lib/supabase"
+import { getSupabaseAdmin, logAdminFallback } from "@/lib/supabase"
 import { getSupabasePublic } from "@/lib/supabase"
 import { cache } from "react"
 
-/** Public directory fields — slug is required for human-readable listing URLs. */
+/** Full record for the detail page — slug drives human-readable listing URLs. */
 const APPROVED_LISTING_SELECT =
-  "id, created_at, business_name, slug, category, description, price_range, opening_hours, owner_name, email, phone, whatsapp, website, facebook, address, google_maps_link, photo_links, plan, status, agreed_to_terms, verified"
+  "id, created_at, business_name, slug, category, description, price_range, opening_hours, owner_name, email, phone, whatsapp, website, facebook, address, google_maps_link, photo_links, plan, status, agreed_to_terms, verified, latitude, longitude"
+
+/**
+ * List views only. Uses the generated `description_preview` and
+ * `cover_photo_url` columns instead of the full `description` / `photo_links`,
+ * and omits fields no card renders. This query runs on the homepage, the
+ * directory, the sitemap and the chat context, so its width matters most.
+ */
+const LISTING_SUMMARY_SELECT =
+  "id, created_at, business_name, slug, category, description_preview, cover_photo_url, price_range, opening_hours, phone, whatsapp, website, address, google_maps_link, plan, verified, latitude, longitude"
 
 async function countApprovedWithClient(
   client: ReturnType<typeof getSupabasePublic>,
@@ -25,7 +34,7 @@ export const fetchApprovedListingsCount = cache(async (): Promise<number> => {
   try {
     return await countApprovedWithClient(getSupabaseAdmin())
   } catch (adminError) {
-    console.error("Approved listings count (admin):", adminError)
+    logAdminFallback("Approved listings count (admin):", adminError)
   }
 
   try {
@@ -41,12 +50,12 @@ async function queryApprovedListings() {
   const supabase = getSupabasePublic()
   return supabase
     .from("business_listings")
-    .select(APPROVED_LISTING_SELECT)
+    .select(LISTING_SUMMARY_SELECT)
     .eq("status", "approved")
 }
 
 /** Fetch approved listings for public directory (server-side). */
-export async function fetchApprovedListings(): Promise<BusinessListing[]> {
+export async function fetchApprovedListings(): Promise<BusinessListingSummary[]> {
   let { data, error } = await queryApprovedListings()
 
   if (error) {
@@ -55,7 +64,7 @@ export async function fetchApprovedListings(): Promise<BusinessListing[]> {
       const admin = getSupabaseAdmin()
       const result = await admin
         .from("business_listings")
-        .select(APPROVED_LISTING_SELECT)
+        .select(LISTING_SUMMARY_SELECT)
         .eq("status", "approved")
       data = result.data
       error = result.error
@@ -70,7 +79,7 @@ export async function fetchApprovedListings(): Promise<BusinessListing[]> {
     return []
   }
 
-  return sortListingsForDisplay(data as BusinessListing[])
+  return sortListingsForDisplay(data as unknown as BusinessListingSummary[])
 }
 
 async function fetchApprovedListingWithClient(

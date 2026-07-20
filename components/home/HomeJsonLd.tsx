@@ -1,9 +1,9 @@
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import { getListingImage } from "@/lib/listings-catalog"
 
 const SITE = "https://www.saurahanepal.com"
 
-function featuredListingUrl(listing: Pick<BusinessListing, "id" | "slug">) {
+function featuredListingUrl(listing: Pick<BusinessListingSummary, "id" | "slug">) {
   const slug = listing.slug?.trim()
   return `${SITE}/listings/${slug || listing.id}`
 }
@@ -32,7 +32,7 @@ const FAQ = [
 ]
 
 type HomeJsonLdProps = {
-  featuredListings: BusinessListing[]
+  featuredListings: BusinessListingSummary[]
   blogCount: number
 }
 
@@ -73,7 +73,7 @@ export default function HomeJsonLd({ featuredListings, blogCount }: HomeJsonLdPr
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: listing.business_name,
-    description: listing.description ?? undefined,
+    description: listing.description_preview ?? undefined,
     image: getListingImage(listing),
     url: featuredListingUrl(listing),
     address: listing.address

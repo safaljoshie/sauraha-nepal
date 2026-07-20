@@ -63,7 +63,9 @@ export function getCategoryDisplay(category: string, catalog?: CategoryCatalog) 
   return names.join(" · ")
 }
 
-export function sortListingsForDisplay(listings: BusinessListing[]) {
+type SortableListing = Pick<BusinessListing, "plan" | "created_at">
+
+export function sortListingsForDisplay<T extends SortableListing>(listings: T[]): T[] {
   return [...listings].sort((a, b) => {
     const planDiff = (PLAN_ORDER[a.plan] ?? 9) - (PLAN_ORDER[b.plan] ?? 9)
     if (planDiff !== 0) return planDiff
@@ -71,10 +73,9 @@ export function sortListingsForDisplay(listings: BusinessListing[]) {
   })
 }
 
-export function sortListingsByOption(
-  listings: BusinessListing[],
-  sort: SortOptionId,
-) {
+export function sortListingsByOption<
+  T extends SortableListing & Pick<BusinessListing, "business_name">,
+>(listings: T[], sort: SortOptionId): T[] {
   const copy = [...listings]
   if (sort === "az") {
     return copy.sort((a, b) =>
@@ -93,7 +94,7 @@ export function sortListingsByOption(
 }
 
 export function matchesCategoryGroup(
-  listing: BusinessListing,
+  listing: Pick<BusinessListing, "category">,
   groupId: CategoryGroupId,
   catalog?: CategoryCatalog,
 ) {
@@ -105,34 +106,49 @@ export function matchesCategoryGroup(
   return names.some((name) => group.matchers.includes(name))
 }
 
-export function matchesPlanFilter(listing: BusinessListing, plan: PlanFilterId) {
+export function matchesPlanFilter(listing: Pick<BusinessListing, "plan">, plan: PlanFilterId) {
   if (plan === "all") return true
   return listing.plan === plan
 }
 
 export type HeroSearchListing = Pick<
   BusinessListing,
-  "id" | "slug" | "business_name" | "category" | "address" | "description"
->
+  "id" | "slug" | "business_name" | "category" | "address"
+> & {
+  /** Summary rows carry `description_preview`; detail rows carry `description`. */
+  description: string | null
+}
 
-export function toHeroSearchListings(listings: BusinessListing[]): HeroSearchListing[] {
-  return listings.map(({ id, slug, business_name, category, address, description }) => ({
-    id,
-    slug,
-    business_name,
-    category,
-    address,
-    description,
+export function toHeroSearchListings(
+  listings: (Pick<
+    BusinessListing,
+    "id" | "slug" | "business_name" | "category" | "address"
+  > & { description?: string | null; description_preview?: string | null })[],
+): HeroSearchListing[] {
+  return listings.map((listing) => ({
+    id: listing.id,
+    slug: listing.slug,
+    business_name: listing.business_name,
+    category: listing.category,
+    address: listing.address,
+    description: listing.description ?? listing.description_preview ?? null,
   }))
 }
 
-export function matchesSearch(listing: HeroSearchListing, query: string) {
+/** Accepts either a detail row (`description`) or a summary row (`description_preview`). */
+export type SearchableListing = Pick<BusinessListing, "business_name" | "category"> & {
+  description?: string | null
+  description_preview?: string | null
+}
+
+export function matchesSearch(listing: SearchableListing, query: string) {
   if (!query.trim()) return true
   const q = query.trim().toLowerCase()
+  const description = listing.description ?? listing.description_preview ?? null
   return (
     listing.business_name.toLowerCase().includes(q) ||
     listing.category.toLowerCase().includes(q) ||
-    (listing.description?.toLowerCase().includes(q) ?? false)
+    (description?.toLowerCase().includes(q) ?? false)
   )
 }
 
@@ -172,8 +188,10 @@ export function parseCategoryParam(
   return "all"
 }
 
-export function filterListings(
-  listings: BusinessListing[],
+export function filterListings<
+  T extends SortableListing & SearchableListing,
+>(
+  listings: T[],
   options: {
     search: string
     category: CategoryGroupId
@@ -181,7 +199,7 @@ export function filterListings(
     sort: SortOptionId
   },
   catalog?: CategoryCatalog,
-) {
+): T[] {
   const filtered = listings.filter(
     (l) =>
       matchesSearch(l, options.search) &&
@@ -192,7 +210,7 @@ export function filterListings(
 }
 
 export function countByCategoryGroup(
-  listings: BusinessListing[],
+  listings: Pick<BusinessListing, "category">[],
   groupId: CategoryGroupId,
   catalog?: CategoryCatalog,
 ) {
@@ -201,7 +219,7 @@ export function countByCategoryGroup(
 
 /** Public category tabs: always show All; hide groups with zero approved listings. */
 export function getCategoryFilterTabs(
-  listings: BusinessListing[],
+  listings: Pick<BusinessListing, "category">[],
   catalog?: CategoryCatalog,
 ): BuiltCategoryGroup[] {
   return resolveGroups(catalog).filter((group) => {
@@ -210,11 +228,11 @@ export function getCategoryFilterTabs(
   })
 }
 
-export function filterByCategoryGroup(
-  listings: BusinessListing[],
+export function filterByCategoryGroup<T extends Pick<BusinessListing, "category">>(
+  listings: T[],
   groupId: CategoryGroupId,
   catalog?: CategoryCatalog,
-) {
+): T[] {
   return listings.filter((l) => matchesCategoryGroup(l, groupId, catalog))
 }
 
@@ -224,7 +242,17 @@ export function truncateDescription(text: string | null, max = 100) {
   return `${text.slice(0, max).trim()}…`
 }
 
-export function getListingImage(listing: BusinessListing) {
+/**
+ * Cover image for a card. Summary rows carry the generated `cover_photo_url`
+ * so list views never need the whole `photo_links` blob; detail rows still
+ * fall back to parsing it.
+ */
+export function getListingImage(
+  listing: { cover_photo_url?: string | null; photo_links?: string | null },
+) {
+  const cover = listing.cover_photo_url?.trim()
+  if (cover) return cover
+
   const firstPhoto = listing.photo_links
     ?.split("\n")
     .map((s) => s.trim())

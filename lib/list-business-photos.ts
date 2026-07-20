@@ -153,7 +153,15 @@ export function storageUploadErrorMessage(error: { message?: string }) {
   return error.message?.trim() || "Failed to upload image. Please try again."
 }
 
+/**
+ * Once the bucket is confirmed for this server instance, stop re-checking it.
+ * Without this every single upload paid a listBuckets + updateBucket round trip.
+ */
+let bucketVerified = false
+
 export async function ensureListingPhotosBucket(supabase: SupabaseClient) {
+  if (bucketVerified) return null
+
   const bucket = getListingPhotosBucket()
   const { data: buckets, error: listError } = await supabase.storage.listBuckets()
 
@@ -172,6 +180,7 @@ export async function ensureListingPhotosBucket(supabase: SupabaseClient) {
     if (createError && !createError.message.toLowerCase().includes("already exists")) {
       return createError
     }
+    bucketVerified = true
     return null
   }
 
@@ -184,6 +193,7 @@ export async function ensureListingPhotosBucket(supabase: SupabaseClient) {
     console.warn("Listing photos updateBucket warning:", updateError)
   }
 
+  bucketVerified = true
   return null
 }
 

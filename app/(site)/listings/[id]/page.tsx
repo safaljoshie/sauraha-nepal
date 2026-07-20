@@ -15,18 +15,27 @@ import {
   telUrl,
   whatsappUrl,
 } from "@/lib/listings-catalog"
-import { getMapCoordinates, parseCoordinates } from "@/lib/google-maps"
-import { fetchApprovedListingBySlugOrId } from "@/lib/listings-fetch"
+import { parseCoordinates } from "@/lib/google-maps"
+import { fetchApprovedListingBySlugOrId, fetchApprovedListings } from "@/lib/listings-fetch"
 import { isListingUuid } from "@/lib/listing-slug"
 import { getListingDetailPath, getListingDetailUrl } from "@/lib/listing-url"
 import { isListingVerified } from "@/lib/listing-badges"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { buildListingDetailMetadata, listingImageAlt } from "@/lib/seo"
 
-export const revalidate = 60
-
 type PageProps = {
   params: Promise<{ id: string }>
+}
+
+/**
+ * Prerender every approved listing at build time so detail pages are served
+ * from the CDN instead of hitting Supabase per request. Listings approved after
+ * a build still render on demand (dynamicParams defaults to true) and are
+ * published immediately by revalidateListingPaths.
+ */
+export async function generateStaticParams() {
+  const listings = await fetchApprovedListings()
+  return listings.map((listing) => ({ id: listing.slug?.trim() || listing.id }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -69,11 +78,16 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const isFeatured = listing.plan === "featured"
   const verified = isListingVerified(listing)
 
+  // Prefer the persisted coordinates; fall back to parsing the link, which is
+  // pure. Resolving short links over the network here meant an uncached fetch
+  // (8s timeout) on every listing page render.
   const mapsLink = listing.google_maps_link?.trim() ?? ""
-  let coords = mapsLink ? parseCoordinates(mapsLink) : null
-  if (!coords && mapsLink) {
-    coords = await getMapCoordinates(mapsLink)
-  }
+  const coords =
+    typeof listing.latitude === "number" && typeof listing.longitude === "number"
+      ? { lat: listing.latitude, lng: listing.longitude }
+      : mapsLink
+        ? parseCoordinates(mapsLink)
+        : null
 
   return (
     <>

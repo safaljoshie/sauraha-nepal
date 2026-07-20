@@ -3,6 +3,7 @@ import { Resend } from "resend"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { hasListingContactEmail, type BusinessListing } from "@/lib/business-listing"
 import { buildApprovalEmail } from "@/lib/emails/listing-status"
+import { revalidateListingPaths } from "@/lib/listing-revalidate"
 import { generateUniqueListingSlug } from "@/lib/listing-slug"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
@@ -50,6 +51,10 @@ export async function POST(_request: Request, context: RouteContext) {
     }
 
     const record = updated as BusinessListing
+
+    // Publish before emailing — a Resend failure must not leave the listing
+    // approved in the database but invisible on the site.
+    revalidateListingPaths(record)
 
     if (!hasListingContactEmail(record.email)) {
       return NextResponse.json({ success: true, listing: record, emailSkipped: true })

@@ -1,9 +1,8 @@
-import { Suspense } from "react"
 import DeferredMount from "@/components/DeferredMount"
 import HomeMapSection from "@/components/home/HomeMapSection"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
-import { buildListingCoordinateMap } from "@/lib/map-coordinates"
+import { coordinateMapFromListings } from "@/lib/map-coordinates"
 
 function HomeMapSectionSkeleton() {
   return (
@@ -21,35 +20,22 @@ function HomeMapSectionSkeleton() {
   )
 }
 
-async function HomeMapSectionContent({
-  listings,
-  catalog,
-}: {
-  listings: BusinessListing[]
-  catalog: CategoryCatalog
-}) {
-  const mapCoordinates = await buildListingCoordinateMap(listings)
-  return (
-    <HomeMapSection
-      listings={listings}
-      catalog={catalog}
-      mapCoordinates={mapCoordinates}
-    />
-  )
-}
-
 export default function HomeMapSectionLoader({
   listings,
   catalog,
 }: {
-  listings: BusinessListing[]
+  listings: BusinessListingSummary[]
   catalog: CategoryCatalog
 }) {
+  // Coordinates come straight off the rows now, so there is no async work left
+  // to suspend on — DeferredMount alone still keeps the map off the critical path.
   return (
     <DeferredMount fallback={<HomeMapSectionSkeleton />}>
-      <Suspense fallback={<HomeMapSectionSkeleton />}>
-        <HomeMapSectionContent listings={listings} catalog={catalog} />
-      </Suspense>
+      <HomeMapSection
+        listings={listings}
+        catalog={catalog}
+        mapCoordinates={coordinateMapFromListings(listings)}
+      />
     </DeferredMount>
   )
 }

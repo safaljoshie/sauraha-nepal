@@ -19,8 +19,6 @@ import {
 import { DEFAULT_OG_IMAGE, pageMetadata } from "@/lib/seo"
 import { fetchApprovedGuides } from "@/lib/tour-guides"
 
-export const revalidate = 60
-
 export const metadata: Metadata = pageMetadata({
   title: GUIDES_PAGE_TITLE,
   description: GUIDES_PAGE_DESCRIPTION,

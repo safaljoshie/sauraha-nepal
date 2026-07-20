@@ -25,6 +25,28 @@ export type BusinessListing = {
   status: string
   agreed_to_terms: boolean | null
   verified: boolean | null
+  /** Resolved once by scripts/backfill-listing-coordinates.ts, not per render. */
+  latitude: number | null
+  longitude: number | null
+}
+
+/**
+ * What list views actually need. Drops the full description and photo_links
+ * blob (replaced by generated `description_preview` / `cover_photo_url`
+ * columns) plus fields no card renders — owner_name, email, agreed_to_terms.
+ */
+export type BusinessListingSummary = Omit<
+  BusinessListing,
+  | "owner_name"
+  | "email"
+  | "agreed_to_terms"
+  | "description"
+  | "photo_links"
+  | "facebook"
+  | "status"
+> & {
+  description_preview: string | null
+  cover_photo_url: string | null
 }
 
 export function formatSubmittedDate(iso: string) {

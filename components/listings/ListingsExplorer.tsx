@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useEffect, useMemo, useRef, useState } from "react"
 import type { CategoryCatalog } from "@/lib/category-catalog"
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import {
   LISTINGS_NAV_EVENT,
@@ -17,6 +17,7 @@ import {
   filterListings,
   getCategoryFilterTabs,
   PAGE_SIZE,
+  parseCategoryParam,
   type CategoryGroupId,
   type PlanFilterId,
   type SortOptionId,
@@ -30,31 +31,23 @@ import ListingsMapView from "./ListingsMapView"
 type ViewMode = "grid" | "map"
 
 type ListingsExplorerProps = {
-  listings: BusinessListing[]
+  listings: BusinessListingSummary[]
   catalog: CategoryCatalog
   mapCoordinates: ListingCoordinateMap
-  initialSearch?: string
-  initialCategory?: CategoryGroupId
-  initialViewMode?: ViewMode
-  focusSearchOnMount?: boolean
 }
 
 export default function ListingsExplorer({
   listings,
   catalog,
   mapCoordinates,
-  initialSearch = "",
-  initialCategory = "all",
-  initialViewMode = "grid",
-  focusSearchOnMount = false,
 }: ListingsExplorerProps) {
-  const [searchInput, setSearchInput] = useState(initialSearch)
-  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch)
-  const [category, setCategory] = useState<CategoryGroupId>(initialCategory)
+  const [searchInput, setSearchInput] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [category, setCategory] = useState<CategoryGroupId>("all")
   const [planFilter, setPlanFilter] = useState<PlanFilterId>("all")
   const [sort, setSort] = useState<SortOptionId>("plan")
   const [currentPage, setCurrentPage] = useState(1)
-  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode)
+  const [viewMode, setViewMode] = useState<ViewMode>("grid")
   const gridTopRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
@@ -63,21 +56,33 @@ export default function ListingsExplorer({
     return () => window.clearTimeout(timer)
   }, [searchInput])
 
+  // Apply query-string state after hydration, reading location directly rather
+  // than via useSearchParams. useSearchParams would mark this subtree dynamic,
+  // pushing the whole grid into a Suspense fallback so /listings prerenders
+  // with no listings in the HTML at all — invisible to crawlers.
   useEffect(() => {
-    setViewMode(initialViewMode)
-  }, [initialViewMode])
+    const params = new URLSearchParams(window.location.search)
+    const searchParam = params.get("search")?.trim() ?? ""
+    const search =
+      searchParam && searchParam !== "true"
+        ? searchParam
+        : (params.get("q") ?? "").trim()
 
-  useEffect(() => {
-    setSearchInput(initialSearch)
-    setDebouncedSearch(initialSearch)
-  }, [initialSearch])
+    if (search) {
+      setSearchInput(search)
+      setDebouncedSearch(search)
+    }
 
-  useEffect(() => {
-    if (!focusSearchOnMount) return
+    const initialCategory = parseCategoryParam(params.get("category"), catalog)
+    if (initialCategory !== "all") setCategory(initialCategory)
+
+    if (params.get("view") === "map") setViewMode("map")
+
+    if (searchParam !== "true") return
     if (window.matchMedia("(max-width: 767px)").matches) return
     const timer = window.setTimeout(() => searchInputRef.current?.focus(), 50)
     return () => window.clearTimeout(timer)
-  }, [focusSearchOnMount])
+  }, [catalog])
 
   useEffect(() => {
     function applyNavMode(mode: ListingsNavMode) {

@@ -19,16 +19,21 @@ import {
   buildGuideProfileUrl,
   fetchApprovedGuideBySlugOrId,
   fetchApprovedGuideReviews,
+  fetchApprovedGuides,
   formatGuidePhoneUrl,
   formatGuideWhatsAppUrl,
   truncateGuideBio,
   type GuideService,
 } from "@/lib/tour-guides"
 
-export const revalidate = 60
-
 type PageProps = {
   params: Promise<{ id: string }>
+}
+
+/** Prerender every approved guide profile; new ones still render on demand. */
+export async function generateStaticParams() {
+  const guides = await fetchApprovedGuides()
+  return guides.map((guide) => ({ id: guide.slug?.trim() || guide.id }))
 }
 
 function formatVerifiedDate(iso: string | null) {

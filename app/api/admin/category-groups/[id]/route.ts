@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
+import { revalidateCategoryCatalog } from "@/lib/listing-revalidate"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 type RouteContext = { params: Promise<{ id: string }> }
@@ -62,6 +63,8 @@ export async function PUT(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Failed to update category group." }, { status: 500 })
     }
 
+    revalidateCategoryCatalog()
+
     return NextResponse.json({ success: true, group: data })
   } catch {
     return NextResponse.json({ error: "Database is not configured." }, { status: 500 })
@@ -105,6 +108,8 @@ export async function DELETE(_request: Request, context: RouteContext) {
       console.error("Category group delete error:", error)
       return NextResponse.json({ error: "Failed to delete category group." }, { status: 500 })
     }
+
+    revalidateCategoryCatalog()
 
     return NextResponse.json({ success: true })
   } catch {

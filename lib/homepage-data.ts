@@ -1,4 +1,4 @@
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import { DEFAULT_CATEGORY_CATALOG } from "@/lib/category-catalog"
 import { resolveCategoryIconName } from "@/lib/category-icon-map"
@@ -22,7 +22,7 @@ export type HomepageCategory = {
 }
 
 export type ActivityCardItem =
-  | { type: "listing"; listing: BusinessListing }
+  | { type: "listing"; listing: BusinessListingSummary }
   | {
       type: "placeholder"
       name: string
@@ -32,25 +32,25 @@ export type ActivityCardItem =
     }
 
 export type HomepageData = {
-  listings: BusinessListing[]
+  listings: BusinessListingSummary[]
   stats: {
     businessCount: number
     categoryCount: number
     guidesCount: number
   }
   categories: HomepageCategory[]
-  featured: BusinessListing[]
-  stayListings: BusinessListing[]
-  eatListings: BusinessListing[]
+  featured: BusinessListingSummary[]
+  stayListings: BusinessListingSummary[]
+  eatListings: BusinessListingSummary[]
   activities: ActivityCardItem[]
   experiences: typeof HOME_EXPERIENCES
 }
 
-export function isActivityListing(listing: BusinessListing, catalog: CategoryCatalog) {
+export function isActivityListing(listing: BusinessListingSummary, catalog: CategoryCatalog) {
   return matchesCategoryGroup(listing, "activities", catalog)
 }
 
-function countUniqueCategories(listings: BusinessListing[]) {
+function countUniqueCategories(listings: BusinessListingSummary[]) {
   const seen = new Set<string>()
   for (const listing of listings) {
     const category = listing.category?.trim()
@@ -60,7 +60,7 @@ function countUniqueCategories(listings: BusinessListing[]) {
 }
 
 export function buildHomepageData(
-  listings: BusinessListing[],
+  listings: BusinessListingSummary[],
   catalog: CategoryCatalog = DEFAULT_CATEGORY_CATALOG,
 ): HomepageData {
   const sorted = sortListingsForDisplay(listings)
@@ -111,10 +111,10 @@ export function buildHomepageData(
 }
 
 export function listingsForMapFilter(
-  listings: BusinessListing[],
+  listings: BusinessListingSummary[],
   filter: CategoryGroupId | "medical" | "all",
   catalog: CategoryCatalog = DEFAULT_CATEGORY_CATALOG,
-): BusinessListing[] {
+): BusinessListingSummary[] {
   if (filter === "all") return listings
   if (filter === "medical") {
     return listings.filter((l) =>
@@ -125,7 +125,7 @@ export function listingsForMapFilter(
 }
 
 export function buildMapFilterGroups(
-  listings: BusinessListing[],
+  listings: BusinessListingSummary[],
   catalog: CategoryCatalog,
 ) {
   const tabs = getCategoryFilterTabs(listings, catalog)

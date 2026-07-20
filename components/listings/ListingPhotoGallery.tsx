@@ -214,12 +214,14 @@ function MultiPhotoGallery({
                 : "opacity-75 hover:opacity-100"
             }`}
           >
+            {/* Explicit width/height keeps the thumbnail srcset to a 1x/2x
+                pair — `sizes="64px"` would request every configured width. */}
             <ListingImage
               src={url}
               alt=""
-              fill
-              className="object-cover"
-              sizes="64px"
+              width={64}
+              height={64}
+              className="h-full w-full object-cover"
               loading="lazy"
             />
           </button>

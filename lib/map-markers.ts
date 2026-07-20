@@ -1,4 +1,4 @@
-import type { BusinessListing } from "@/lib/business-listing"
+import type { BusinessListingSummary } from "@/lib/business-listing"
 import type { ListingCoordinateMap } from "@/lib/map-coordinates"
 import { parseCoordinates } from "@/lib/google-maps"
 
@@ -13,7 +13,7 @@ export type MapListingMarker = {
 }
 
 export function listingsToMapMarkers(
-  listings: BusinessListing[],
+  listings: BusinessListingSummary[],
   coordinateMap?: ListingCoordinateMap,
 ) {
   const onMap: MapListingMarker[] = []

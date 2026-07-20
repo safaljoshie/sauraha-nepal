@@ -1,12 +1,17 @@
 import type { MetadataRoute } from "next"
-import { fetchPublishedBlogPosts } from "@/lib/blog-db"
+import { fetchPublishedBlogSlugs } from "@/lib/blog-db"
 import { SEO_PRIORITY_BLOG_SLUGS } from "@/lib/blog-related-links"
 import { SITE_URL } from "@/lib/blog-posts"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
 import { fetchApprovedGuides, buildGuideProfilePath } from "@/lib/tour-guides"
 import { getListingDetailPath } from "@/lib/listing-url"
 
-export const revalidate = 3600
+/**
+ * Every other public route is fully static and republished on demand via
+ * revalidatePath. This one keeps a daily TTL purely as a cheap backstop, so a
+ * missed revalidate call can never leave the sitemap stale for long.
+ */
+export const revalidate = 86400
 
 function absoluteUrl(path: string): string {
   const normalized = path.startsWith("/") ? path : `/${path}`
@@ -63,7 +68,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const [listings, blogPosts, guides] = await Promise.all([
       fetchApprovedListings(),
-      fetchPublishedBlogPosts(),
+      fetchPublishedBlogSlugs(),
       fetchApprovedGuides(),
     ])
 

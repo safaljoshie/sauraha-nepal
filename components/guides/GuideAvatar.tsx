@@ -18,10 +18,6 @@ const sizeMap = {
   profile: { px: 96, className: "h-24 w-24 text-2xl" },
 } as const
 
-function shouldUseUnoptimized(src: string) {
-  return src.includes(".supabase.co")
-}
-
 export default function GuideAvatar({
   name,
   photoUrl,
@@ -52,14 +48,15 @@ export default function GuideAvatar({
     <div
       className={`relative shrink-0 overflow-hidden rounded-full ring-2 ring-white shadow-md ${sizeClass} ${className}`}
     >
+      {/* Explicit width/height (not `fill` + `sizes`) so Next emits a 1x/2x
+          pair instead of a srcset spanning every configured width. */}
       <Image
         src={src}
         alt={alt ?? ""}
-        fill
+        width={px}
+        height={px}
         loading="lazy"
-        className="object-cover"
-        sizes={`${px}px`}
-        unoptimized={shouldUseUnoptimized(src)}
+        className="h-full w-full object-cover"
         onError={() => setFailed(true)}
       />
     </div>

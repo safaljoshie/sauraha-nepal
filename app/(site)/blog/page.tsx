@@ -1,11 +1,7 @@
 import type { Metadata } from "next"
-import { createClient } from "@supabase/supabase-js"
 import BlogPostCard from "@/components/blog/BlogPostCard"
+import { fetchPublishedBlogPostsPreview } from "@/lib/blog-db"
 import { pageMetadata } from "@/lib/seo"
-
-export const dynamic = "force-dynamic"
-export const revalidate = 0
-export const fetchCache = "force-no-store"
 
 export const metadata: Metadata = pageMetadata({
   title: "Travel Guides & Tips for Sauraha, Nepal | Sauraha Nepal",
@@ -16,16 +12,7 @@ export const metadata: Metadata = pageMetadata({
 })
 
 export default async function BlogIndexPage() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  )
-
-  const { data: articles } = await supabase
-    .from("blog_posts")
-    .select("id, title, slug, tag, read_time, published_at, cover_image, excerpt")
-    .eq("status", "published")
-    .order("published_at", { ascending: false })
+  const articles = await fetchPublishedBlogPostsPreview()
 
   return (
     <main className="mt-[68px] bg-cream py-12 md:py-16">
@@ -36,11 +23,11 @@ export default async function BlogIndexPage() {
           Practical advice for planning your trip — seasons, transport, park permits, packing lists, and more.
         </p>
 
-        {articles && articles.length > 0 ? (
+        {articles.length > 0 ? (
           <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {articles.map((article, index) => (
               <BlogPostCard
-                key={article.id}
+                key={article.slug}
                 post={article}
                 priority={index === 0}
                 showReadMore
