@@ -10,6 +10,13 @@ then apply it. Not the other way round — a change applied first and documented
 later exists only in the remote history, and nothing in the repo records that it
 happened.
 
+One gotcha: applying through the Supabase MCP assigns its **own** timestamp and
+ignores whatever version you put in the filename. After applying, check
+`list_migrations` and rename the file to the version actually recorded, or local
+and remote silently disagree — the file looks unapplied and the remote version
+has no file. The `20260720111446` / `111601` / `111739` migrations here were
+renamed for exactly that reason.
+
 Data backfills are not migrations. They live in `scripts/` (see
 `scripts/backfill-listing-coordinates.ts`) so they stay re-runnable and don't
 bake row IDs into schema history.
@@ -26,9 +33,9 @@ Demonstrated drift, found 2026-07-20 by comparing each file against `pg_policies
 | File | Drift |
 |---|---|
 | `blog_posts.sql` | Declared a public-read policy that had **never been applied**. RLS was on with zero policies, so anon reads returned nothing and the blog rendered only via the service-role key. Fixed in `20260720110509`. |
-| `site_settings.sql`, `site_content.sql` | Same pattern, three more tables: `site_settings`, `contact_page_content`, `hero_media`. Fixed in `20260720120000`. |
-| `team_members.sql` | No policy authored at all, though `/about` reads the table. Fixed in `20260720123000`. |
-| `chat_logs.sql` | Says "No public policies", but an `INSERT` policy granting `public` with_check(true) was deployed by hand — an unauthenticated write path. Removed in `20260720130000`. |
+| `site_settings.sql`, `site_content.sql` | Same pattern, three more tables: `site_settings`, `contact_page_content`, `hero_media`. Fixed in `20260720111446`. |
+| `team_members.sql` | No policy authored at all, though `/about` reads the table. Fixed in `20260720111601`. |
+| `chat_logs.sql` | Says "No public policies", but an `INSERT` policy granting `public` with_check(true) was deployed by hand — an unauthenticated write path. Removed in `20260720111739`. |
 | `rls-business-listings.sql` | Declares `"Public read approved listings"`, which was never applied. `business_listings` instead carries two *differently named* policies with identical `status = 'approved'` predicates. Running this file would add a redundant third. |
 
 ## Current RLS posture
