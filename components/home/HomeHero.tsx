@@ -1,10 +1,8 @@
 import Link from "next/link"
-import { Suspense } from "react"
 import HeroMakeItineraryButton from "@/components/home/HeroMakeItineraryButton"
 import HomeHeroSearchSlot from "@/components/home/HomeHeroSearchSlot"
 import HomeHeroVideo from "@/components/home/HomeHeroVideo"
-import HeroWeatherSlot from "@/components/home/HeroWeatherSlot"
-import { HeroWeatherSkeleton } from "@/components/home/HeroWeather"
+import HeroWeather from "@/components/home/HeroWeather"
 import { heroCtaCompact } from "@/lib/hero-cta-classes"
 import type { CategoryCatalog } from "@/lib/category-catalog"
 import type { HeroMedia } from "@/lib/site-content"
@@ -41,9 +39,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
         </p>
         <div className="hero-headline-wrap max-w-4xl" aria-hidden={false}>
           <div className="mb-5">
-            <Suspense fallback={<HeroWeatherSkeleton />}>
-              <HeroWeatherSlot />
-            </Suspense>
+            <HeroWeather />
           </div>
           <span className="nsw-hero-line md:!text-[3.3rem] lg:!text-[4.2rem] xl:!text-[5.28rem]">Discover</span>
           <span className="nsw-hero-line text-orange-brand md:!text-[3.3rem] lg:!text-[4.2rem] xl:!text-[5.28rem]">The Wild</span>

@@ -60,7 +60,10 @@ export async function fetchSaurahaWeather(): Promise<SaurahaWeather | null> {
   url.searchParams.set("timezone", "Asia/Kathmandu")
 
   try {
-    const res = await fetch(url.toString(), { next: { revalidate: 1800 } })
+    // No `next: { revalidate }` here on purpose. A fetch TTL propagates to the
+    // whole route, and this used to put a 30-minute clock on the homepage. The
+    // caching now belongs to app/api/weather/route.ts, which owns the TTL.
+    const res = await fetch(url.toString())
     if (!res.ok) return null
 
     const data = (await res.json()) as {
