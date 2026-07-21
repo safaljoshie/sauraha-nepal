@@ -36,6 +36,7 @@ Demonstrated drift, found 2026-07-20 by comparing each file against `pg_policies
 | `site_settings.sql`, `site_content.sql` | Same pattern, three more tables: `site_settings`, `contact_page_content`, `hero_media`. Fixed in `20260720111446`. |
 | `team_members.sql` | No policy authored at all, though `/about` reads the table. Fixed in `20260720111601`. |
 | `chat_logs.sql` | Says "No public policies", but an `INSERT` policy granting `public` with_check(true) was deployed by hand — an unauthenticated write path. Removed in `20260720111739`. |
+| `tour_guides.sql` (and `migrations/20260708120000_tour_guides.sql:66-69`) | Granted `INSERT` on `guide_reviews` to `public` with check (true) — anyone with the anon key could inject rows straight into the admin moderation queue. Unused: submissions go through the service role. Removed in `20260721104031`. Unlike the `chat_logs` case this was authored intent, not hand-applied drift. |
 | `rls-business-listings.sql` | Declares `"Public read approved listings"`, which was never applied. `business_listings` instead carries two *differently named* policies with identical `status = 'approved'` predicates. Running this file would add a redundant third. |
 
 ## Current RLS posture
@@ -59,6 +60,13 @@ Readable by anon — all rendered on public pages:
 Blocked to anon — service-role only, confirmed returning zero rows:
 `team_resources`, `team_itineraries`, `team_calendar_notices`,
 `content_calendar`, `newsletter_subscribers`, `chat_logs`.
+
+**No table grants anon `INSERT`, `UPDATE` or `DELETE`.** Every write goes through
+an API route using the service role. Two tables previously did — `chat_logs`
+(`20260720111739`) and `guide_reviews` (`20260721104031`) — and both were
+unauthenticated write paths reachable with the publicly-shipped anon key. If a
+future policy needs a public write, that is a deliberate decision to argue for,
+not a default to inherit.
 
 ## Why the anon policies matter even though the app uses the service role
 
