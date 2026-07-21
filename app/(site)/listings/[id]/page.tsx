@@ -22,6 +22,7 @@ import { getListingDetailPath, getListingDetailUrl } from "@/lib/listing-url"
 import { isListingVerified } from "@/lib/listing-badges"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { buildListingDetailMetadata, listingImageAlt } from "@/lib/seo"
+import { socialImageUrl } from "@/lib/image"
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -275,7 +276,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             ...(listing.website?.trim() && { url: listing.website.trim() }),
             ...(listing.opening_hours?.trim() && { openingHours: listing.opening_hours.trim() }),
             ...(listing.price_range?.trim() && { priceRange: listing.price_range.trim() }),
-            ...(photos[0] && { image: photos[0] }),
+            ...(photos[0] && { image: socialImageUrl(photos[0]) }),
             ...(coords?.lat != null &&
               coords?.lng != null && {
                 geo: {

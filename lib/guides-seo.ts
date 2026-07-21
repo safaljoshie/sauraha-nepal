@@ -1,5 +1,6 @@
 import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { SITE_URL } from "@/lib/blog-posts"
+import { socialImageUrl } from "@/lib/image"
 import {
   buildGuideProfilePath,
   buildGuideProfileUrl,
@@ -326,7 +327,7 @@ export function buildGuideProfileJsonLd(guide: TourGuide) {
 
   if (guide.bio?.trim()) person.description = guide.bio.trim()
   if (guide.phone?.trim()) person.telephone = guide.phone.trim()
-  if (guide.photo_url?.trim()) person.image = guide.photo_url.trim()
+  if (guide.photo_url?.trim()) person.image = socialImageUrl(guide.photo_url)
   if (guide.languages.length > 0) {
     person.knowsLanguage = guide.languages
   }

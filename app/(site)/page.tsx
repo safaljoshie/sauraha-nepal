@@ -21,12 +21,15 @@ import { toHeroSearchListings } from "@/lib/listings-catalog"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
 import { fetchActiveHeroMedia } from "@/lib/site-content"
 
-import { DEFAULT_OG_IMAGE, SITE_KEYWORDS } from "@/lib/seo"
+import { SITE_KEYWORDS } from "@/lib/seo"
+import { socialImageUrl } from "@/lib/image"
 
 export async function generateMetadata(): Promise<Metadata> {
   const heroMedia = await fetchActiveHeroMedia()
   const primaryVideo = heroMedia[0] ?? null
-  const ogImage = primaryVideo?.poster_url?.trim() || DEFAULT_OG_IMAGE
+  // socialImageUrl absolutises, routes through the optimizer, and falls back
+  // to the static card when there is no hero poster.
+  const ogImage = socialImageUrl(primaryVideo?.poster_url)
 
   return {
     title: {
@@ -44,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName: "Sauraha Nepal",
       locale: "en_US",
       type: "website",
-      images: [{ url: ogImage, width: 1200, height: 630 }],
+      images: [{ url: ogImage }],
     },
     twitter: {
       card: "summary_large_image",

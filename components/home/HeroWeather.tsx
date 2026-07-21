@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import SiteIcon from "@/components/icons/SiteIcon"
 import type { SaurahaWeather } from "@/lib/sauraha-weather"
 
@@ -9,28 +9,36 @@ import type { SaurahaWeather } from "@/lib/sauraha-weather"
  * meant its 30-minute open-meteo TTL became the homepage's revalidation period,
  * regenerating the whole page — and re-running six Supabase queries — 48 times
  * a day. See app/api/weather/route.ts.
+ *
+ * Deliberately not the `useCallback` + `useEffect` loader used by the admin
+ * components: calling that loader synchronously from an effect trips
+ * react-hooks/set-state-in-effect and can set state after unmount. Resolving in
+ * promise callbacks behind a `cancelled` flag avoids both.
  */
 export default function HeroWeather() {
   const [weather, setWeather] = useState<SaurahaWeather | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const loadWeather = useCallback(async () => {
-    try {
-      const res = await fetch("/api/weather")
-      if (!res.ok) return
-      const data = (await res.json()) as { weather?: SaurahaWeather | null }
-      setWeather(data.weather ?? null)
-    } catch {
-      // Ambient detail — a failure hides the pill rather than surfacing an
-      // error, matching what the server component did when the fetch failed.
-    } finally {
-      setLoading(false)
+  useEffect(() => {
+    let cancelled = false
+
+    fetch("/api/weather")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { weather?: SaurahaWeather | null } | null) => {
+        if (!cancelled) setWeather(data?.weather ?? null)
+      })
+      .catch(() => {
+        // Ambient detail — a failure hides the pill rather than surfacing an
+        // error, matching what the server component did when the fetch failed.
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
     }
   }, [])
-
-  useEffect(() => {
-    loadWeather()
-  }, [loadWeather])
 
   if (loading) return <HeroWeatherSkeleton />
   if (!weather) return null

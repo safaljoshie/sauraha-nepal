@@ -1,5 +1,6 @@
 import type { BusinessListingSummary } from "@/lib/business-listing"
 import { getListingImage } from "@/lib/listings-catalog"
+import { socialImageUrl } from "@/lib/image"
 
 const SITE = "https://www.saurahanepal.com"
 
@@ -74,7 +75,7 @@ export default function HomeJsonLd({ featuredListings, blogCount }: HomeJsonLdPr
     "@type": "LocalBusiness",
     name: listing.business_name,
     description: listing.description_preview ?? undefined,
-    image: getListingImage(listing),
+    image: socialImageUrl(getListingImage(listing)),
     url: featuredListingUrl(listing),
     address: listing.address
       ? {
