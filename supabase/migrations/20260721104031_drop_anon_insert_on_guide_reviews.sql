@@ -1,0 +1,19 @@
+-- Same class of hole as chat_logs (see 20260720111739): guide_reviews carries an
+-- INSERT policy granting `public` with check (true), so anyone holding the anon
+-- key — which ships in the client bundle — can write unlimited rows. Here the
+-- cost is not just database quota: injected rows land in the admin moderation
+-- queue at /admin, so it is a spam vector against a human workflow.
+--
+-- Nothing in the app relies on it. app/api/guide-reviews/submit/route.ts:51
+-- inserts via getSupabaseAdmin() (service role), which bypasses RLS entirely,
+-- and components/guides/ contains no Supabase calls at all — every reference to
+-- guide_reviews in the codebase is server-side.
+--
+-- Unlike chat_logs, this policy is not hand-applied drift: it originates in
+-- supabase/migrations/20260708120000_tour_guides.sql:66-69. That migration is
+-- immutable history and is deliberately left untouched; this migration is the
+-- record of walking the grant back.
+--
+-- The SELECT policy "Public can view approved guide reviews" stays — the public
+-- profile pages read reviews through it.
+drop policy if exists "Anyone can submit a guide review" on guide_reviews;

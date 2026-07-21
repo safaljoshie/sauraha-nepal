@@ -1,13 +1,50 @@
+"use client"
+
+import { useEffect, useState } from "react"
 import SiteIcon from "@/components/icons/SiteIcon"
 import type { SaurahaWeather } from "@/lib/sauraha-weather"
 
-type HeroWeatherProps = SaurahaWeather
+/**
+ * Fetched on the client rather than during render. Server-rendering this pill
+ * meant its 30-minute open-meteo TTL became the homepage's revalidation period,
+ * regenerating the whole page — and re-running six Supabase queries — 48 times
+ * a day. See app/api/weather/route.ts.
+ *
+ * Deliberately not the `useCallback` + `useEffect` loader used by the admin
+ * components: calling that loader synchronously from an effect trips
+ * react-hooks/set-state-in-effect and can set state after unmount. Resolving in
+ * promise callbacks behind a `cancelled` flag avoids both.
+ */
+export default function HeroWeather() {
+  const [weather, setWeather] = useState<SaurahaWeather | null>(null)
+  const [loading, setLoading] = useState(true)
 
-export default function HeroWeather({
-  temperatureC,
-  conditionLabel,
-  iconName,
-}: HeroWeatherProps) {
+  useEffect(() => {
+    let cancelled = false
+
+    fetch("/api/weather")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { weather?: SaurahaWeather | null } | null) => {
+        if (!cancelled) setWeather(data?.weather ?? null)
+      })
+      .catch(() => {
+        // Ambient detail — a failure hides the pill rather than surfacing an
+        // error, matching what the server component did when the fetch failed.
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (loading) return <HeroWeatherSkeleton />
+  if (!weather) return null
+
+  const { temperatureC, conditionLabel, iconName } = weather
+
   return (
     <div
       className="hero-weather inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-medium text-white shadow-[0_4px_24px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:px-4 sm:py-2 md:gap-2 md:px-4 md:py-2 md:text-[0.9rem]"

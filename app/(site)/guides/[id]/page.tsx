@@ -14,6 +14,7 @@ import {
   buildGuideProfileJsonLd,
   buildGuideProfileTitle,
 } from "@/lib/guides-seo"
+import { socialImageUrl } from "@/lib/image"
 import {
   buildGuideProfilePath,
   buildGuideProfileUrl,
@@ -83,13 +84,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: profileUrl,
       siteName: "Sauraha Nepal",
       type: "profile",
-      images: guide.photo_url ? [{ url: guide.photo_url }] : undefined,
+      images: guide.photo_url ? [{ url: socialImageUrl(guide.photo_url) }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: guide.photo_url ? [guide.photo_url] : undefined,
+      images: guide.photo_url ? [socialImageUrl(guide.photo_url)] : undefined,
     },
   }
 }

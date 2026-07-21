@@ -23,6 +23,11 @@ const nextConfig: NextConfig = {
     formats: ["image/webp"],
     // Deliberately short lists: every extra width/quality is another billable
     // transformation per source image.
+    //
+    // LOAD-BEARING: `1200` here and `75` in qualities below are used by
+    // socialImageUrl() in lib/image.ts to build og:image / twitter:image /
+    // JSON-LD URLs. Removing either makes the optimizer 400 and breaks every
+    // social preview on the site at once, with no local signal.
     deviceSizes: [640, 828, 1200, 1920],
     imageSizes: [64, 128, 256, 384],
     // 31 days — reduces repeat fetches from Supabase Storage via the image optimizer

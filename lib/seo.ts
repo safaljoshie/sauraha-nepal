@@ -6,8 +6,11 @@ import { SITE_URL } from "@/lib/blog-posts"
 import { getPrimaryListingCategory } from "@/lib/listing-categories"
 import { getCategoryDisplay, getCategoryGroupId, getListingImage } from "@/lib/listings-catalog"
 import { getListingDetailUrl } from "@/lib/listing-url"
+import { DEFAULT_OG_IMAGE, socialImageUrl } from "@/lib/image"
 
-export const DEFAULT_OG_IMAGE = "/og-image.jpg"
+// Owned by lib/image.ts (alongside the optimizer helpers that use it) and
+// re-exported here so the existing `from "@/lib/seo"` imports keep working.
+export { DEFAULT_OG_IMAGE }
 
 export const SITE_KEYWORDS = [
   "Sauraha Nepal",
@@ -134,10 +137,6 @@ export function blogCoverAlt(title: string) {
   return `${title} — Sauraha Nepal travel guide`
 }
 
-function absoluteImageUrl(image: string) {
-  return image.startsWith("http") ? image : `${SITE_URL}${image}`
-}
-
 export function pageMetadata({
   title,
   description,
@@ -160,7 +159,7 @@ export function pageMetadata({
   skipTruncation?: boolean
 }): Metadata {
   const url = `${SITE_URL}${path}`
-  const ogImage = absoluteImageUrl(image)
+  const ogImage = socialImageUrl(image)
   const safeDescription = skipTruncation
     ? description.replace(/\s+/g, " ").trim()
     : truncateMetaDescription(description)
@@ -233,13 +232,13 @@ export function buildListingDetailMetadata(
       siteName: "Sauraha Nepal",
       locale: "en_US",
       type: "website",
-      images: [{ url: absoluteImageUrl(image), width: 1200, height: 630 }],
+      images: [{ url: socialImageUrl(image) }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [absoluteImageUrl(image)],
+      images: [socialImageUrl(image)],
     },
   }
 }
@@ -271,7 +270,7 @@ export function buildListingsIndexMetadata(categorySlug?: string | null): Metada
 export function buildBlogPostMetadata(post: BlogPostRow): Metadata {
   const title = truncateMetaTitle(post.meta_title?.trim() || post.title)
   const description = truncateMetaDescription(post.meta_description?.trim() || post.excerpt || "")
-  const image = post.cover_image ?? DEFAULT_OG_IMAGE
+  const image = post.cover_image
   const url = `${SITE_URL}/blog/${post.slug}`
 
   return {
@@ -287,19 +286,19 @@ export function buildBlogPostMetadata(post: BlogPostRow): Metadata {
       locale: "en_US",
       publishedTime: post.published_at ?? undefined,
       authors: [post.author?.trim() || "Sauraha Nepal"],
-      images: [{ url: absoluteImageUrl(image), width: 1200, height: 630 }],
+      images: [{ url: socialImageUrl(image) }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [absoluteImageUrl(image)],
+      images: [socialImageUrl(image)],
     },
   }
 }
 
 export function articleJsonLd(post: BlogPostRow) {
-  const image = post.cover_image ? absoluteImageUrl(post.cover_image) : absoluteImageUrl(DEFAULT_OG_IMAGE)
+  const image = socialImageUrl(post.cover_image)
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -350,9 +349,7 @@ export function listingJsonLd(listing: {
 
   const image = listing.image?.trim()
   if (image) {
-    schema.image = image.startsWith("http")
-      ? image
-      : `${SITE_URL}${image.startsWith("/") ? image : `/${image}`}`
+    schema.image = socialImageUrl(image.startsWith("http") || image.startsWith("/") ? image : `/${image}`)
   }
 
   const streetAddress = listing.address?.trim()
