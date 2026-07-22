@@ -507,6 +507,14 @@ body {
   }
 }
 
+/* Leaflet's panes/controls use z-index up to 1000, which paints over the fixed
+   navbar (z-100). Isolate the map into its own stacking context so its internal
+   z-indexes stay contained and can't overlap the nav while scrolling. */
+.map-shell {
+  position: relative;
+  isolation: isolate;
+}
+
 /* Homepage nav overlay — static-safe via #home-page-marker (works before JS hydrates) */
 #site-root:has(#home-page-marker):not(.nav-scrolled) .site-navbar {
   background-color: transparent !important;

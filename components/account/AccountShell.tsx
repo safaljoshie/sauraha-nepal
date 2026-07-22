@@ -39,8 +39,9 @@ export default function AccountShell({
 
   return (
     <div className="flex min-h-screen flex-col bg-cream md:flex-row">
-      {/* Sidebar */}
-      <aside className="flex flex-col bg-ink text-white md:min-h-screen md:w-72">
+      {/* Sidebar — sticky on desktop so nav + sign out stay in view while the
+          main panel scrolls. */}
+      <aside className="flex flex-col bg-ink text-white md:sticky md:top-0 md:h-screen md:w-72 md:overflow-y-auto">
         <div className="flex items-center gap-3 border-b border-white/10 px-5 py-5">
           <UserAvatar user={avatarUser} size={44} />
           <div className="min-w-0">

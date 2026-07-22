@@ -1,5 +1,9 @@
-import { createSupabaseServerClient } from "@/lib/supabase/auth-server"
-import type { User } from "@supabase/supabase-js"
+import { cache } from "react"
+import {
+  createSupabaseServerClient,
+  getCurrentUser,
+  type SessionUser,
+} from "@/lib/supabase/auth-server"
 
 export type Profile = {
   id: string
@@ -19,13 +23,13 @@ export type ProfileView = {
   avatarUrl: string | null
 }
 
-function metaString(user: User, key: string): string | null {
+function metaString(user: SessionUser, key: string): string | null {
   const v = user.user_metadata?.[key]
   return typeof v === "string" ? v : null
 }
 
 /** Fold a profile row + auth metadata into the values the account UI renders. */
-export function toProfileView(user: User, profile: Profile | null): ProfileView {
+export function toProfileView(user: SessionUser, profile: Profile | null): ProfileView {
   return {
     displayName:
       profile?.display_name ||
@@ -39,21 +43,22 @@ export function toProfileView(user: User, profile: Profile | null): ProfileView 
 }
 
 /**
- * Returns the signed-in user and their profile row (via owner-RLS). Returns null
- * when nobody is signed in.
+ * Returns the signed-in user and their profile row (via owner-RLS), or null.
+ * Wrapped in React `cache()` so the /account layout and page share a single
+ * auth check + profile query per request instead of each running their own.
  */
-export async function getOwnProfile(): Promise<{ user: User; profile: Profile | null } | null> {
-  const supabase = await createSupabaseServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
+export const getOwnProfile = cache(
+  async (): Promise<{ user: SessionUser; profile: Profile | null } | null> => {
+    const user = await getCurrentUser()
+    if (!user) return null
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .maybeSingle()
+    const supabase = await createSupabaseServerClient()
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle()
 
-  return { user, profile: (profile as Profile | null) ?? null }
-}
+    return { user, profile: (profile as Profile | null) ?? null }
+  },
+)

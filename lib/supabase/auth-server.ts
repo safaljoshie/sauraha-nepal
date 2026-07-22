@@ -1,3 +1,4 @@
+import { cache } from "react"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 
@@ -30,11 +31,30 @@ export async function createSupabaseServerClient() {
   )
 }
 
-/** Convenience: returns the signed-in Supabase user, or null. */
-export async function getCurrentUser() {
-  const supabase = await createSupabaseServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  return user
+export type SessionUser = {
+  id: string
+  email: string | null
+  user_metadata: Record<string, unknown>
 }
+
+/**
+ * The signed-in user for page/render reads, or null.
+ *
+ * Uses `getClaims()` — which verifies the JWT locally (no network round-trip)
+ * when the project uses asymmetric JWT signing keys, and transparently falls
+ * back to `getUser()` otherwise — and is wrapped in React `cache()` so the
+ * layout and page in a single request share one call instead of each hitting
+ * Supabase. For write paths (review/account mutations) keep using
+ * `getUser()` directly for its stronger server-side revalidation.
+ */
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
+  const supabase = await createSupabaseServerClient()
+  const { data, error } = await supabase.auth.getClaims()
+  const claims = data?.claims
+  if (error || !claims) return null
+  return {
+    id: String(claims.sub),
+    email: (claims.email as string | undefined) ?? null,
+    user_metadata: (claims.user_metadata as Record<string, unknown> | undefined) ?? {},
+  }
+})
