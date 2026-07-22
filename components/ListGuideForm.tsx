@@ -10,6 +10,8 @@ import {
   COMMON_LANGUAGES,
   type GuideService,
 } from "@/lib/tour-guides"
+import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
+import { useToast } from "@/components/ui/ToastProvider"
 
 const inputClass =
   "w-full rounded-xl border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
@@ -72,7 +74,9 @@ async function submitGuideApplication(
   }
 
   if (!res.ok) {
-    throw new Error(data.error ?? GENERIC_ERROR)
+    const err = new Error(data.error ?? GENERIC_ERROR) as Error & { status?: number }
+    err.status = res.status
+    throw err
   }
 
   return data
@@ -101,6 +105,8 @@ async function uploadPhoto(file: File, submissionId: string) {
 }
 
 export default function ListGuideForm() {
+  const getRecaptchaToken = useRecaptchaToken()
+  const { toast } = useToast()
   const [submissionId] = useState(() => crypto.randomUUID())
   const [form, setForm] = useState<ListGuideFormState>(INITIAL_FORM)
   const [photoFile, setPhotoFile] = useState<File | null>(null)
@@ -229,8 +235,11 @@ export default function ListGuideForm() {
           ? null
           : Number.parseInt(form.years_experience, 10)
 
+      const recaptchaToken = await getRecaptchaToken("list_guide")
+
       const result = await submitGuideApplication(
         {
+          recaptchaToken,
           full_name: form.full_name.trim(),
           nickname: form.nickname.trim(),
           photo_url,
@@ -260,8 +269,15 @@ export default function ListGuideForm() {
       setCustomLanguage("")
       setCustomExpertise("")
     } catch (err) {
+      const status = (err as { status?: number }).status
+      const msg = err instanceof Error ? err.message : GENERIC_ERROR
+      if (status === 429) {
+        toast(msg, "error")
+        setStatus("idle")
+        return
+      }
       setStatus("error")
-      setErrorMessage(err instanceof Error ? err.message : GENERIC_ERROR)
+      setErrorMessage(msg)
     }
   }
 

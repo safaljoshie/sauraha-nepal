@@ -7,7 +7,7 @@ import { cache } from "react"
 
 /** Full record for the detail page — slug drives human-readable listing URLs. */
 const APPROVED_LISTING_SELECT =
-  "id, created_at, business_name, slug, category, description, price_range, opening_hours, owner_name, email, phone, whatsapp, website, facebook, address, google_maps_link, photo_links, plan, status, agreed_to_terms, verified, latitude, longitude"
+  "id, created_at, business_name, slug, category, description, price_range, opening_hours, owner_name, email, phone, whatsapp, website, facebook, address, google_maps_link, photo_links, plan, status, agreed_to_terms, verified, latitude, longitude, avg_rating, review_count"
 
 /**
  * List views only. Uses the generated `description_preview` and

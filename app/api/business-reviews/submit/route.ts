@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
-import { buildGuideReviewNotificationEmail } from "@/lib/emails/guide-review"
-import { fetchGuideByIdAdmin } from "@/lib/tour-guides"
+import { buildBusinessReviewNotificationEmail } from "@/lib/emails/business-review"
 import { getSupabaseAdmin } from "@/lib/supabase"
 import { createSupabaseServerClient } from "@/lib/supabase/auth-server"
 import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
@@ -10,11 +9,10 @@ const FROM = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
 const ADMIN_EMAIL = process.env.CONTACT_TO_EMAIL ?? "safaljoshie@gmail.com"
 
 type ReviewPayload = {
-  guide_id?: string
+  business_id?: string
   rating?: number
   comment?: string
   visit_date?: string
-  tour_type?: string
   recaptchaToken?: string
 }
 
@@ -26,11 +24,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 })
   }
 
-  // Rate limit + reCAPTCHA before any auth/db work.
   const blocked = await enforceRecaptchaAndRateLimit(request, "REVIEW_SUBMIT", payload)
   if (blocked) return blocked
 
-  // Reviews are sign-in gated.
   const auth = await createSupabaseServerClient()
   const {
     data: { user },
@@ -39,12 +35,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Please sign in to leave a review." }, { status: 401 })
   }
 
-  const guideId = payload.guide_id?.trim() ?? ""
+  const businessId = payload.business_id?.trim() ?? ""
   const comment = payload.comment?.trim() ?? ""
   const rating = Number(payload.rating)
 
-  if (!guideId) {
-    return NextResponse.json({ error: "Guide is required." }, { status: 400 })
+  if (!businessId) {
+    return NextResponse.json({ error: "Business is required." }, { status: 400 })
   }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return NextResponse.json({ error: "Please select a rating from 1 to 5." }, { status: 400 })
@@ -56,7 +52,6 @@ export async function POST(request: Request) {
     )
   }
 
-  // Reviewer identity comes from the authenticated profile, not the client.
   const { data: profile } = await auth
     .from("profiles")
     .select("display_name, country")
@@ -72,13 +67,18 @@ export async function POST(request: Request) {
 
   try {
     const supabase = getSupabaseAdmin()
-    const guide = await fetchGuideByIdAdmin(guideId)
-    if (!guide || guide.status !== "approved") {
-      return NextResponse.json({ error: "Guide not found." }, { status: 404 })
+
+    const { data: business } = await supabase
+      .from("business_listings")
+      .select("id, business_name, status")
+      .eq("id", businessId)
+      .maybeSingle()
+    if (!business || business.status !== "approved") {
+      return NextResponse.json({ error: "Business not found." }, { status: 404 })
     }
 
     const insertRow = {
-      guide_id: guideId,
+      business_id: businessId,
       user_id: user.id,
       reviewer_name: reviewerName,
       reviewer_email: user.email ?? null,
@@ -86,37 +86,32 @@ export async function POST(request: Request) {
       rating,
       comment,
       visit_date: payload.visit_date?.trim() || null,
-      tour_type: payload.tour_type?.trim() || null,
       status: "pending",
     }
 
     const { data, error } = await supabase
-      .from("guide_reviews")
+      .from("business_reviews")
       .insert(insertRow)
       .select("*")
       .single()
 
     if (error?.code === "23505") {
       return NextResponse.json(
-        { error: "You've already reviewed this guide." },
+        { error: "You've already reviewed this business." },
         { status: 409 },
       )
     }
     if (error || !data) {
-      console.error("Guide review insert error:", error)
+      console.error("Business review insert error:", error)
       return NextResponse.json({ error: "Could not submit review." }, { status: 500 })
     }
 
     const resendKey = process.env.RESEND_API_KEY
     if (resendKey) {
-      const email = buildGuideReviewNotificationEmail(guide, {
-        reviewer_name: reviewerName,
-        reviewer_country: insertRow.reviewer_country,
-        rating,
-        comment,
-        tour_type: insertRow.tour_type,
-        visit_date: insertRow.visit_date,
-      })
+      const email = buildBusinessReviewNotificationEmail(
+        { id: business.id as string, business_name: business.business_name as string },
+        { reviewer_name: reviewerName, reviewer_country: reviewerCountry, rating, comment, visit_date: insertRow.visit_date },
+      )
       const resend = new Resend(resendKey)
       const { error: emailError } = await resend.emails.send({
         from: FROM,
@@ -125,12 +120,12 @@ export async function POST(request: Request) {
         html: email.html,
         text: email.text,
       })
-      if (emailError) console.error("Guide review notification email error:", emailError)
+      if (emailError) console.error("Business review notification email error:", emailError)
     }
 
     return NextResponse.json({ success: true, review: data })
   } catch (error) {
-    console.error("POST /api/guide-reviews/submit error:", error)
+    console.error("POST /api/business-reviews/submit error:", error)
     return NextResponse.json({ error: "Database is not configured." }, { status: 500 })
   }
 }

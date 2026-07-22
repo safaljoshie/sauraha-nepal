@@ -22,6 +22,8 @@ import {
   getActiveCategoryNames,
 } from "@/lib/category-catalog"
 import { pricingPlans } from "@/lib/data"
+import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
+import { useToast } from "@/components/ui/ToastProvider"
 
 const inputClass =
   "w-full rounded-xl border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
@@ -82,7 +84,9 @@ async function submitListing(payload: Record<string, unknown>) {
   }
 
   if (!res.ok) {
-    throw new Error(data.error ?? GENERIC_ERROR)
+    const err = new Error(data.error ?? GENERIC_ERROR) as Error & { status?: number }
+    err.status = res.status
+    throw err
   }
 
   return data
@@ -133,6 +137,8 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
       : getActiveCategoryNames(DEFAULT_CATEGORY_CATALOG)
   const defaultCategory = categoryOptions[0] ?? ""
 
+  const getRecaptchaToken = useRecaptchaToken()
+  const { toast } = useToast()
   const [submissionId] = useState(() => crypto.randomUUID())
   const [plan, setPlan] = useState<(typeof pricingPlans)[number]["name"]>("Basic")
   const [form, setForm] = useState(() => buildInitialForm(defaultCategory))
@@ -292,8 +298,10 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
       }
 
       const photo_links = mergePhotoLinks(uploadedUrls, form.photoLinks)
+      const recaptchaToken = await getRecaptchaToken("list_business")
 
       const result = await submitListing({
+        recaptchaToken,
         business_name: form.businessName.trim(),
         category: form.category,
         description: form.description.trim(),
@@ -321,8 +329,15 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
       setPlan("Basic")
       clearPhotoFiles()
     } catch (err) {
+      const httpStatus = (err as { status?: number }).status
+      const msg = err instanceof Error ? err.message : GENERIC_ERROR
+      if (httpStatus === 429) {
+        toast(msg, "error")
+        setStatus("idle")
+        return
+      }
       setStatus("error")
-      setErrorMessage(err instanceof Error ? err.message : GENERIC_ERROR)
+      setErrorMessage(msg)
     }
   }
 

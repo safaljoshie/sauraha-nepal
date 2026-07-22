@@ -6,20 +6,14 @@ import { useState } from "react"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
 import { useToast } from "@/components/ui/ToastProvider"
-import { TOUR_TYPE_OPTIONS, type GuideReview } from "@/lib/tour-guides"
+import type { BusinessReview } from "@/lib/business-reviews"
 
-type GuideReviewFormProps = {
-  guideId: string
-  signedIn: boolean
-}
-
-export default function GuideReviewForm({ guideId, signedIn }: GuideReviewFormProps) {
+function BusinessReviewForm({ businessId, signedIn }: { businessId: string; signedIn: boolean }) {
   const pathname = usePathname()
   const getRecaptchaToken = useRecaptchaToken()
   const { toast } = useToast()
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
-  const [tourType, setTourType] = useState("")
   const [visitDate, setVisitDate] = useState("")
   const [comment, setComment] = useState("")
   const [submitting, setSubmitting] = useState(false)
@@ -31,9 +25,7 @@ export default function GuideReviewForm({ guideId, signedIn }: GuideReviewFormPr
         <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-text-brand">
           Write a review
         </h3>
-        <p className="mt-2 text-sm text-text-mid">
-          Sign in to share your experience with this guide.
-        </p>
+        <p className="mt-2 text-sm text-text-mid">Sign in to share your experience.</p>
         <Link
           href={`/signin?next=${encodeURIComponent(pathname)}`}
           className="mt-4 inline-block rounded-xl bg-green-brand px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-green-mid"
@@ -47,7 +39,6 @@ export default function GuideReviewForm({ guideId, signedIn }: GuideReviewFormPr
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
     setMessage(null)
-
     if (rating < 1) {
       setMessage({ type: "error", text: "Please select a star rating." })
       return
@@ -59,15 +50,14 @@ export default function GuideReviewForm({ guideId, signedIn }: GuideReviewFormPr
 
     setSubmitting(true)
     try {
-      const recaptchaToken = await getRecaptchaToken("guide_review")
-      const res = await fetch("/api/guide-reviews/submit", {
+      const recaptchaToken = await getRecaptchaToken("business_review")
+      const res = await fetch("/api/business-reviews/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          guide_id: guideId,
+          business_id: businessId,
           rating,
           comment: comment.trim(),
-          tour_type: tourType || undefined,
           visit_date: visitDate.trim() || undefined,
           recaptchaToken,
         }),
@@ -90,7 +80,6 @@ export default function GuideReviewForm({ guideId, signedIn }: GuideReviewFormPr
         text: "Thank you! Your review has been submitted and will appear after approval.",
       })
       setRating(0)
-      setTourType("")
       setVisitDate("")
       setComment("")
     } catch {
@@ -131,32 +120,15 @@ export default function GuideReviewForm({ guideId, signedIn }: GuideReviewFormPr
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="block text-sm font-semibold text-text-mid">
-          Tour type
-          <select
-            value={tourType}
-            onChange={(e) => setTourType(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-border-brand bg-white px-3 py-2.5 text-sm outline-none focus:border-green-mid"
-          >
-            <option value="">Select tour type</option>
-            {TOUR_TYPE_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="block text-sm font-semibold text-text-mid">
-          Visit date (approximate)
-          <input
-            value={visitDate}
-            onChange={(e) => setVisitDate(e.target.value)}
-            placeholder="e.g. March 2026"
-            className="mt-1 w-full rounded-xl border border-border-brand px-3 py-2.5 text-sm outline-none focus:border-green-mid"
-          />
-        </label>
-      </div>
+      <label className="mt-4 block text-sm font-semibold text-text-mid">
+        Visit date (approximate)
+        <input
+          value={visitDate}
+          onChange={(e) => setVisitDate(e.target.value)}
+          placeholder="e.g. March 2026"
+          className="mt-1 w-full rounded-xl border border-border-brand px-3 py-2.5 text-sm outline-none focus:border-green-mid"
+        />
+      </label>
 
       <label className="mt-4 block text-sm font-semibold text-text-mid">
         Your review * (min 20 characters)
@@ -193,21 +165,21 @@ export default function GuideReviewForm({ guideId, signedIn }: GuideReviewFormPr
   )
 }
 
-type GuideReviewsSectionProps = {
-  guideId: string
+type BusinessReviewsSectionProps = {
+  businessId: string
   avgRating: number
   reviewCount: number
-  reviews: GuideReview[]
+  reviews: BusinessReview[]
   signedIn: boolean
 }
 
-export function GuideReviewsSection({
-  guideId,
+export default function BusinessReviewsSection({
+  businessId,
   avgRating,
   reviewCount,
   reviews,
   signedIn,
-}: GuideReviewsSectionProps) {
+}: BusinessReviewsSectionProps) {
   const [visibleCount, setVisibleCount] = useState(5)
   const visibleReviews = reviews.slice(0, visibleCount)
 
@@ -250,14 +222,13 @@ export function GuideReviewsSection({
       </div>
 
       {reviews.length === 0 ? (
-        <p className="text-sm text-text-light">No reviews yet. Be the first to share your experience.</p>
+        <p className="text-sm text-text-light">
+          No reviews yet. Be the first to share your experience.
+        </p>
       ) : (
         <div className="space-y-4">
           {visibleReviews.map((review) => (
-            <article
-              key={review.id}
-              className="rounded-2xl border border-border-brand bg-white p-5"
-            >
+            <article key={review.id} className="rounded-2xl border border-border-brand bg-white p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="font-semibold text-text-brand">
                   {review.reviewer_name}
@@ -267,11 +238,6 @@ export function GuideReviewsSection({
                 </p>
                 <GuideStarRating rating={review.rating} />
               </div>
-              {review.tour_type ? (
-                <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-orange-brand">
-                  {review.tour_type}
-                </p>
-              ) : null}
               <p className="mt-3 text-sm leading-relaxed text-text-mid">{review.comment}</p>
             </article>
           ))}
@@ -287,7 +253,7 @@ export function GuideReviewsSection({
         </div>
       )}
 
-      <GuideReviewForm guideId={guideId} signedIn={signedIn} />
+      <BusinessReviewForm businessId={businessId} signedIn={signedIn} />
     </section>
   )
 }
