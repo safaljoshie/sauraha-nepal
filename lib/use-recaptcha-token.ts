@@ -13,10 +13,18 @@ export function useRecaptchaToken() {
 
   return useCallback(
     async (action: string): Promise<string | null> => {
-      if (!executeRecaptcha) return null
+      if (!executeRecaptcha) {
+        // Provider inactive (no site key) or script not yet loaded — the server
+        // will reject the resulting null token when a secret is configured.
+        console.warn(
+          `[recaptcha] token requested for "${action}" but reCAPTCHA is not available — submitting null.`,
+        )
+        return null
+      }
       try {
         return await executeRecaptcha(action)
-      } catch {
+      } catch (error) {
+        console.warn(`[recaptcha] execute failed for "${action}":`, error)
         return null
       }
     },
