@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
 
 type SubmitStatus = "idle" | "loading" | "success" | "error"
 
@@ -9,7 +8,6 @@ export default function HomeNewsletter() {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
   const [errorMessage, setErrorMessage] = useState("")
-  const getRecaptchaToken = useRecaptchaToken()
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -20,17 +18,10 @@ export default function HomeNewsletter() {
     setErrorMessage("")
 
     try {
-      const recaptchaToken = await getRecaptchaToken("newsletter")
-      if (!recaptchaToken) {
-        setErrorMessage("We couldn't verify you're human. Please try again.")
-        setStatus("error")
-        return
-      }
-
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed, recaptchaToken }),
+        body: JSON.stringify({ email: trimmed }),
       })
 
       const data = (await res.json().catch(() => ({}))) as { error?: string }

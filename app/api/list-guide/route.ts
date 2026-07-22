@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
-import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
 import {
   buildGuideAdminNotificationEmail,
   buildGuideApplicantConfirmationEmail,
 } from "@/lib/emails/guide-application"
 import { validateListGuidePayload } from "@/lib/list-guide"
 import { buildGuideInsertRow } from "@/lib/guide-admin"
-import { RATE_LIMITS } from "@/lib/rate-limit"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
@@ -22,26 +20,14 @@ export async function POST(request: Request) {
     )
   }
 
-  let body: Record<string, unknown> & { recaptchaToken?: string }
+  let body: Record<string, unknown>
   try {
-    body = (await request.json()) as Record<string, unknown> & { recaptchaToken?: string }
+    body = (await request.json()) as Record<string, unknown>
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
   }
 
-  const securityError = await enforceRecaptchaAndRateLimit(
-    request,
-    RATE_LIMITS.LIST_GUIDE,
-    body,
-  )
-  if (securityError) return securityError
-
-  const { recaptchaToken, ...payload } = body
-  void recaptchaToken
-
-  const { data, error: validationError } = validateListGuidePayload(
-    payload as Parameters<typeof validateListGuidePayload>[0],
-  )
+  const { data, error: validationError } = validateListGuidePayload(body)
   if (!data || validationError) {
     return NextResponse.json({ error: validationError }, { status: 400 })
   }

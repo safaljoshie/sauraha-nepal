@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
-import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
 import {
   buildAdminNotificationEmail,
   buildOwnerConfirmationEmail,
@@ -10,7 +9,6 @@ import {
   validateListBusinessPayload,
 } from "@/lib/list-business"
 import { generateUniqueListingSlug } from "@/lib/listing-slug"
-import { RATE_LIMITS } from "@/lib/rate-limit"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM =
@@ -26,19 +24,12 @@ export async function POST(request: Request) {
     )
   }
 
-  let body: Partial<ListBusinessPayload> & { recaptchaToken?: string }
+  let body: Partial<ListBusinessPayload>
   try {
     body = await request.json()
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
   }
-
-  const securityError = await enforceRecaptchaAndRateLimit(
-    request,
-    RATE_LIMITS.LIST_BUSINESS,
-    body,
-  )
-  if (securityError) return securityError
 
   const { data, error: validationError } = validateListBusinessPayload(body)
   if (!data || validationError) {

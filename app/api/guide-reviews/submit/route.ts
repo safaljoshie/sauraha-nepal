@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
-import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
 import { buildGuideReviewNotificationEmail } from "@/lib/emails/guide-review"
 import { fetchGuideByIdAdmin } from "@/lib/tour-guides"
-import { RATE_LIMITS } from "@/lib/rate-limit"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
@@ -18,7 +16,6 @@ type ReviewPayload = {
   comment?: string
   visit_date?: string
   tour_type?: string
-  recaptchaToken?: string
 }
 
 export async function POST(request: Request) {
@@ -29,16 +26,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 })
   }
 
-  const securityError = await enforceRecaptchaAndRateLimit(
-    request,
-    RATE_LIMITS.GUIDE_REVIEW,
-    payload,
-  )
-  if (securityError) return securityError
-
   const guideId = payload.guide_id?.trim() ?? ""
   const reviewerName = payload.reviewer_name?.trim() ?? ""
-  const reviewerEmail = payload.reviewer_email?.trim() ?? ""
   const comment = payload.comment?.trim() ?? ""
   const rating = Number(payload.rating)
 
@@ -47,12 +36,6 @@ export async function POST(request: Request) {
   }
   if (!reviewerName) {
     return NextResponse.json({ error: "Your name is required." }, { status: 400 })
-  }
-  if (!reviewerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(reviewerEmail)) {
-    return NextResponse.json(
-      { error: "Please provide your email to submit a review." },
-      { status: 400 },
-    )
   }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return NextResponse.json({ error: "Please select a rating from 1 to 5." }, { status: 400 })
@@ -74,7 +57,7 @@ export async function POST(request: Request) {
     const insertRow = {
       guide_id: guideId,
       reviewer_name: reviewerName,
-      reviewer_email: reviewerEmail,
+      reviewer_email: payload.reviewer_email?.trim() || null,
       reviewer_country: payload.reviewer_country?.trim() || null,
       rating,
       comment,

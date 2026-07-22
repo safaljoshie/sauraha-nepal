@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server"
-import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
-import { RATE_LIMITS } from "@/lib/rate-limit"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 type NewsletterBody = {
   email?: string
-  recaptchaToken?: string
 }
 
 export async function POST(request: Request) {
@@ -17,13 +14,6 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
   }
-
-  const securityError = await enforceRecaptchaAndRateLimit(
-    request,
-    RATE_LIMITS.NEWSLETTER,
-    body,
-  )
-  if (securityError) return securityError
 
   const email = body.email?.trim().toLowerCase()
   if (!email) {

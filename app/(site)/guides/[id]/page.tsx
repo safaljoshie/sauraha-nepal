@@ -4,12 +4,9 @@ import type { Metadata } from "next"
 import GuideAvatar from "@/components/guides/GuideAvatar"
 import GuideProfileBreadcrumbs from "@/components/guides/GuideProfileBreadcrumbs"
 import GuideProfileRelatedLinks from "@/components/guides/GuideProfileRelatedLinks"
-import GuideContactSection, {
-  GuideContactActions,
-  GuideStickyCtaGate,
-} from "@/components/guides/GuideContactSection"
 import { GuideReviewsSection } from "@/components/guides/GuideReviewsSection"
 import GuideStarRating from "@/components/guides/GuideStarRating"
+import GuideStickyCta from "@/components/guides/GuideStickyCta"
 import SiteIcon from "@/components/icons/SiteIcon"
 import { isListingUuid } from "@/lib/listing-slug"
 import { formatInrFromNpr, formatUsdFromNpr } from "@/lib/currency"
@@ -24,6 +21,8 @@ import {
   fetchApprovedGuideBySlugOrId,
   fetchApprovedGuideReviews,
   fetchApprovedGuides,
+  formatGuidePhoneUrl,
+  formatGuideWhatsAppUrl,
   truncateGuideBio,
   type GuideService,
 } from "@/lib/tour-guides"
@@ -111,18 +110,10 @@ export default async function GuideProfilePage({ params }: PageProps) {
 
   const reviews = await fetchApprovedGuideReviews(guide.id)
 
+  const waUrl = guide.whatsapp ? formatGuideWhatsAppUrl(guide.whatsapp) : ""
+  const callUrl = guide.phone ? formatGuidePhoneUrl(guide.phone) : ""
   const verifiedDate = formatVerifiedDate(guide.verified_at)
   const services = guide.services as GuideService[]
-
-  const contactGuide = {
-    id: guide.id,
-    phone: guide.phone,
-    whatsapp: guide.whatsapp,
-    email: guide.email,
-    facebook_url: guide.facebook_url,
-    instagram_url: guide.instagram_url,
-    website_url: guide.website_url,
-  }
 
   const jsonLd = buildGuideProfileJsonLd(guide)
 
@@ -221,7 +212,84 @@ export default async function GuideProfilePage({ params }: PageProps) {
             </div>
           </div>
 
-          <GuideContactSection guide={contactGuide} />
+          <ProfileCard title="Contact">
+            <ul className="space-y-3 text-sm">
+              {guide.phone ? (
+                <li>
+                  <a
+                    href={callUrl}
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <SiteIcon name="phone" size={20} strokeWidth={2.25} className="shrink-0" />
+                    {guide.phone}
+                  </a>
+                </li>
+              ) : null}
+              {guide.whatsapp ? (
+                <li>
+                  <a
+                    href={waUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <SiteIcon name="message-circle" size={20} strokeWidth={2.25} className="shrink-0" />
+                    {guide.whatsapp}
+                  </a>
+                </li>
+              ) : null}
+              {guide.email ? (
+                <li>
+                  <a
+                    href={`mailto:${guide.email}`}
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <SiteIcon name="mail" size={20} strokeWidth={2.25} className="shrink-0" />
+                    {guide.email}
+                  </a>
+                </li>
+              ) : null}
+              {guide.facebook_url ? (
+                <li>
+                  <a
+                    href={guide.facebook_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <FacebookIcon />
+                    Facebook
+                  </a>
+                </li>
+              ) : null}
+              {guide.instagram_url ? (
+                <li>
+                  <a
+                    href={guide.instagram_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <InstagramIcon />
+                    Instagram
+                  </a>
+                </li>
+              ) : null}
+              {guide.website_url ? (
+                <li>
+                  <a
+                    href={guide.website_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 font-semibold text-green-brand transition-colors hover:text-green-mid hover:underline"
+                  >
+                    <SiteIcon name="globe" size={20} strokeWidth={2.25} className="shrink-0" />
+                    Website
+                  </a>
+                </li>
+              ) : null}
+            </ul>
+          </ProfileCard>
 
           {guide.languages.length > 0 ? (
             <ProfileCard title="Languages">
@@ -307,10 +375,29 @@ export default async function GuideProfilePage({ params }: PageProps) {
             </p>
           </aside>
 
-          <GuideContactActions guide={contactGuide} className="hidden md:flex" />
+          <div className="hidden gap-3 md:flex">
+            {waUrl ? (
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex flex-1 items-center justify-center rounded-xl bg-green-brand px-6 py-3 text-sm font-bold text-white hover:bg-green-mid"
+              >
+                Contact on WhatsApp
+              </a>
+            ) : null}
+            {callUrl ? (
+              <a
+                href={callUrl}
+                className="inline-flex flex-1 items-center justify-center rounded-xl border border-green-brand px-6 py-3 text-sm font-bold text-green-brand hover:bg-green-brand/5"
+              >
+                Call
+              </a>
+            ) : null}
+          </div>
         </div>
       </main>
-      <GuideStickyCtaGate guide={contactGuide} />
+      <GuideStickyCta guide={guide} />
     </>
   )
 }
@@ -323,5 +410,32 @@ function ProfileCard({ title, children }: { title: string; children: React.React
       </h2>
       <div className="mt-4">{children}</div>
     </section>
+  )
+}
+
+function FacebookIcon() {
+  return (
+    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden className="shrink-0">
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  )
+}
+
+function InstagramIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      viewBox="0 0 24 24"
+      aria-hidden
+      className="shrink-0"
+    >
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
   )
 }
