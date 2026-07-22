@@ -1,16 +1,22 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useState } from "react"
 import GuideStarRating from "@/components/guides/GuideStarRating"
+import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
+import { useToast } from "@/components/ui/ToastProvider"
 import { TOUR_TYPE_OPTIONS, type GuideReview } from "@/lib/tour-guides"
 
 type GuideReviewFormProps = {
   guideId: string
+  signedIn: boolean
 }
 
-export default function GuideReviewForm({ guideId }: GuideReviewFormProps) {
-  const [reviewerName, setReviewerName] = useState("")
-  const [reviewerCountry, setReviewerCountry] = useState("")
+export default function GuideReviewForm({ guideId, signedIn }: GuideReviewFormProps) {
+  const pathname = usePathname()
+  const getRecaptchaToken = useRecaptchaToken()
+  const { toast } = useToast()
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
   const [tourType, setTourType] = useState("")
@@ -19,14 +25,29 @@ export default function GuideReviewForm({ guideId }: GuideReviewFormProps) {
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
+  if (!signedIn) {
+    return (
+      <div className="rounded-2xl border border-border-brand bg-white p-6 text-center">
+        <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-text-brand">
+          Write a review
+        </h3>
+        <p className="mt-2 text-sm text-text-mid">
+          Sign in to share your experience with this guide.
+        </p>
+        <Link
+          href={`/signin?next=${encodeURIComponent(pathname)}`}
+          className="mt-4 inline-block rounded-xl bg-green-brand px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-green-mid"
+        >
+          Sign in to write a review
+        </Link>
+      </div>
+    )
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
     setMessage(null)
 
-    if (!reviewerName.trim()) {
-      setMessage({ type: "error", text: "Please enter your name." })
-      return
-    }
     if (rating < 1) {
       setMessage({ type: "error", text: "Please select a star rating." })
       return
@@ -38,20 +59,28 @@ export default function GuideReviewForm({ guideId }: GuideReviewFormProps) {
 
     setSubmitting(true)
     try {
+      const recaptchaToken = await getRecaptchaToken("guide_review")
       const res = await fetch("/api/guide-reviews/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           guide_id: guideId,
-          reviewer_name: reviewerName.trim(),
-          reviewer_country: reviewerCountry.trim() || undefined,
           rating,
           comment: comment.trim(),
           tour_type: tourType || undefined,
           visit_date: visitDate.trim() || undefined,
+          recaptchaToken,
         }),
       })
       const data = (await res.json()) as { error?: string }
+      if (res.status === 429) {
+        toast(data.error ?? "You're doing that too fast. Please try again shortly.", "error")
+        return
+      }
+      if (res.status === 401) {
+        toast("Please sign in to leave a review.", "error")
+        return
+      }
       if (!res.ok) {
         setMessage({ type: "error", text: data.error ?? "Could not submit review." })
         return
@@ -60,8 +89,6 @@ export default function GuideReviewForm({ guideId }: GuideReviewFormProps) {
         type: "success",
         text: "Thank you! Your review has been submitted and will appear after approval.",
       })
-      setReviewerName("")
-      setReviewerCountry("")
       setRating(0)
       setTourType("")
       setVisitDate("")
@@ -80,25 +107,6 @@ export default function GuideReviewForm({ guideId }: GuideReviewFormProps) {
       <h3 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-text-brand">
         Write a review
       </h3>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <label className="block text-sm font-semibold text-text-mid">
-          Your name *
-          <input
-            value={reviewerName}
-            onChange={(e) => setReviewerName(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-border-brand px-3 py-2.5 text-sm outline-none focus:border-green-mid"
-            required
-          />
-        </label>
-        <label className="block text-sm font-semibold text-text-mid">
-          Country (optional)
-          <input
-            value={reviewerCountry}
-            onChange={(e) => setReviewerCountry(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-border-brand px-3 py-2.5 text-sm outline-none focus:border-green-mid"
-          />
-        </label>
-      </div>
 
       <div className="mt-4">
         <p className="text-sm font-semibold text-text-mid">Your rating *</p>
@@ -190,6 +198,7 @@ type GuideReviewsSectionProps = {
   avgRating: number
   reviewCount: number
   reviews: GuideReview[]
+  signedIn: boolean
 }
 
 export function GuideReviewsSection({
@@ -197,6 +206,7 @@ export function GuideReviewsSection({
   avgRating,
   reviewCount,
   reviews,
+  signedIn,
 }: GuideReviewsSectionProps) {
   const [visibleCount, setVisibleCount] = useState(5)
   const visibleReviews = reviews.slice(0, visibleCount)
@@ -277,7 +287,7 @@ export function GuideReviewsSection({
         </div>
       )}
 
-      <GuideReviewForm guideId={guideId} />
+      <GuideReviewForm guideId={guideId} signedIn={signedIn} />
     </section>
   )
 }

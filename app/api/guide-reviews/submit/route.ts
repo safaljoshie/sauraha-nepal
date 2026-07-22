@@ -3,19 +3,19 @@ import { Resend } from "resend"
 import { buildGuideReviewNotificationEmail } from "@/lib/emails/guide-review"
 import { fetchGuideByIdAdmin } from "@/lib/tour-guides"
 import { getSupabaseAdmin } from "@/lib/supabase"
+import { createSupabaseServerClient } from "@/lib/supabase/auth-server"
+import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
 
 const FROM = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
 const ADMIN_EMAIL = process.env.CONTACT_TO_EMAIL ?? "safaljoshie@gmail.com"
 
 type ReviewPayload = {
   guide_id?: string
-  reviewer_name?: string
-  reviewer_email?: string
-  reviewer_country?: string
   rating?: number
   comment?: string
   visit_date?: string
   tour_type?: string
+  recaptchaToken?: string
 }
 
 export async function POST(request: Request) {
@@ -26,16 +26,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 })
   }
 
+  // Rate limit + reCAPTCHA before any auth/db work.
+  const blocked = await enforceRecaptchaAndRateLimit(request, "REVIEW_SUBMIT", payload)
+  if (blocked) return blocked
+
+  // Reviews are sign-in gated.
+  const auth = await createSupabaseServerClient()
+  const {
+    data: { user },
+  } = await auth.auth.getUser()
+  if (!user) {
+    return NextResponse.json({ error: "Please sign in to leave a review." }, { status: 401 })
+  }
+
   const guideId = payload.guide_id?.trim() ?? ""
-  const reviewerName = payload.reviewer_name?.trim() ?? ""
   const comment = payload.comment?.trim() ?? ""
   const rating = Number(payload.rating)
 
   if (!guideId) {
     return NextResponse.json({ error: "Guide is required." }, { status: 400 })
-  }
-  if (!reviewerName) {
-    return NextResponse.json({ error: "Your name is required." }, { status: 400 })
   }
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
     return NextResponse.json({ error: "Please select a rating from 1 to 5." }, { status: 400 })
@@ -47,6 +56,20 @@ export async function POST(request: Request) {
     )
   }
 
+  // Reviewer identity comes from the authenticated profile, not the client.
+  const { data: profile } = await auth
+    .from("profiles")
+    .select("display_name, country")
+    .eq("id", user.id)
+    .maybeSingle()
+  const reviewerName =
+    (profile?.display_name as string) ||
+    (user.user_metadata?.full_name as string) ||
+    (user.user_metadata?.name as string) ||
+    user.email ||
+    "Traveller"
+  const reviewerCountry = (profile?.country as string) || null
+
   try {
     const supabase = getSupabaseAdmin()
     const guide = await fetchGuideByIdAdmin(guideId)
@@ -56,9 +79,10 @@ export async function POST(request: Request) {
 
     const insertRow = {
       guide_id: guideId,
+      user_id: user.id,
       reviewer_name: reviewerName,
-      reviewer_email: payload.reviewer_email?.trim() || null,
-      reviewer_country: payload.reviewer_country?.trim() || null,
+      reviewer_email: user.email ?? null,
+      reviewer_country: reviewerCountry,
       rating,
       comment,
       visit_date: payload.visit_date?.trim() || null,
@@ -72,6 +96,12 @@ export async function POST(request: Request) {
       .select("*")
       .single()
 
+    if (error?.code === "23505") {
+      return NextResponse.json(
+        { error: "You've already reviewed this guide." },
+        { status: 409 },
+      )
+    }
     if (error || !data) {
       console.error("Guide review insert error:", error)
       return NextResponse.json({ error: "Could not submit review." }, { status: 500 })
