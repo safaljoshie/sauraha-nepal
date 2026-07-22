@@ -8,6 +8,8 @@ import DhurbePromptBubble from "@/components/chat/DhurbePromptBubble"
 import ChatMarkdown from "@/components/chat/ChatMarkdown"
 import SiteIcon from "@/components/icons/SiteIcon"
 import type { AnthropicHistoryMessage, ChatUiMessage } from "@/lib/chat-types"
+import { CHAT_RECAPTCHA_SESSION_KEY } from "@/lib/email-verification"
+import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
 import {
   AUTO_DISMISS_MS,
   getDhurbePromptMessage,
@@ -94,6 +96,7 @@ export default function ChatWidget() {
   const [error, setError] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
+  const getRecaptchaToken = useRecaptchaToken()
   const listRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const promptShownRef = useRef(false)
@@ -251,6 +254,22 @@ export default function ChatWidget() {
     const sid = sessionId ?? crypto.randomUUID()
     if (!sessionId) setSessionId(sid)
 
+    const isFirstMessage = messages.length === 0
+    const chatVerified =
+      typeof window !== "undefined" &&
+      sessionStorage.getItem(CHAT_RECAPTCHA_SESSION_KEY) === "true"
+
+    let recaptchaToken: string | undefined
+    if (isFirstMessage && !chatVerified) {
+      const token = await getRecaptchaToken("chat_first_message")
+      if (!token) {
+        setError("We couldn't verify you're human. Please try again.")
+        setLoading(false)
+        return
+      }
+      recaptchaToken = token
+    }
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -259,14 +278,23 @@ export default function ChatWidget() {
           message: trimmed,
           history: toApiHistory(messages),
           sessionId: sid,
+          ...(recaptchaToken ? { recaptchaToken } : {}),
         }),
       })
 
-      const data = (await res.json()) as { reply?: string; error?: string }
+      const data = (await res.json()) as {
+        reply?: string
+        error?: string
+        recaptchaVerified?: boolean
+      }
 
       if (!res.ok) {
         setError(data.error ?? ERROR_MESSAGE)
         return
+      }
+
+      if (data.recaptchaVerified) {
+        sessionStorage.setItem(CHAT_RECAPTCHA_SESSION_KEY, "true")
       }
 
       const reply = data.reply?.trim() || "Sorry, I could not process that."

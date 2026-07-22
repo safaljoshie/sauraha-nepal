@@ -20,6 +20,7 @@ import {
   Hotel,
   Info,
   LayoutGrid,
+  Lock,
   Mail,
   Map,
   MapPin,
@@ -69,6 +70,7 @@ const LUCIDE_BY_NAME: Record<string, LucideIcon> = {
   "cloud-rain": CloudRain,
   "cloud-lightning": CloudLightning,
   "cloud-snow": CloudSnow,
+  lock: Lock,
 }
 
 type SiteIconProps = {

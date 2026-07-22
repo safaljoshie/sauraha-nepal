@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useState, type FormEvent } from "react"
 import SiteIcon from "@/components/icons/SiteIcon"
+import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
 import { formatWhatsAppDisplay, whatsappUrl } from "@/lib/whatsapp"
 
 const listingPlans = [
@@ -36,6 +37,7 @@ type ContactPayload = {
   email: string
   message: string
   business: string
+  recaptchaToken: string
 }
 
 async function submitContact(payload: ContactPayload) {
@@ -168,6 +170,7 @@ const SUBJECT_OPTIONS = [
 
 function GeneralForm() {
   const searchParams = useSearchParams()
+  const getRecaptchaToken = useRecaptchaToken()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [subject, setSubject] = useState<string>("General Question")
@@ -202,11 +205,17 @@ function GeneralForm() {
     setErrorMessage("")
 
     try {
+      const recaptchaToken = await getRecaptchaToken("contact_form")
+      if (!recaptchaToken) {
+        throw new Error("We couldn't verify you're human. Please try again.")
+      }
+
       await submitContact({
         name,
         email,
         message,
         business: subject,
+        recaptchaToken,
       })
       setStatus("success")
       setName("")
@@ -291,6 +300,7 @@ function GeneralForm() {
 }
 
 function ListingForm() {
+  const getRecaptchaToken = useRecaptchaToken()
   const [businessName, setBusinessName] = useState("")
   const [category, setCategory] = useState("Stay")
   const [name, setName] = useState("")
@@ -317,11 +327,17 @@ function ListingForm() {
     ].filter(Boolean)
 
     try {
+      const recaptchaToken = await getRecaptchaToken("contact_form")
+      if (!recaptchaToken) {
+        throw new Error("We couldn't verify you're human. Please try again.")
+      }
+
       await submitContact({
         name,
         email,
         message: messageParts.join("\n"),
         business: businessName,
+        recaptchaToken,
       })
       setStatus("success")
       setBusinessName("")

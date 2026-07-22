@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server"
 import { Resend } from "resend"
+import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
+import { RATE_LIMITS } from "@/lib/rate-limit"
 
 const FROM =
   process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
@@ -10,22 +12,30 @@ type ContactBody = {
   email?: string
   message?: string
   business?: string
+  recaptchaToken?: string
 }
 
 export async function POST(request: Request) {
+  let body: ContactBody
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
+  }
+
+  const securityError = await enforceRecaptchaAndRateLimit(
+    request,
+    RATE_LIMITS.CONTACT_FORM,
+    body,
+  )
+  if (securityError) return securityError
+
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
     return NextResponse.json(
       { error: "Email service is not configured." },
       { status: 500 },
     )
-  }
-
-  let body: ContactBody
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
   }
 
   const name = body.name?.trim()

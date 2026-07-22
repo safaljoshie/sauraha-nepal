@@ -10,6 +10,7 @@ import {
   COMMON_LANGUAGES,
   type GuideService,
 } from "@/lib/tour-guides"
+import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
 
 const inputClass =
   "w-full rounded-xl border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
@@ -112,6 +113,7 @@ export default function ListGuideForm() {
   const [emailWarning, setEmailWarning] = useState("")
   const [customLanguage, setCustomLanguage] = useState("")
   const [customExpertise, setCustomExpertise] = useState("")
+  const getRecaptchaToken = useRecaptchaToken()
 
   useEffect(() => {
     return () => {
@@ -229,6 +231,11 @@ export default function ListGuideForm() {
           ? null
           : Number.parseInt(form.years_experience, 10)
 
+      const recaptchaToken = await getRecaptchaToken("list_guide")
+      if (!recaptchaToken) {
+        throw new Error("We couldn't verify you're human. Please try again.")
+      }
+
       const result = await submitGuideApplication(
         {
           full_name: form.full_name.trim(),
@@ -248,6 +255,7 @@ export default function ListGuideForm() {
           expertise: form.expertise,
           services: form.services,
           agreed_to_terms: form.agreedToTerms,
+          recaptchaToken,
         },
         submissionId,
       )

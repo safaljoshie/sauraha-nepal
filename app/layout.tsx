@@ -3,6 +3,7 @@ import { GoogleAnalytics } from "@next/third-parties/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ChatUIProvider } from "@/components/ChatUIProvider"
 import ChatWidgetLoader from "@/components/ChatWidgetLoader"
+import RecaptchaProvider from "@/components/RecaptchaProvider"
 import SiteJsonLd from "@/components/seo/SiteJsonLd"
 import { SITE_KEYWORDS } from "@/lib/seo"
 import { Inter, Nunito, Playfair_Display, Poppins } from "next/font/google"
@@ -90,10 +91,12 @@ export default function RootLayout({
         <SiteJsonLd />
       </head>
       <body className="font-[family-name:var(--font-inter)] antialiased">
-        <ChatUIProvider>
-          {children}
-          <ChatWidgetLoader />
-        </ChatUIProvider>
+        <RecaptchaProvider>
+          <ChatUIProvider>
+            {children}
+            <ChatWidgetLoader />
+          </ChatUIProvider>
+        </RecaptchaProvider>
         <Analytics />
         {process.env.NODE_ENV === "production" && gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>

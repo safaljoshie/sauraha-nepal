@@ -22,6 +22,7 @@ import {
   getActiveCategoryNames,
 } from "@/lib/category-catalog"
 import { pricingPlans } from "@/lib/data"
+import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
 
 const inputClass =
   "w-full rounded-xl border-[1.5px] border-border-brand bg-cream px-4 py-3 text-sm text-text-brand outline-none transition-colors focus:border-green-mid focus:bg-white disabled:cursor-not-allowed disabled:opacity-60"
@@ -144,6 +145,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
   const [submittedEmail, setSubmittedEmail] = useState("")
   const [submittedOwnerName, setSubmittedOwnerName] = useState("")
   const [emailWarning, setEmailWarning] = useState("")
+  const getRecaptchaToken = useRecaptchaToken()
 
   function updateField<K extends keyof ListBusinessFormState>(
     key: K,
@@ -293,6 +295,11 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
 
       const photo_links = mergePhotoLinks(uploadedUrls, form.photoLinks)
 
+      const recaptchaToken = await getRecaptchaToken("list_business")
+      if (!recaptchaToken) {
+        throw new Error("We couldn't verify you're human. Please try again.")
+      }
+
       const result = await submitListing({
         business_name: form.businessName.trim(),
         category: form.category,
@@ -310,6 +317,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
         photo_links,
         plan: planValue,
         agreed_to_terms: form.agreedToTerms,
+        recaptchaToken,
       })
 
       setSubmittedPlan(result.plan ?? planValue)

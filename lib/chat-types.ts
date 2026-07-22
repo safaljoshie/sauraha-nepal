@@ -16,4 +16,5 @@ export type ChatApiRequestBody = {
   message?: string
   history?: AnthropicHistoryMessage[]
   sessionId?: string
+  recaptchaToken?: string
 }
