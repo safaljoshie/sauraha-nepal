@@ -3,10 +3,13 @@
 import { useState, type FormEvent } from "react"
 
 type SubmitStatus = "idle" | "loading" | "success" | "error"
+type SubscribeResult = "pending" | "already_subscribed"
 
 export default function HomeNewsletter() {
   const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
+  const [result, setResult] = useState<SubscribeResult>("pending")
   const [errorMessage, setErrorMessage] = useState("")
 
   async function handleSubmit(e: FormEvent) {
@@ -18,13 +21,16 @@ export default function HomeNewsletter() {
     setErrorMessage("")
 
     try {
-      const res = await fetch("/api/newsletter", {
+      const res = await fetch("/api/newsletter/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: trimmed }),
+        body: JSON.stringify({ email: trimmed, name: name.trim() || undefined }),
       })
 
-      const data = (await res.json().catch(() => ({}))) as { error?: string }
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string
+        status?: SubscribeResult
+      }
 
       if (!res.ok) {
         setErrorMessage(data.error ?? "Something went wrong. Please try again.")
@@ -32,6 +38,7 @@ export default function HomeNewsletter() {
         return
       }
 
+      setResult(data.status === "already_subscribed" ? "already_subscribed" : "pending")
       setStatus("success")
     } catch {
       setErrorMessage("Something went wrong. Please try again.")
@@ -57,34 +64,51 @@ export default function HomeNewsletter() {
         </p>
         {status === "success" ? (
           <p className="mt-4 text-sm font-semibold text-green-brand md:mt-8 md:text-base">
-            Thanks! We&apos;ll keep you posted.
+            {result === "already_subscribed"
+              ? "You're already subscribed to our newsletter!"
+              : "Almost there! Check your email to confirm your subscription."}
           </p>
         ) : (
           <form
             onSubmit={handleSubmit}
-            className="mt-4 flex flex-row items-stretch justify-center gap-2 md:mt-8 md:gap-3"
+            className="mx-auto mt-4 flex max-w-md flex-col items-stretch gap-2 md:mt-8 md:gap-3"
           >
-            <label htmlFor="newsletter-email" className="sr-only">
-              Email address
+            <label htmlFor="newsletter-name" className="sr-only">
+              Your name (optional)
             </label>
             <input
-              id="newsletter-email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email address"
-              className="min-w-0 flex-1 rounded-xl border border-black/15 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-green-brand md:max-w-sm md:px-5 md:py-3.5 md:text-base"
-              autoComplete="email"
+              id="newsletter-name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name (optional)"
+              className="min-w-0 rounded-xl border border-black/15 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-green-brand md:px-5 md:py-3.5 md:text-base"
+              autoComplete="name"
               disabled={status === "loading"}
             />
-            <button
-              type="submit"
-              className="shrink-0 rounded-xl bg-green-brand px-4 py-2.5 text-xs font-bold tracking-wide text-white uppercase hover:bg-green-mid md:px-8 md:py-3.5 md:text-sm disabled:opacity-60"
-              disabled={status === "loading"}
-            >
-              Subscribe
-            </button>
+            <div className="flex flex-row items-stretch gap-2 md:gap-3">
+              <label htmlFor="newsletter-email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="newsletter-email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                className="min-w-0 flex-1 rounded-xl border border-black/15 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-green-brand md:px-5 md:py-3.5 md:text-base"
+                autoComplete="email"
+                disabled={status === "loading"}
+              />
+              <button
+                type="submit"
+                className="shrink-0 rounded-xl bg-green-brand px-4 py-2.5 text-xs font-bold tracking-wide text-white uppercase hover:bg-green-mid md:px-8 md:py-3.5 md:text-sm disabled:opacity-60"
+                disabled={status === "loading"}
+              >
+                {status === "loading" ? "Subscribing…" : "Subscribe"}
+              </button>
+            </div>
           </form>
         )}
         {status === "error" && (

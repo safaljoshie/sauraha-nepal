@@ -15,6 +15,7 @@ import { isListingVerified } from "@/lib/listing-badges"
 import { parseListingCategories, serializeListingCategories } from "@/lib/listing-categories"
 import AdminGuidesSection from "@/components/admin/AdminGuidesSection"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
+import AdminNewsletterSection from "@/components/admin/AdminNewsletterSection"
 import AdminCalendarSection from "@/components/admin/AdminCalendarSection"
 import AdminListingCategoryPicker, {
   type CategoryPickerOption,
@@ -752,6 +753,8 @@ export default function AdminDashboard() {
       {adminTab === "guides" && <AdminGuidesSection />}
 
       {adminTab === "blog" && <AdminBlogSection />}
+
+      {adminTab === "newsletter" && <AdminNewsletterSection />}
 
       {adminTab === "calendar" && <AdminCalendarSection />}
 

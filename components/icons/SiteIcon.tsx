@@ -60,6 +60,7 @@ const LUCIDE_BY_NAME: Record<string, LucideIcon> = {
   sparkles: Sparkles,
   "clipboard-list": ClipboardList,
   "pen-line": PenLine,
+  mail: Mail,
   calendar: Calendar,
   "folder-open": FolderOpen,
   map: Map,
