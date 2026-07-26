@@ -148,6 +148,27 @@ export default async function Footer({ catalog }: { catalog: CategoryCatalog }) 
         <div className="border-t border-white/10 pt-6 text-center text-sm text-white/40">
           © {new Date().getFullYear()} SaurahaNepal.com · Built with 💚 for travellers
           exploring Sauraha
+          <p className="mt-2 text-[11px] text-white/40">
+            This site is protected by reCAPTCHA and the Google{" "}
+            <a
+              href="https://policies.google.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline transition-colors hover:text-white/70"
+            >
+              Privacy Policy
+            </a>{" "}
+            and{" "}
+            <a
+              href="https://policies.google.com/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline transition-colors hover:text-white/70"
+            >
+              Terms of Service
+            </a>{" "}
+            apply.
+          </p>
         </div>
       </div>
     </footer>

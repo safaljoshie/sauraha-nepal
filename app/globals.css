@@ -515,6 +515,13 @@ body {
   isolation: isolate;
 }
 
+/* Hide the reCAPTCHA v3 badge. Google permits this as long as the required
+   disclosure ("This site is protected by reCAPTCHA…") is shown in the footer. */
+.grecaptcha-badge {
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
 /* Homepage nav overlay — static-safe via #home-page-marker (works before JS hydrates) */
 #site-root:has(#home-page-marker):not(.nav-scrolled) .site-navbar {
   background-color: transparent !important;
