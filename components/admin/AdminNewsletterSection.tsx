@@ -53,9 +53,9 @@ const CAMPAIGN_BADGES: Record<NewsletterCampaign["status"], string> = {
 const fieldClass =
   "w-full rounded-[10px] border border-border-brand bg-cream px-3 py-2 text-sm text-text-brand outline-none focus:border-green-mid focus:bg-white"
 
-export default function AdminNewsletterSection() {
+export default function AdminNewsletterSection({ view }: { view?: SubTab } = {}) {
   const router = useRouter()
-  const [subTab, setSubTab] = useState<SubTab>("subscribers")
+  const [subTab, setSubTab] = useState<SubTab>(view ?? "subscribers")
 
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([])
   const [campaigns, setCampaigns] = useState<NewsletterCampaign[]>([])
@@ -304,27 +304,30 @@ export default function AdminNewsletterSection() {
 
   return (
     <div className="min-w-0 w-full max-w-full">
-      <div className="mb-6 flex flex-wrap items-center gap-2">
-        {(["subscribers", "campaigns"] as SubTab[]).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setSubTab(tab)}
-            className={`cursor-pointer rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
-              subTab === tab ? "bg-green-brand text-white" : "bg-white text-text-mid hover:bg-cream"
-            }`}
+      {!(view && subTab === "subscribers") && (
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          {!view &&
+            (["subscribers", "campaigns"] as SubTab[]).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setSubTab(tab)}
+                className={`cursor-pointer rounded-full px-5 py-2 text-sm font-semibold transition-colors ${
+                  subTab === tab ? "bg-green-brand text-white" : "bg-white text-text-mid hover:bg-cream"
+                }`}
+              >
+                {tab === "subscribers" ? "Subscribers" : "Campaigns"}
+              </button>
+            ))}
+          <Link
+            href="/admin/newsletter/compose"
+            className="ml-auto inline-flex items-center gap-2 rounded-full bg-green-brand px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-mid"
           >
-            {tab === "subscribers" ? "Subscribers" : "Campaigns"}
-          </button>
-        ))}
-        <Link
-          href="/admin/newsletter/compose"
-          className="ml-auto inline-flex items-center gap-2 rounded-full bg-green-brand px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-green-mid"
-        >
-          <SiteIcon name="pen-line" size={16} className="text-white" />
-          New Campaign
-        </Link>
-      </div>
+            <SiteIcon name="pen-line" size={16} className="text-white" />
+            New Campaign
+          </Link>
+        </div>
+      )}
 
       {error && (
         <p className="mb-4 rounded-[10px] border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">

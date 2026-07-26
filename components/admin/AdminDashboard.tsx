@@ -1,8 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent } from "react"
 import type { BusinessListing } from "@/lib/business-listing"
 import { formatSubmittedDate, formatSubmittedDateParts, planLabel } from "@/lib/business-listing"
@@ -23,8 +22,21 @@ import AdminListingCategoryPicker, {
 import AdminSiteSettingsSection from "@/components/admin/AdminSiteSettingsSection"
 import AdminTeamItinerarySection from "@/components/admin/AdminTeamItinerarySection"
 import AdminTeamResourcesSection from "@/components/admin/AdminTeamResourcesSection"
-import AdminTabNav, { type AdminTab } from "@/components/admin/AdminTabNav"
+import AdminTeamManager from "@/components/admin/AdminTeamManager"
+import AdminContactContentManager from "@/components/admin/AdminContactContentManager"
+import AdminHeroMediaManager from "@/components/admin/AdminHeroMediaManager"
+import AdminCategoriesManager from "@/components/admin/AdminCategoriesManager"
+import AdminSidebar, {
+  ADMIN_SECTION_LOOKUP,
+  type AdminSection,
+} from "@/components/admin/AdminSidebar"
 import SiteIcon from "@/components/icons/SiteIcon"
+
+const VALID_SECTIONS = new Set(Object.keys(ADMIN_SECTION_LOOKUP))
+
+function isAdminSection(value: string | null): value is AdminSection {
+  return value !== null && VALID_SECTIONS.has(value)
+}
 
 type FilterTab =
   | "all"
@@ -217,7 +229,11 @@ export default function AdminDashboard() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [uploadingPhotos, setUploadingPhotos] = useState(false)
   const photoUploadInFlight = useRef(false)
-  const [adminTab, setAdminTab] = useState<AdminTab>("listings")
+  const searchParams = useSearchParams()
+  const sectionParam = searchParams.get("section")
+  const section: AdminSection = isAdminSection(sectionParam) ? sectionParam : "listings"
+  const sectionMeta = ADMIN_SECTION_LOOKUP[section]
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const [searchInput, setSearchInput] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [categoryPickerOptions, setCategoryPickerOptions] = useState<CategoryPickerOption[]>(() =>
@@ -703,68 +719,78 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-7xl overflow-x-hidden px-4 py-8 md:px-8">
-      <header className="mb-8 flex flex-col gap-4 border-b border-border-brand pb-6 md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0">
-          <h1 className="font-[family-name:var(--font-playfair)] text-2xl font-bold text-green-brand md:text-3xl">
-            Sauraha Nepal — Admin Dashboard
-          </h1>
-          <p className="mt-1 text-sm text-text-light">
-            Manage listings, blog posts, content calendar, and site settings
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin/team"
-            className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
-          >
-            Manage Team
-          </Link>
-          <Link
-            href="/admin/content/contact"
-            className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
-          >
-            Edit Contact
-          </Link>
-          <Link
-            href="/admin/content/hero"
-            className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
-          >
-            Edit Hero Video
-          </Link>
-          <Link
-            href="/admin/content/categories"
-            className="self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
-          >
-            Manage Categories
-          </Link>
+    <div className="min-h-screen bg-cream">
+      <AdminSidebar
+        active={section}
+        mobileOpen={mobileNavOpen}
+        onCloseMobile={() => setMobileNavOpen(false)}
+        onLogout={handleLogout}
+      />
+
+      <div className="md:pl-[220px]">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border-brand bg-white/95 px-4 py-3 backdrop-blur md:px-8">
           <button
             type="button"
-            onClick={handleLogout}
-            className="cursor-pointer self-start rounded-full border border-border-brand bg-white px-5 py-2 text-sm font-semibold text-text-mid transition-colors hover:border-green-mid hover:text-green-brand"
+            onClick={() => setMobileNavOpen(true)}
+            aria-label="Open menu"
+            className="cursor-pointer rounded-lg border border-border-brand p-2 text-text-mid hover:bg-cream md:hidden"
           >
-            Logout
+            <SiteIcon name="menu" size={20} strokeWidth={2} className="text-text-mid" />
           </button>
-        </div>
-      </header>
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold uppercase tracking-wider text-text-light">
+              {sectionMeta.groupLabel} › {sectionMeta.label}
+            </p>
+            <h1 className="truncate font-[family-name:var(--font-playfair)] text-lg font-bold text-green-brand md:text-xl">
+              {sectionMeta.label}
+            </h1>
+          </div>
+        </header>
 
-      <AdminTabNav active={adminTab} onChange={setAdminTab} />
+        <main className="mx-auto w-full min-w-0 max-w-7xl overflow-x-hidden px-4 py-8 md:px-8">
+          {section === "blog-posts" && <AdminBlogSection />}
 
-      {adminTab === "guides" && <AdminGuidesSection />}
+          {section === "tour-guides" && <AdminGuidesSection />}
 
-      {adminTab === "blog" && <AdminBlogSection />}
+          {section === "newsletter" && (
+            <AdminNewsletterSection key="newsletter" view="campaigns" />
+          )}
 
-      {adminTab === "newsletter" && <AdminNewsletterSection />}
+          {section === "subscribers" && (
+            <AdminNewsletterSection key="subscribers" view="subscribers" />
+          )}
 
-      {adminTab === "calendar" && <AdminCalendarSection />}
+          {section === "content-calendar" && <AdminCalendarSection />}
 
-      {adminTab === "resources" && <AdminTeamResourcesSection />}
+          {section === "team-resources" && <AdminTeamResourcesSection />}
 
-      {adminTab === "itineraries" && <AdminTeamItinerarySection />}
+          {section === "team-itinerary" && <AdminTeamItinerarySection />}
 
-      {adminTab === "settings" && <AdminSiteSettingsSection />}
+          {section === "site-settings" && <AdminSiteSettingsSection />}
 
-      {adminTab === "listings" && (
+          {section === "edit-contact" && <AdminContactContentManager />}
+
+          {section === "edit-hero" && <AdminHeroMediaManager />}
+
+          {section === "manage-categories" && <AdminCategoriesManager />}
+
+          {section === "manage-team" && <AdminTeamManager />}
+
+          {section === "business-reviews" && (
+            <SectionPlaceholder
+              title="Business Reviews"
+              message="Business listing reviews aren't a feature yet. Tour guide reviews are moderated under the Tour Guides section."
+            />
+          )}
+
+          {section === "logged-in-accounts" && (
+            <SectionPlaceholder
+              title="Logged In Accounts"
+              message="This view lists people who verified their email through the site's verification system. The email_verifications table hasn't been set up yet — once it exists, verified accounts will appear here."
+            />
+          )}
+
+          {section === "listings" && (
         <div className="min-w-0 w-full max-w-full">
       <div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
         {[
@@ -1375,6 +1401,21 @@ export default function AdminDashboard() {
       </div>
         </div>
       )}
+        </main>
+      </div>
+    </div>
+  )
+}
+
+function SectionPlaceholder({ title, message }: { title: string; message: string }) {
+  return (
+    <div className="min-w-0 w-full max-w-full">
+      <div className="rounded-2xl border border-dashed border-border-brand bg-white p-10 text-center">
+        <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
+          {title}
+        </h2>
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-text-light">{message}</p>
+      </div>
     </div>
   )
 }
