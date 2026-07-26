@@ -5,6 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react"
 import SiteIcon from "@/components/icons/SiteIcon"
+import UserMenu from "@/components/auth/UserMenu"
+import MobileAuthLinks from "@/components/auth/MobileAuthLinks"
 import { getStayListingsHref, type CategoryCatalog } from "@/lib/category-catalog"
 
 const baseNavLinks = [
@@ -153,6 +155,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
           >
             List business
           </Link>
+          <UserMenu transparent={transparent} />
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
@@ -226,6 +229,9 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
               <Link href="/contact" onClick={closeMenu} className="block py-3 font-semibold text-ink-muted hover:text-green-brand">
                 Contact
               </Link>
+            </li>
+            <li className="mt-2 border-t border-black/8 pt-2">
+              <MobileAuthLinks onNavigate={closeMenu} />
             </li>
           </ul>
           <Link

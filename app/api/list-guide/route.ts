@@ -7,6 +7,7 @@ import {
 import { validateListGuidePayload } from "@/lib/list-guide"
 import { buildGuideInsertRow } from "@/lib/guide-admin"
 import { getSupabaseAdmin } from "@/lib/supabase"
+import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
 
 const FROM = process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
 const ADMIN_TO = process.env.CONTACT_TO_EMAIL ?? "safaljoshie@gmail.com"
@@ -26,6 +27,9 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
   }
+
+  const blocked = await enforceRecaptchaAndRateLimit(request, "LIST_GUIDE", body)
+  if (blocked) return blocked
 
   const { data, error: validationError } = validateListGuidePayload(body)
   if (!data || validationError) {

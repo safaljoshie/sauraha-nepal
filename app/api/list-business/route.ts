@@ -10,6 +10,7 @@ import {
 } from "@/lib/list-business"
 import { generateUniqueListingSlug } from "@/lib/listing-slug"
 import { getSupabaseAdmin } from "@/lib/supabase"
+import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
 
 const FROM =
   process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"
@@ -30,6 +31,13 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 })
   }
+
+  const blocked = await enforceRecaptchaAndRateLimit(
+    request,
+    "LIST_BUSINESS",
+    body as { recaptchaToken?: string },
+  )
+  if (blocked) return blocked
 
   const { data, error: validationError } = validateListBusinessPayload(body)
   if (!data || validationError) {

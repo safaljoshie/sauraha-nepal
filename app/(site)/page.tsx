@@ -33,14 +33,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return {
     title: {
-      absolute: "Sauraha | Nepal - Complete Tour Guide",
+      absolute: "Sauraha Nepal - Complete Tour Guide",
     },
     description:
       "Your complete guide to Sauraha — gateway to Chitwan National Park. Best stays, food, activities & local experiences.",
     keywords: [...SITE_KEYWORDS],
     alternates: { canonical: "https://www.saurahanepal.com" },
     openGraph: {
-      title: "Sauraha | Nepal - Complete Tour Guide",
+      title: "Sauraha Nepal - Complete Tour Guide",
       description:
         "Your complete guide to Sauraha — gateway to Chitwan National Park. Best stays, food, activities & local experiences.",
       url: "https://www.saurahanepal.com",
@@ -51,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: "Sauraha | Nepal - Complete Tour Guide",
+      title: "Sauraha Nepal - Complete Tour Guide",
       description:
         "Your complete guide to Sauraha — gateway to Chitwan National Park. Best stays, food, activities & local experiences.",
       images: [ogImage],

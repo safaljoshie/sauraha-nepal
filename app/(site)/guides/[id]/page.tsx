@@ -8,6 +8,7 @@ import { GuideReviewsSection } from "@/components/guides/GuideReviewsSection"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import GuideStickyCta from "@/components/guides/GuideStickyCta"
 import SiteIcon from "@/components/icons/SiteIcon"
+import { getCurrentUser } from "@/lib/supabase/auth-server"
 import { isListingUuid } from "@/lib/listing-slug"
 import { formatInrFromNpr, formatUsdFromNpr } from "@/lib/currency"
 import {
@@ -109,6 +110,7 @@ export default async function GuideProfilePage({ params }: PageProps) {
   }
 
   const reviews = await fetchApprovedGuideReviews(guide.id)
+  const viewer = await getCurrentUser()
 
   const waUrl = guide.whatsapp ? formatGuideWhatsAppUrl(guide.whatsapp) : ""
   const callUrl = guide.phone ? formatGuidePhoneUrl(guide.phone) : ""
@@ -361,6 +363,7 @@ export default async function GuideProfilePage({ params }: PageProps) {
             avgRating={guide.avg_rating}
             reviewCount={guide.review_count}
             reviews={reviews}
+            signedIn={Boolean(viewer)}
           />
 
           <GuideProfileRelatedLinks />

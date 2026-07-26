@@ -6,6 +6,9 @@ import ListingDetailMapSection from "@/components/listings/ListingDetailMapSecti
 import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaIcons"
 import ListingShareButtons from "@/components/listings/ListingShareButtons"
 import OpeningHoursDisplay from "@/components/listings/OpeningHoursDisplay"
+import BusinessReviewsSection from "@/components/businesses/BusinessReviewsSection"
+import { fetchApprovedBusinessReviews } from "@/lib/business-reviews"
+import { getCurrentUser } from "@/lib/supabase/auth-server"
 import {
   formatListingDate,
   formatWhatsAppDisplay,
@@ -68,6 +71,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
   ) {
     permanentRedirect(getListingDetailPath(listing))
   }
+
+  const [reviews, viewer] = await Promise.all([
+    fetchApprovedBusinessReviews(listing.id),
+    getCurrentUser(),
+  ])
 
   const photos = getPhotoUrls(listing)
   const heroImage = getListingImage(listing)
@@ -256,6 +264,16 @@ export default async function ListingDetailPage({ params }: PageProps) {
             Listed {formatListingDate(listing.created_at)}
           </p>
         </aside>
+      </div>
+
+      <div className="mx-auto max-w-4xl px-4 pb-6 md:px-8">
+        <BusinessReviewsSection
+          businessId={listing.id}
+          avgRating={listing.avg_rating ?? 0}
+          reviewCount={listing.review_count ?? 0}
+          reviews={reviews}
+          signedIn={Boolean(viewer)}
+        />
       </div>
       <script
         type="application/ld+json"

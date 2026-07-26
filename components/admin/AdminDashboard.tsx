@@ -13,6 +13,8 @@ import { matchesAdminListingSearch } from "@/lib/listings-catalog"
 import { isListingVerified } from "@/lib/listing-badges"
 import { parseListingCategories, serializeListingCategories } from "@/lib/listing-categories"
 import AdminGuidesSection from "@/components/admin/AdminGuidesSection"
+import AdminBusinessReviewsSection from "@/components/admin/AdminBusinessReviewsSection"
+import AdminAccountsSection from "@/components/admin/AdminAccountsSection"
 import AdminBlogSection from "@/components/admin/AdminBlogSection"
 import AdminNewsletterSection from "@/components/admin/AdminNewsletterSection"
 import AdminCalendarSection from "@/components/admin/AdminCalendarSection"
@@ -776,19 +778,9 @@ export default function AdminDashboard() {
 
           {section === "manage-team" && <AdminTeamManager />}
 
-          {section === "business-reviews" && (
-            <SectionPlaceholder
-              title="Business Reviews"
-              message="Business listing reviews aren't a feature yet. Tour guide reviews are moderated under the Tour Guides section."
-            />
-          )}
+          {section === "business-reviews" && <AdminBusinessReviewsSection />}
 
-          {section === "logged-in-accounts" && (
-            <SectionPlaceholder
-              title="Logged In Accounts"
-              message="This view lists people who verified their email through the site's verification system. The email_verifications table hasn't been set up yet — once it exists, verified accounts will appear here."
-            />
-          )}
+          {section === "logged-in-accounts" && <AdminAccountsSection />}
 
           {section === "listings" && (
         <div className="min-w-0 w-full max-w-full">
@@ -1402,19 +1394,6 @@ export default function AdminDashboard() {
         </div>
       )}
         </main>
-      </div>
-    </div>
-  )
-}
-
-function SectionPlaceholder({ title, message }: { title: string; message: string }) {
-  return (
-    <div className="min-w-0 w-full max-w-full">
-      <div className="rounded-2xl border border-dashed border-border-brand bg-white p-10 text-center">
-        <h2 className="font-[family-name:var(--font-playfair)] text-xl font-bold text-green-brand">
-          {title}
-        </h2>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-text-light">{message}</p>
       </div>
     </div>
   )

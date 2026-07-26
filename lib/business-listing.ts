@@ -28,6 +28,9 @@ export type BusinessListing = {
   /** Resolved once by scripts/backfill-listing-coordinates.ts, not per render. */
   latitude: number | null
   longitude: number | null
+  /** Maintained by the update_business_rating() trigger from approved reviews. */
+  avg_rating: number | null
+  review_count: number | null
 }
 
 /**
@@ -44,6 +47,8 @@ export type BusinessListingSummary = Omit<
   | "photo_links"
   | "facebook"
   | "status"
+  | "avg_rating"
+  | "review_count"
 > & {
   description_preview: string | null
   cover_photo_url: string | null
