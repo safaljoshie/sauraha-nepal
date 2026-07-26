@@ -185,7 +185,7 @@ export function buildWelcomeEmail(
     </p>
   </div>
   <div style="max-width:600px;margin:0 auto;padding:32px 24px;background:#ffffff;">
-    <p style="font-size:20px;color:#1a5c2a;font-weight:700;margin:0 0 16px;">Welcome aboard, ${greetingName}! 🎉</p>
+    <p style="font-size:20px;color:#1a5c2a;font-weight:700;margin:0 0 16px;">Welcome aboard, ${greetingName}! 💚</p>
     <p style="font-size:16px;color:#3d4f3e;line-height:1.7;margin:0 0 16px;">
       Thanks for confirming your subscription. You're all set to receive the best of Sauraha
       &amp; Chitwan straight to your inbox.
@@ -234,7 +234,7 @@ export function buildWelcomeEmail(
   ].join("\n")
 
   return {
-    subject: "Welcome to Sauraha Nepal 🎉",
+    subject: "Welcome to Sauraha Nepal 💚",
     html,
     text,
   }
