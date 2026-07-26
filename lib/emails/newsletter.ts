@@ -162,3 +162,80 @@ export function buildSubscriptionConfirmationEmail(
     text,
   }
 }
+
+/** Welcome / thank-you email sent once, right after a subscriber confirms. */
+export function buildWelcomeEmail(
+  subscriber: Pick<NewsletterSubscriber, "email" | "name" | "unsubscribe_token">,
+) {
+  const unsubscribeUrl = `${SITE_URL}/newsletter/unsubscribe?token=${encodeURIComponent(subscriber.unsubscribe_token)}`
+  const greetingName = subscriber.name?.trim() ? escapeHtml(subscriber.name.trim()) : "there"
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Welcome to the Sauraha Nepal newsletter</title>
+</head>
+<body style="margin:0;padding:0;background:#faf7f2;font-family:Calibri,Arial,Helvetica,sans-serif;">
+  <div style="background:#1a5c2a;padding:20px;text-align:center;">
+    <span style="color:#ffffff;font-size:22px;font-weight:bold;">Sauraha Nepal</span>
+    <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:4px 0 0;">
+      Your guide to Sauraha &amp; Chitwan National Park
+    </p>
+  </div>
+  <div style="max-width:600px;margin:0 auto;padding:32px 24px;background:#ffffff;">
+    <p style="font-size:20px;color:#1a5c2a;font-weight:700;margin:0 0 16px;">Welcome aboard, ${greetingName}! 🎉</p>
+    <p style="font-size:16px;color:#3d4f3e;line-height:1.7;margin:0 0 16px;">
+      Thanks for confirming your subscription. You're all set to receive the best of Sauraha
+      &amp; Chitwan straight to your inbox.
+    </p>
+    <p style="font-size:16px;color:#3d4f3e;line-height:1.7;margin:0 0 8px;">Here's what to expect:</p>
+    <ul style="padding-left:24px;margin:0 0 24px;color:#3d4f3e;font-size:16px;line-height:1.7;">
+      <li>Practical travel tips &amp; seasonal guides for Chitwan National Park</li>
+      <li>New hotels, restaurants, and tour guides worth knowing about</li>
+      <li>Wildlife, culture, and things to do around Sauraha</li>
+    </ul>
+    <p style="text-align:center;margin:0 0 24px;">
+      <a href="${SITE_URL}/blog" style="display:inline-block;background:#1a5c2a;color:#ffffff;font-size:16px;font-weight:700;padding:14px 28px;border-radius:999px;text-decoration:none;">Read our latest guides</a>
+    </p>
+    <p style="font-size:14px;color:#6b7f6c;line-height:1.6;margin:0;">
+      Have a question or a place we should feature? Just reply to this email — we'd love to hear from you.
+    </p>
+  </div>
+  <div style="max-width:600px;margin:0 auto;padding:20px 24px;text-align:center;border-top:1px solid #e5e7eb;background:#ffffff;">
+    <p style="font-size:12px;color:#6b7f6c;margin:0 0 8px;line-height:1.6;">
+      You're receiving this because you confirmed your subscription at saurahanepal.com<br>
+      <a href="${unsubscribeUrl}" style="color:#e8621a;">Unsubscribe</a>
+      &nbsp;·&nbsp;
+      <a href="${SITE_URL}" style="color:#1a5c2a;">Visit Sauraha Nepal</a>
+    </p>
+    <p style="font-size:12px;color:#9ca89c;margin:0;">${PHYSICAL_ADDRESS}</p>
+  </div>
+</body>
+</html>`
+
+  const text = [
+    `Welcome aboard, ${subscriber.name?.trim() || "there"}!`,
+    "",
+    "Thanks for confirming your subscription. You're all set to receive the best of Sauraha & Chitwan straight to your inbox.",
+    "",
+    "Here's what to expect:",
+    "- Practical travel tips & seasonal guides for Chitwan National Park",
+    "- New hotels, restaurants, and tour guides worth knowing about",
+    "- Wildlife, culture, and things to do around Sauraha",
+    "",
+    `Read our latest guides: ${SITE_URL}/blog`,
+    "",
+    "Have a question or a place we should feature? Just reply to this email.",
+    "",
+    `Unsubscribe: ${unsubscribeUrl}`,
+    PHYSICAL_ADDRESS,
+  ].join("\n")
+
+  return {
+    subject: "Welcome to Sauraha Nepal 🎉",
+    html,
+    text,
+  }
+}
