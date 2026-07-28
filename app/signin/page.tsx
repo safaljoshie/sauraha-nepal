@@ -78,8 +78,8 @@ export default async function SignInPage({
       {/* Right: feature image (hidden on small screens) */}
       <div className="relative hidden md:block md:w-[54%] lg:w-[60%]">
         <Image
-          src="/images/signin-feature.avif"
-          alt="A train winding through the forested hills near Sauraha, Nepal"
+          src="/images/signin-peacock.png"
+          alt="A peacock displaying its plumage in the grasslands of Chitwan National Park, Sauraha, Nepal"
           fill
           priority
           sizes="(max-width: 768px) 0px, 60vw"
