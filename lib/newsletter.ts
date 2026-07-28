@@ -1,5 +1,5 @@
 export type SubscriberStatus = "active" | "unsubscribed" | "bounced"
-export type SubscriberSource = "website" | "admin" | "import"
+export type SubscriberSource = "website" | "admin" | "import" | "account"
 
 export type NewsletterSubscriber = {
   id: string

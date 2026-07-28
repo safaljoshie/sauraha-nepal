@@ -1,6 +1,6 @@
 import { Resend } from "resend"
 import { buildWelcomeEmail } from "@/lib/emails/newsletter"
-import type { NewsletterSubscriber } from "@/lib/newsletter"
+import { isValidEmail, type NewsletterSubscriber } from "@/lib/newsletter"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const FROM = `Sauraha Nepal <${process.env.CONTACT_FROM_EMAIL ?? "hello@mail.saurahanepal.com"}>`
@@ -38,6 +38,48 @@ async function sendWelcomeEmail(subscriber: ConfirmRow) {
   } catch (err) {
     console.error("Newsletter welcome email error:", err)
   }
+}
+
+/**
+ * Subscribes a newly created account holder to the newsletter as a confirmed,
+ * active subscriber and sends the welcome email. Best-effort and idempotent:
+ * a unique-violation means the email is already on the list (subscribed or
+ * previously unsubscribed), in which case we leave it untouched to respect any
+ * earlier opt-out. Never throws, so it can't break the sign-in flow.
+ */
+export async function subscribeNewAccount(email: string, name: string | null): Promise<void> {
+  const normalized = email.trim().toLowerCase()
+  if (!normalized || !isValidEmail(normalized)) return
+
+  let supabase
+  try {
+    supabase = getSupabaseAdmin()
+  } catch {
+    return
+  }
+
+  const { data, error } = await supabase
+    .from("newsletter_subscribers")
+    .insert({
+      email: normalized,
+      name,
+      status: "active",
+      source: "account",
+      confirmed: true,
+      confirmed_at: new Date().toISOString(),
+    })
+    .select("id, email, name, confirmed, unsubscribe_token")
+    .single<ConfirmRow>()
+
+  if (error) {
+    // 23505 = email already on the list; respect its current state.
+    if (error.code !== "23505") {
+      console.error("Account newsletter subscribe error:", error)
+    }
+    return
+  }
+
+  if (data) await sendWelcomeEmail(data)
 }
 
 /** Confirms a subscriber via their confirm_token (double opt-in). Idempotent. */

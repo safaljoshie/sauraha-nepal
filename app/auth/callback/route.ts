@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server"
 import { createSupabaseServerClient } from "@/lib/supabase/auth-server"
 import { getSupabaseAdmin, hasSupabaseAdminCredentials } from "@/lib/supabase"
+import { subscribeNewAccount } from "@/lib/newsletter-tokens"
+
+// Treat a profile created within this window as a brand-new account, so we only
+// newsletter-subscribe genuinely new sign-ups (not returning users).
+const NEW_ACCOUNT_WINDOW_MS = 120_000
 
 // Only allow relative, same-site redirect targets to avoid open redirects.
 function safeNext(next: string | null): string {
@@ -36,13 +41,24 @@ export async function GET(request: Request) {
     if (user) {
       const { data: profile } = await getSupabaseAdmin()
         .from("profiles")
-        .select("deleted_at")
+        .select("deleted_at, created_at")
         .eq("id", user.id)
         .maybeSingle()
 
       if (profile?.deleted_at) {
         await supabase.auth.signOut()
         return NextResponse.redirect(`${base}/signin?error=deactivated`)
+      }
+
+      // Newly created account: opt into the newsletter (best-effort, never blocks).
+      const createdAt = profile?.created_at ? new Date(profile.created_at).getTime() : null
+      const isNewAccount = createdAt !== null && Date.now() - createdAt < NEW_ACCOUNT_WINDOW_MS
+      if (isNewAccount && user.email) {
+        const name =
+          (user.user_metadata?.full_name as string | undefined) ??
+          (user.user_metadata?.name as string | undefined) ??
+          null
+        await subscribeNewAccount(user.email, name)
       }
     }
   }
