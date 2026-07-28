@@ -64,6 +64,9 @@ export default async function ListingDetailPage({ params }: PageProps) {
   ])
   if (!listing) notFound()
 
+  // Fallback only. Legacy UUID → slug redirects are issued as a real HTTP 308 in
+  // middleware.ts; this page-level redirect just emits a client-side meta refresh
+  // (a page render is a streaming context), so it should rarely be reached.
   if (
     isListingUuid(slugOrId) &&
     listing.slug?.trim() &&
