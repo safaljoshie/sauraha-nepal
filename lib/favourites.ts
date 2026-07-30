@@ -31,6 +31,18 @@ export function isFavouriteTargetType(value: unknown): value is FavouriteTargetT
   return value === "listing" || value === "guide"
 }
 
+/** True when PostgREST cannot find the favourites table (migration not applied yet). */
+function isFavouritesTableMissing(error: { code?: string; message?: string } | null | undefined): boolean {
+  if (!error) return false
+  if (error.code === "PGRST205" || error.code === "42P01") return true
+  const message = error.message ?? ""
+  return (
+    message.includes("Could not find the table") ||
+    message.includes("schema cache") ||
+    message.includes('relation "public.favourites" does not exist')
+  )
+}
+
 /** Set of favourited target IDs for the signed-in user (empty if signed out). */
 export const fetchFavouritedIds = cache(
   async (targetType: FavouriteTargetType): Promise<Set<string>> => {
@@ -46,8 +58,11 @@ export const fetchFavouritedIds = cache(
         .eq("target_type", targetType)
 
       if (error || !data) {
-        // Table may not exist yet before migration is applied.
-        console.error("fetchFavouritedIds:", error?.message)
+        // Missing table is expected until the migration is applied — don't
+        // console.error (Next.js surfaces that as a blocking overlay).
+        if (!isFavouritesTableMissing(error)) {
+          console.error("fetchFavouritedIds:", error?.message)
+        }
         return new Set()
       }
 
@@ -57,7 +72,10 @@ export const fetchFavouritedIds = cache(
           .filter(Boolean),
       )
     } catch (err) {
-      console.error("fetchFavouritedIds:", err)
+      const message = err instanceof Error ? err.message : String(err)
+      if (!isFavouritesTableMissing({ message })) {
+        console.error("fetchFavouritedIds:", err)
+      }
       return new Set()
     }
   },
@@ -125,6 +143,9 @@ export async function toggleFavourite(
     .maybeSingle()
 
   if (lookupError) {
+    if (isFavouritesTableMissing(lookupError)) {
+      return { error: "Favourites are not available yet.", status: 503 }
+    }
     console.error("toggleFavourite lookup:", lookupError)
     return { error: "Could not update favourites.", status: 500 }
   }
@@ -162,7 +183,9 @@ export async function fetchMyFavourites(userId: string): Promise<FavouriteListIt
     .order("created_at", { ascending: false })
 
   if (error || !rows) {
-    console.error("fetchMyFavourites:", error?.message)
+    if (!isFavouritesTableMissing(error)) {
+      console.error("fetchMyFavourites:", error?.message)
+    }
     return []
   }
 
