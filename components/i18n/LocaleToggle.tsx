@@ -42,7 +42,7 @@ export default function LocaleToggle({
           transparent
             ? "border-white/40 bg-white/15 text-white [color-scheme:dark] hover:bg-white/25"
             : "border-border-brand bg-cream text-ink hover:border-green-mid"
-        } ${showLabel ? "w-full" : "w-[2rem]"}`}
+        } ${showLabel ? "w-full" : "w-[2.5rem]"}`}
         style={{
           backgroundImage: transparent
             ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`
