@@ -17,7 +17,9 @@
     "check-photo-sizes": "tsx scripts/check-photo-sizes.ts",
     "check-listing-photo-integrity": "tsx scripts/check-listing-photo-integrity.ts",
     "backfill:coordinates": "tsx scripts/backfill-listing-coordinates.ts",
-    "backfill:coordinates:dry": "tsx scripts/backfill-listing-coordinates.ts --dry-run"
+    "backfill:coordinates:dry": "tsx scripts/backfill-listing-coordinates.ts --dry-run",
+    "backfill-guide-slugs": "tsx scripts/backfill-guide-slugs.ts",
+    "backfill-guide-slugs:dry": "tsx scripts/backfill-guide-slugs.ts --dry-run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.100.1",

@@ -16,6 +16,10 @@ function redirectWithSession(url: URL, source: NextResponse, status = 307) {
 const LISTING_UUID_PATH =
   /^\/listings\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i
 
+// Matches exactly /guides/<uuid> (legacy id-based guide profile URLs).
+const GUIDE_UUID_PATH =
+  /^\/guides\/([0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})$/i
+
 /**
  * Resolve an approved listing's slug from its UUID via the Supabase REST API.
  * Kept dependency-free (raw fetch) so it stays cheap in the Edge middleware, and
@@ -29,6 +33,23 @@ async function fetchApprovedListingSlug(id: string): Promise<string | null> {
   try {
     const res = await fetch(
       `${url}/rest/v1/business_listings?id=eq.${id}&status=eq.approved&select=slug&limit=1`,
+      { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
+    )
+    if (!res.ok) return null
+    const rows = (await res.json()) as { slug: string | null }[]
+    return rows[0]?.slug?.trim() || null
+  } catch {
+    return null
+  }
+}
+
+async function fetchApprovedGuideSlug(id: string): Promise<string | null> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/tour_guides?id=eq.${id}&status=eq.approved&select=slug&limit=1`,
       { headers: { apikey: key, Authorization: `Bearer ${key}` }, cache: "no-store" },
     )
     if (!res.ok) return null
@@ -53,6 +74,14 @@ export async function middleware(request: NextRequest) {
     const slug = await fetchApprovedListingSlug(listingUuid[1])
     if (slug && slug !== listingUuid[1]) {
       return redirectWithSession(new URL(`/listings/${slug}`, request.url), response, 308)
+    }
+  }
+
+  const guideUuid = pathname.match(GUIDE_UUID_PATH)
+  if (guideUuid) {
+    const slug = await fetchApprovedGuideSlug(guideUuid[1])
+    if (slug && slug !== guideUuid[1]) {
+      return redirectWithSession(new URL(`/guides/${slug}`, request.url), response, 308)
     }
   }
 

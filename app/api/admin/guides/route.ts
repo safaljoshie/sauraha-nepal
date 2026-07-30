@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { buildGuideInsertRow, type GuideWritePayload } from "@/lib/guide-admin"
+import { generateUniqueGuideSlug } from "@/lib/listing-slug"
 import { fetchAllGuidesAdmin, normalizeTourGuide } from "@/lib/tour-guides"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
@@ -35,9 +36,10 @@ export async function POST(request: Request) {
 
   try {
     const supabase = getSupabaseAdmin()
+    const slug = await generateUniqueGuideSlug(supabase, built.row.full_name)
     const { data, error } = await supabase
       .from("tour_guides")
-      .insert(built.row)
+      .insert({ ...built.row, slug })
       .select("*")
       .single()
 

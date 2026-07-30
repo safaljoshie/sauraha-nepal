@@ -6,6 +6,7 @@ import {
   buildGuideApprovalEmail,
 } from "@/lib/emails/guide-application"
 import { hasGuideContactEmail } from "@/lib/list-guide"
+import { generateUniqueGuideSlug } from "@/lib/listing-slug"
 import {
   buildGuideProfilePath,
   fetchGuideByIdAdmin,
@@ -30,12 +31,17 @@ export async function POST(_request: Request, context: RouteContext) {
     }
 
     const supabase = getSupabaseAdmin()
+    const patch: Record<string, unknown> = {
+      status: "approved",
+      updated_at: new Date().toISOString(),
+    }
+    if (!existing.slug?.trim()) {
+      patch.slug = await generateUniqueGuideSlug(supabase, existing.full_name, existing.id)
+    }
+
     const { data: updated, error: updateError } = await supabase
       .from("tour_guides")
-      .update({
-        status: "approved",
-        updated_at: new Date().toISOString(),
-      })
+      .update(patch)
       .eq("id", id)
       .select("*")
       .single()

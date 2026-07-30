@@ -6,6 +6,7 @@ import {
 } from "@/lib/emails/guide-application"
 import { validateListGuidePayload } from "@/lib/list-guide"
 import { buildGuideInsertRow } from "@/lib/guide-admin"
+import { generateUniqueGuideSlug } from "@/lib/listing-slug"
 import { getSupabaseAdmin } from "@/lib/supabase"
 import { enforceRecaptchaAndRateLimit } from "@/lib/api-security"
 
@@ -57,9 +58,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: built.error }, { status: 400 })
   }
 
+  const slug = await generateUniqueGuideSlug(supabase, built.row.full_name)
+
   const { data: inserted, error: dbError } = await supabase
     .from("tour_guides")
-    .insert(built.row)
+    .insert({ ...built.row, slug })
     .select("id")
     .single()
 

@@ -106,6 +106,7 @@ export default async function GuideProfilePage({ params }: PageProps) {
     guide.slug?.trim() &&
     id !== guide.slug.trim()
   ) {
+    // Middleware issues a real HTTP 308 for UUID → slug; this is a fallback.
     permanentRedirect(buildGuideProfilePath(guide))
   }
 

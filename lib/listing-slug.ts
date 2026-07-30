@@ -40,3 +40,28 @@ export async function generateUniqueListingSlug(
     suffix += 1
   }
 }
+
+/** Unique guide slug from full_name; same slugify rules as listings. */
+export async function generateUniqueGuideSlug(
+  supabase: SupabaseClient,
+  fullName: string,
+  excludeId?: string,
+): Promise<string> {
+  const base = slugifyBusinessName(fullName) || "guide"
+  let candidate = base
+  let suffix = 2
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("tour_guides")
+      .select("id")
+      .eq("slug", candidate)
+      .maybeSingle()
+
+    if (error) throw error
+    if (!data || (excludeId && data.id === excludeId)) return candidate
+
+    candidate = `${base}-${suffix}`
+    suffix += 1
+  }
+}

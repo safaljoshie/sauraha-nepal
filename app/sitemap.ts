@@ -3,7 +3,7 @@ import { fetchPublishedBlogSlugs } from "@/lib/blog-db"
 import { SEO_PRIORITY_BLOG_SLUGS } from "@/lib/blog-related-links"
 import { SITE_URL } from "@/lib/blog-posts"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
-import { fetchApprovedGuides, buildGuideProfilePath } from "@/lib/tour-guides"
+import { fetchApprovedGuides } from "@/lib/tour-guides"
 import { getListingDetailPath } from "@/lib/listing-url"
 
 /**
@@ -91,9 +91,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }))
 
     const guidePages: MetadataRoute.Sitemap = guides
-      .filter((guide) => guide.id?.trim())
+      .filter((guide) => guide.slug?.trim() && isValidSlug(guide.slug.trim()))
       .map((guide) => ({
-        url: absoluteUrl(buildGuideProfilePath(guide)),
+        url: absoluteUrl(`/guides/${guide.slug!.trim()}`),
         lastModified: safeLastModified(guide.updated_at ?? guide.created_at, now),
         changeFrequency: "weekly" as const,
         priority: 0.8,

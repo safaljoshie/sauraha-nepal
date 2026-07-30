@@ -635,7 +635,7 @@ export default function AdminGuidesSection() {
                         </button>
                         {guide.status === "approved" ? (
                           <Link
-                            href={`/guides/${guide.id}`}
+                            href={`/guides/${guide.slug || guide.id}`}
                             target="_blank"
                             className="rounded-lg border border-border-brand px-2 py-1 text-xs font-semibold hover:bg-cream"
                           >

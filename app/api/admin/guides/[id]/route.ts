@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { revalidatePath } from "next/cache"
 import { requireAdminApi } from "@/lib/admin-auth"
 import { buildGuideUpdateRow, type GuideWritePayload } from "@/lib/guide-admin"
+import { generateUniqueGuideSlug } from "@/lib/listing-slug"
 import {
   buildGuideProfilePath,
   fetchGuideByIdAdmin,
@@ -47,9 +48,16 @@ export async function PUT(request: Request, context: RouteContext) {
 
   try {
     const supabase = getSupabaseAdmin()
+    const existing = await fetchGuideByIdAdmin(id)
+    const row: Record<string, unknown> = { ...built.row }
+    // Fill a missing slug on edit so older rows get one without renaming existing URLs.
+    if (!existing?.slug?.trim()) {
+      row.slug = await generateUniqueGuideSlug(supabase, built.row.full_name, id)
+    }
+
     const { data, error } = await supabase
       .from("tour_guides")
-      .update(built.row)
+      .update(row)
       .eq("id", id)
       .select("*")
       .single()
