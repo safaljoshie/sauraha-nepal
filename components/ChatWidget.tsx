@@ -17,6 +17,7 @@ import {
   markDhurbePromptBlocked,
   PROMPT_DELAY_MS,
 } from "@/lib/dhurbe-prompt"
+import { armDhurbePopSound, playDhurbePopSound } from "@/lib/dhurbe-pop-sound"
 import { MOBILE_HOME_NAV_TOP } from "@/lib/mobile-home-nav"
 
 function SearchIcon() {
@@ -137,6 +138,7 @@ export default function ChatWidget() {
     promptShownRef.current = true
     markDhurbePromptBlocked()
     setShowPrompt(true)
+    playDhurbePopSound()
 
     if (delayTimerRef.current) {
       clearTimeout(delayTimerRef.current)
@@ -148,6 +150,10 @@ export default function ChatWidget() {
       autoDismissTimerRef.current = null
     }, AUTO_DISMISS_MS)
   }, [canShowPrompt])
+
+  useEffect(() => {
+    armDhurbePopSound()
+  }, [])
 
   const openFromPrompt = useCallback(() => {
     setShowPrompt(false)
