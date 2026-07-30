@@ -34,13 +34,18 @@ type ListingsExplorerProps = {
   listings: BusinessListingSummary[]
   catalog: CategoryCatalog
   mapCoordinates: ListingCoordinateMap
+  signedIn?: boolean
+  favouritedIds?: string[]
 }
 
 export default function ListingsExplorer({
   listings,
   catalog,
   mapCoordinates,
+  signedIn = false,
+  favouritedIds = [],
 }: ListingsExplorerProps) {
+  const favouritedSet = useMemo(() => new Set(favouritedIds), [favouritedIds])
   const [searchInput, setSearchInput] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [category, setCategory] = useState<CategoryGroupId>("all")
@@ -329,7 +334,13 @@ export default function ListingsExplorer({
           <ListingsGridErrorBoundary>
             <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {pageListings.map((listing, index) => (
-                <BusinessListingCard key={listing.id} listing={listing} priority={index < 6} />
+                <BusinessListingCard
+                  key={listing.id}
+                  listing={listing}
+                  priority={index < 6}
+                  signedIn={signedIn}
+                  favourited={favouritedSet.has(listing.id)}
+                />
               ))}
             </div>
 

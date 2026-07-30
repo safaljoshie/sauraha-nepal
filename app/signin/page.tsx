@@ -7,7 +7,7 @@ import { getCurrentUser } from "@/lib/supabase/auth-server"
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to Sauraha Nepal to leave reviews and manage your profile.",
+  description: "Sign in to Sauraha Nepal to leave reviews, save favourites, and manage your profile.",
   robots: { index: false, follow: false },
 }
 
@@ -45,9 +45,10 @@ export default async function SignInPage({
         <div className="mx-auto w-full max-w-sm py-12">
           <h1 className="font-heading text-4xl font-bold md:text-5xl">Welcome</h1>
           <p className="mt-3 text-white/80">
-            Welcome to the Sauraha Nepal community! Sign in to rate businesses and local guides and
-            manage your Sauraha Nepal profile. By creating an account, you&apos;ll also receive our
-            newsletter with travel tips, local events, and the latest updates from Sauraha.
+            Welcome to the Sauraha Nepal community! Sign in to rate businesses and local guides,
+            save your favourites, and manage your Sauraha Nepal profile. By creating an account,
+            you&apos;ll also receive our newsletter with travel tips, local events, and the latest
+            updates from Sauraha.
           </p>
 
           {errorMessage && (

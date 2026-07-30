@@ -9,6 +9,7 @@ import { UserAvatar } from "@/components/auth/UserAvatar"
 const NAV = [
   { href: "/account", label: "Profile", icon: "👤" },
   { href: "/account/reviews", label: "My reviews", icon: "⭐" },
+  { href: "/account/favourites", label: "My Favourites", icon: "💚" },
 ]
 
 export default function AccountShell({

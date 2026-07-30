@@ -98,6 +98,14 @@ export default function UserMenu({ transparent = false }: { transparent?: boolea
           >
             My reviews
           </Link>
+          <Link
+            href="/account/favourites"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="block px-4 py-2.5 text-sm font-semibold text-ink-muted hover:bg-cream hover:text-green-brand"
+          >
+            My Favourites
+          </Link>
           <button
             type="button"
             role="menuitem"

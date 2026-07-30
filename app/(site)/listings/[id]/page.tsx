@@ -7,7 +7,9 @@ import { ListingAddress, PremiumBadge } from "@/components/listings/ListingMetaI
 import ListingShareButtons from "@/components/listings/ListingShareButtons"
 import OpeningHoursDisplay from "@/components/listings/OpeningHoursDisplay"
 import BusinessReviewsSection from "@/components/businesses/BusinessReviewsSection"
+import FavouriteButton from "@/components/favourites/FavouriteButton"
 import { fetchApprovedBusinessReviews } from "@/lib/business-reviews"
+import { isTargetFavourited } from "@/lib/favourites"
 import { getCurrentUser } from "@/lib/supabase/auth-server"
 import {
   formatListingDate,
@@ -75,9 +77,10 @@ export default async function ListingDetailPage({ params }: PageProps) {
     permanentRedirect(getListingDetailPath(listing))
   }
 
-  const [reviews, viewer] = await Promise.all([
+  const [reviews, viewer, favourited] = await Promise.all([
     fetchApprovedBusinessReviews(listing.id),
     getCurrentUser(),
+    isTargetFavourited("listing", listing.id),
   ])
 
   const photos = getPhotoUrls(listing)
@@ -261,7 +264,16 @@ export default async function ListingDetailPage({ params }: PageProps) {
             </div>
           </section>
 
-          <ListingShareButtons businessName={listing.business_name} url={listingUrl} />
+          <div className="flex flex-col gap-3">
+            <FavouriteButton
+              targetType="listing"
+              targetId={listing.id}
+              signedIn={Boolean(viewer)}
+              initialFavourited={favourited}
+              variant="detail"
+            />
+            <ListingShareButtons businessName={listing.business_name} url={listingUrl} />
+          </div>
 
           <p className="text-center text-xs text-text-light">
             Listed {formatListingDate(listing.created_at)}

@@ -7,7 +7,9 @@ import GuideProfileRelatedLinks from "@/components/guides/GuideProfileRelatedLin
 import { GuideReviewsSection } from "@/components/guides/GuideReviewsSection"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import GuideStickyCta from "@/components/guides/GuideStickyCta"
+import FavouriteButton from "@/components/favourites/FavouriteButton"
 import SiteIcon from "@/components/icons/SiteIcon"
+import { isTargetFavourited } from "@/lib/favourites"
 import { getCurrentUser } from "@/lib/supabase/auth-server"
 import { isListingUuid } from "@/lib/listing-slug"
 import { formatInrFromNpr, formatUsdFromNpr } from "@/lib/currency"
@@ -110,8 +112,11 @@ export default async function GuideProfilePage({ params }: PageProps) {
     permanentRedirect(buildGuideProfilePath(guide))
   }
 
-  const reviews = await fetchApprovedGuideReviews(guide.id)
-  const viewer = await getCurrentUser()
+  const [reviews, viewer, favourited] = await Promise.all([
+    fetchApprovedGuideReviews(guide.id),
+    getCurrentUser(),
+    isTargetFavourited("guide", guide.id),
+  ])
 
   const waUrl = guide.whatsapp ? formatGuideWhatsAppUrl(guide.whatsapp) : ""
   const callUrl = guide.phone ? formatGuidePhoneUrl(guide.phone) : ""
@@ -157,9 +162,19 @@ export default async function GuideProfilePage({ params }: PageProps) {
                 }
               />
               <div>
-                <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-bold md:text-4xl">
-                  {guide.full_name}
-                </h1>
+                <div className="flex flex-wrap items-start gap-3">
+                  <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-bold md:text-4xl">
+                    {guide.full_name}
+                  </h1>
+                  <FavouriteButton
+                    targetType="guide"
+                    targetId={guide.id}
+                    signedIn={Boolean(viewer)}
+                    initialFavourited={favourited}
+                    variant="detail"
+                    className="mt-1"
+                  />
+                </div>
                 <p className="mt-2 text-sm text-white/85">Jungle guide in Sauraha, Chitwan</p>
                 {guide.nickname ? (
                   <p className="mt-1 text-white/80">&ldquo;{guide.nickname}&rdquo;</p>

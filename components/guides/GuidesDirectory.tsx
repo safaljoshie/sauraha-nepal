@@ -20,6 +20,8 @@ type SortOption = "rating" | "experience" | "newest"
 type GuidesDirectoryProps = {
   guides: TourGuide[]
   intro?: ReactNode
+  signedIn?: boolean
+  favouritedIds?: string[]
 }
 
 const EMPTY_FILTERS = {
@@ -32,7 +34,13 @@ const EMPTY_FILTERS = {
   sort: "rating" as SortOption,
 }
 
-export default function GuidesDirectory({ guides, intro }: GuidesDirectoryProps) {
+export default function GuidesDirectory({
+  guides,
+  intro,
+  signedIn = false,
+  favouritedIds = [],
+}: GuidesDirectoryProps) {
+  const favouritedSet = useMemo(() => new Set(favouritedIds), [favouritedIds])
   const [search, setSearch] = useState(EMPTY_FILTERS.search)
   const [language, setLanguage] = useState(EMPTY_FILTERS.language)
   const [expertise, setExpertise] = useState(EMPTY_FILTERS.expertise)
@@ -260,7 +268,12 @@ export default function GuidesDirectory({ guides, intro }: GuidesDirectoryProps)
         ) : (
           <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((guide) => (
-              <GuideCard key={guide.id} guide={guide} />
+              <GuideCard
+                key={guide.id}
+                guide={guide}
+                signedIn={signedIn}
+                favourited={favouritedSet.has(guide.id)}
+              />
             ))}
           </div>
         )}

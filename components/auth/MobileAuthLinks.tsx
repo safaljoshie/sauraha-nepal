@@ -62,6 +62,13 @@ export default function MobileAuthLinks({ onNavigate }: { onNavigate: () => void
       >
         My reviews
       </Link>
+      <Link
+        href="/account/favourites"
+        onClick={onNavigate}
+        className="block py-3 font-semibold text-ink-muted hover:text-green-brand"
+      >
+        My Favourites
+      </Link>
       <button
         type="button"
         onClick={signOut}

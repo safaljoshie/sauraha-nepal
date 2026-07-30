@@ -16,7 +16,9 @@ import {
   GUIDES_PAGE_PATH,
   GUIDES_PAGE_TITLE,
 } from "@/lib/guides-seo"
+import { fetchFavouritedIds } from "@/lib/favourites"
 import { DEFAULT_OG_IMAGE, pageMetadata } from "@/lib/seo"
+import { getCurrentUser } from "@/lib/supabase/auth-server"
 import { fetchApprovedGuides } from "@/lib/tour-guides"
 
 export const metadata: Metadata = pageMetadata({
@@ -30,14 +32,23 @@ export const metadata: Metadata = pageMetadata({
 })
 
 export default async function GuidesPage() {
-  const guides = await fetchApprovedGuides()
+  const [guides, viewer, favouritedIds] = await Promise.all([
+    fetchApprovedGuides(),
+    getCurrentUser(),
+    fetchFavouritedIds("guide"),
+  ])
 
   return (
     <main>
       <GuidesJsonLd guides={guides} />
       <GuidesBreadcrumbs />
       <GuidesHero />
-      <GuidesDirectory guides={guides} intro={<GuidesIntro />} />
+      <GuidesDirectory
+        guides={guides}
+        intro={<GuidesIntro />}
+        signedIn={Boolean(viewer)}
+        favouritedIds={[...favouritedIds]}
+      />
       <GuideTypesSection />
       <GuidesWhyVerified />
       <GuidesHowItWorks />

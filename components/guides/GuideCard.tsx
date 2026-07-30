@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { MessageCircle, Phone } from "lucide-react"
+import FavouriteButton from "@/components/favourites/FavouriteButton"
 import GuideAvatar from "@/components/guides/GuideAvatar"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import SiteIcon from "@/components/icons/SiteIcon"
@@ -13,9 +14,15 @@ import {
 
 type GuideCardProps = {
   guide: TourGuide
+  signedIn?: boolean
+  favourited?: boolean
 }
 
-export default function GuideCard({ guide }: GuideCardProps) {
+export default function GuideCard({
+  guide,
+  signedIn = false,
+  favourited = false,
+}: GuideCardProps) {
   const startingPrice = getGuideStartingPrice(guide.services)
   const languages = guide.languages.filter(Boolean)
   const expertise = guide.expertise.filter(Boolean)
@@ -25,7 +32,16 @@ export default function GuideCard({ guide }: GuideCardProps) {
   const profileHref = `/guides/${guide.slug || guide.id}`
 
   return (
-    <article className="flex h-full w-full flex-col items-center rounded-2xl border border-border-brand bg-white p-5 text-center shadow-sm transition-shadow hover:shadow-md">
+    <article className="relative flex h-full w-full flex-col items-center rounded-2xl border border-border-brand bg-white p-5 text-center shadow-sm transition-shadow hover:shadow-md">
+      <div className="absolute top-3 right-3 z-[1]">
+        <FavouriteButton
+          targetType="guide"
+          targetId={guide.id}
+          signedIn={signedIn}
+          initialFavourited={favourited}
+          variant="card"
+        />
+      </div>
       <GuideAvatar
         name={guide.full_name}
         photoUrl={guide.photo_url}

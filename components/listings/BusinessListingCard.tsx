@@ -1,4 +1,5 @@
 import Link from "next/link"
+import FavouriteButton from "@/components/favourites/FavouriteButton"
 import ListingCardActions from "@/components/listings/ListingCardActions"
 import ListingImage from "@/components/listings/ListingImage"
 import ListingVerifiedBadge from "@/components/listings/ListingVerifiedBadge"
@@ -22,10 +23,14 @@ export default function BusinessListingCard({
   listing,
   showStatus = true,
   priority = false,
+  signedIn = false,
+  favourited = false,
 }: {
   listing: BusinessListingSummary
   showStatus?: boolean
   priority?: boolean
+  signedIn?: boolean
+  favourited?: boolean
 }) {
   const image = getListingImage(listing)
   const imageAlt = listingImageAlt(listing.business_name, listing.category)
@@ -41,7 +46,7 @@ export default function BusinessListingCard({
 
   return (
     <article
-      className={`listing-card-interactive flex h-full flex-col overflow-hidden rounded-2xl border bg-white ${
+      className={`listing-card-interactive relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white ${
         isPremium
           ? "border-orange-brand shadow-[0_8px_32px_rgba(232,98,26,0.18)] ring-2 ring-orange-brand/35"
           : isFeatured
@@ -78,12 +83,21 @@ export default function BusinessListingCard({
           {isNew && (
             <span
               className={`absolute top-3 rounded-full bg-green-brand px-2.5 py-1 text-[0.72rem] font-bold text-white ${
-                hasPlanBadge ? "right-3" : "left-3"
+                hasPlanBadge ? "right-14" : "left-3"
               }`}
             >
               New
             </span>
           )}
+          <span className="pointer-events-auto absolute top-3 right-3 z-[2]">
+            <FavouriteButton
+              targetType="listing"
+              targetId={listing.id}
+              signedIn={signedIn}
+              initialFavourited={favourited}
+              variant="card"
+            />
+          </span>
           {verified && (
             <span className="absolute bottom-2 left-2 z-[2] sm:bottom-3 sm:left-3">
               <ListingVerifiedBadge size="card" />

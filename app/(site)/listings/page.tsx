@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
 import ListingsExplorer from "@/components/listings/ListingsExplorer"
 import PageHeader from "@/components/PageHeader"
 import { fetchCategoryCatalog } from "@/lib/category-catalog"
+import { fetchFavouritedIds } from "@/lib/favourites"
 import { coordinateMapFromListings } from "@/lib/map-coordinates"
 import { fetchApprovedListings } from "@/lib/listings-fetch"
-import { buildListingsIndexMetadata } from "@/lib/seo"
+import { getCurrentUser } from "@/lib/supabase/auth-server"
 
 export const metadata = {
   title: "Sauraha Hotels, Restaurants & Tours | Browse Verified Local Listings",
@@ -27,9 +27,11 @@ export const metadata = {
 }
 
 export default async function ListingsPage() {
-  const [listings, catalog] = await Promise.all([
+  const [listings, catalog, viewer, favouritedIds] = await Promise.all([
     fetchApprovedListings(),
     fetchCategoryCatalog(),
+    getCurrentUser(),
+    fetchFavouritedIds("listing"),
   ])
   const mapCoordinates = coordinateMapFromListings(listings)
 
@@ -48,6 +50,8 @@ export default async function ListingsPage() {
         listings={listings}
         catalog={catalog}
         mapCoordinates={mapCoordinates}
+        signedIn={Boolean(viewer)}
+        favouritedIds={[...favouritedIds]}
       />
     </main>
   )
