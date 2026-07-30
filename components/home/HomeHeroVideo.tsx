@@ -9,19 +9,15 @@ const YOUTUBE_VIDEO_ID = "YPXwRXfC3t4"
 const YOUTUBE_API_SRC = "https://www.youtube.com/iframe_api"
 const USER_INTERACTION_EVENTS = ["pointerdown", "keydown", "touchstart", "scroll"] as const
 
-/**
- * Oversized + top-anchored so YouTube's centre prev/pause/next chrome
- * sits below the visible crop (overflow:hidden on the parent).
- */
 const FRAME_STYLE: CSSProperties = {
   position: "absolute",
-  top: 0,
+  top: "50%",
   left: "50%",
-  width: "300vw",
-  height: "300vh",
-  minWidth: "533.33vh",
-  minHeight: "168.75vw",
-  transform: "translateX(-50%)",
+  width: "100vw",
+  height: "56.25vw",
+  minHeight: "100%",
+  minWidth: "177.77vh",
+  transform: "translate(-50%, -50%)",
   pointerEvents: "none",
 }
 
@@ -44,7 +40,7 @@ type YtNamespace = {
       }
     },
   ) => YtPlayer
-  PlayerState: { PLAYING: number; PAUSED: number; ENDED: number }
+  PlayerState: { PLAYING: number }
 }
 
 declare global {
@@ -137,7 +133,6 @@ export default function HomeHeroVideo() {
           disablekb: 1,
           fs: 0,
           iv_load_policy: 3,
-          cc_load_policy: 0,
           loop: 1,
           modestbranding: 1,
           playsinline: 1,
@@ -152,19 +147,11 @@ export default function HomeHeroVideo() {
             sizeIframeToCover(event.target)
             event.target.mute()
             event.target.playVideo()
+            // If the browser still blocks autoplay, keep the poster and retry on first gesture.
             attachInteractionFallback()
           },
           onStateChange: (event) => {
             if (cancelled) return
-            // Never leave the player paused — paused state shows the centre control chrome.
-            if (
-              event.data === YT.PlayerState.PAUSED ||
-              event.data === YT.PlayerState.ENDED
-            ) {
-              event.target.mute()
-              event.target.playVideo()
-              return
-            }
             if (event.data === YT.PlayerState.PLAYING) {
               sizeIframeToCover(event.target)
               setIsPlaying(true)
