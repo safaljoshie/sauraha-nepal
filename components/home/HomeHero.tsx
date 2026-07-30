@@ -24,7 +24,7 @@ export default function HomeHero({ primaryHeroMedia, searchListings, searchCateg
     >
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
         {heroVideo ? (
-          <HomeHeroVideo url={heroVideo.url} posterUrl={heroVideo.poster_url} />
+          <HomeHeroVideo />
         ) : null}
       </div>
       <div
