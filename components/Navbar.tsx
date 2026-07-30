@@ -7,15 +7,10 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "reac
 import SiteIcon from "@/components/icons/SiteIcon"
 import UserMenu from "@/components/auth/UserMenu"
 import MobileAuthLinks from "@/components/auth/MobileAuthLinks"
+import CurrencyToggle from "@/components/currency/CurrencyToggle"
+import LocaleToggle from "@/components/i18n/LocaleToggle"
+import { useT } from "@/components/i18n/LocaleProvider"
 import { getStayListingsHref, type CategoryCatalog } from "@/lib/category-catalog"
-
-const baseNavLinks = [
-  { href: "/#places", label: "Places" },
-  { href: "/#experiences", label: "Things to do" },
-  { href: "/guides", label: "Guides" },
-  { href: "/blog", label: "Articles" },
-  { href: "/#map", label: "Map" },
-]
 
 function getSiteRoot() {
   return document.getElementById("site-root")
@@ -27,13 +22,15 @@ function hasHomeMarker() {
 }
 
 export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
+  const t = useT()
   const navLinks = useMemo(
     () => [
-      baseNavLinks[0],
-      { href: getStayListingsHref(catalog), label: "Stay" },
-      ...baseNavLinks.slice(1),
+      { href: "/listings", label: t("nav.listings") },
+      { href: getStayListingsHref(catalog), label: t("nav.stay") },
+      { href: "/guides", label: t("nav.guides") },
+      { href: "/blog", label: t("nav.articles") },
     ],
-    [catalog],
+    [catalog, t],
   )
   const pathname = usePathname()
   const isHome = pathname === "/"
@@ -100,78 +97,80 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
         }`}
       >
         <div className="site-container flex items-center justify-between py-3">
-        <Link href="/" className="nav-brand flex items-center gap-3">
-          <Image
-            src="/one.png"
-            alt="Sauraha Nepal"
-            width={44}
-            height={44}
-            className="h-11 w-11 rounded-full object-cover ring-2 ring-white/30"
-            priority
-          />
-          <span
-            className={`font-heading text-lg font-bold tracking-tight ${
-              transparent ? "text-white" : "text-green-brand"
-            }`}
-          >
-            Sauraha Nepal
-          </span>
-        </Link>
-
-        <ul className="hidden items-center gap-7 lg:flex">
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className={`nav-link text-[0.9rem] font-semibold tracking-wide uppercase transition-colors ${
-                  transparent
-                    ? "text-white/90 hover:text-white"
-                    : "text-ink-muted hover:text-green-brand"
-                }`}
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="flex items-center gap-2">
-          <Link
-            href="/#hero-search"
-            className={`nav-icon hidden h-10 w-10 items-center justify-center md:flex ${
-              transparent ? "text-white" : "text-ink"
-            }`}
-            aria-label="Search"
-          >
-            <SiteIcon name="search" size={22} strokeWidth={2.25} />
+          <Link href="/" className="nav-brand flex items-center gap-3">
+            <Image
+              src="/one.png"
+              alt={t("nav.brand")}
+              width={44}
+              height={44}
+              className="h-11 w-11 rounded-full object-cover ring-2 ring-white/30"
+              priority
+            />
+            <span
+              className={`font-heading text-lg font-bold tracking-tight ${
+                transparent ? "text-white" : "text-green-brand"
+              }`}
+            >
+              {t("nav.brand")}
+            </span>
           </Link>
-          <Link
-            href="/list-your-business"
-            className={`nav-cta hidden rounded-xl px-5 py-2 text-xs font-bold tracking-wide uppercase transition-colors md:inline-block ${
-              transparent
-                ? "border border-white/60 text-white hover:bg-white/10"
-                : "bg-green-brand text-white hover:bg-green-mid"
-            }`}
-          >
-            List business
-          </Link>
-          <UserMenu transparent={transparent} />
-          <button
-            type="button"
-            onClick={() => setMenuOpen((open) => !open)}
-            className={`nav-icon flex h-11 w-11 items-center justify-center text-2xl lg:hidden ${
-              transparent ? "text-white" : "text-ink"
-            }`}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? (
-              <SiteIcon name="close" size={24} strokeWidth={2.5} />
-            ) : (
-              <SiteIcon name="menu" size={24} strokeWidth={2.5} />
-            )}
-          </button>
-        </div>
+
+          <ul className="hidden items-center gap-7 lg:flex">
+            {navLinks.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className={`nav-link text-[0.9rem] font-semibold tracking-wide uppercase transition-colors ${
+                    transparent
+                      ? "text-white/90 hover:text-white"
+                      : "text-ink-muted hover:text-green-brand"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex items-center gap-2">
+            <LocaleToggle transparent={transparent} className="hidden sm:flex" />
+            <CurrencyToggle transparent={transparent} className="hidden sm:flex" />
+            <Link
+              href="/#hero-search"
+              className={`nav-icon hidden h-10 w-10 items-center justify-center md:flex ${
+                transparent ? "text-white" : "text-ink"
+              }`}
+              aria-label={t("nav.search")}
+            >
+              <SiteIcon name="search" size={22} strokeWidth={2.25} />
+            </Link>
+            <Link
+              href="/list-your-business"
+              className={`nav-cta hidden rounded-xl px-5 py-2 text-xs font-bold tracking-wide uppercase transition-colors md:inline-block ${
+                transparent
+                  ? "border border-white/60 text-white hover:bg-white/10"
+                  : "bg-green-brand text-white hover:bg-green-mid"
+              }`}
+            >
+              {t("nav.listBusiness")}
+            </Link>
+            <UserMenu transparent={transparent} />
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              className={`nav-icon flex h-11 w-11 items-center justify-center text-2xl lg:hidden ${
+                transparent ? "text-white" : "text-ink"
+              }`}
+              aria-label={menuOpen ? t("nav.closeMenu") : t("nav.openMenu")}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? (
+                <SiteIcon name="close" size={24} strokeWidth={2.5} />
+              ) : (
+                <SiteIcon name="menu" size={24} strokeWidth={2.5} />
+              )}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -185,7 +184,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
             menuOpen ? "opacity-100" : "opacity-0"
           }`}
           onClick={closeMenu}
-          aria-label="Close menu"
+          aria-label={t("nav.closeMenu")}
         />
         <div
           className={`absolute top-0 right-0 flex h-full w-[min(320px,88vw)] flex-col bg-white px-6 py-8 shadow-xl transition-transform duration-300 ${
@@ -193,20 +192,29 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
           }`}
         >
           <div className="mb-8 flex items-center justify-between">
-            <span className="font-heading text-lg font-bold text-ink">Menu</span>
+            <span className="font-heading text-lg font-bold text-ink">{t("nav.menu")}</span>
             <button
               type="button"
               onClick={closeMenu}
               className="flex h-11 w-11 items-center justify-center text-ink"
-              aria-label="Close"
+              aria-label={t("nav.close")}
             >
               <SiteIcon name="close" size={24} strokeWidth={2.5} />
             </button>
           </div>
+          <div className="mb-4 space-y-3">
+            <LocaleToggle showLabel />
+            <div>
+              <span className="mb-1 block text-[10px] font-bold tracking-wide text-ink-muted uppercase">
+                {t("nav.currency")}
+              </span>
+              <CurrencyToggle showDisclaimer />
+            </div>
+          </div>
           <ul className="flex flex-col gap-1">
             <li>
               <Link href="/" onClick={closeMenu} className="block py-3 font-semibold text-ink">
-                Home
+                {t("nav.home")}
               </Link>
             </li>
             {navLinks.map((link) => (
@@ -221,13 +229,21 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
               </li>
             ))}
             <li>
-              <Link href="/about" onClick={closeMenu} className="block py-3 font-semibold text-ink-muted hover:text-green-brand">
-                About
+              <Link
+                href="/about"
+                onClick={closeMenu}
+                className="block py-3 font-semibold text-ink-muted hover:text-green-brand"
+              >
+                {t("nav.about")}
               </Link>
             </li>
             <li>
-              <Link href="/contact" onClick={closeMenu} className="block py-3 font-semibold text-ink-muted hover:text-green-brand">
-                Contact
+              <Link
+                href="/contact"
+                onClick={closeMenu}
+                className="block py-3 font-semibold text-ink-muted hover:text-green-brand"
+              >
+                {t("nav.contact")}
               </Link>
             </li>
             <li className="mt-2 border-t border-black/8 pt-2">
@@ -239,7 +255,7 @@ export default function Navbar({ catalog }: { catalog: CategoryCatalog }) {
             onClick={closeMenu}
             className="mt-8 rounded-xl bg-green-brand py-3 text-center text-sm font-bold tracking-wide text-white uppercase"
           >
-            List your business
+            {t("nav.listYourBusiness")}
           </Link>
         </div>
       </div>

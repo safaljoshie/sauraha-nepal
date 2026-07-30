@@ -1,11 +1,13 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
+import { useT } from "@/components/i18n/LocaleProvider"
 
 type SubmitStatus = "idle" | "loading" | "success" | "error"
 type SubscribeResult = "pending" | "already_subscribed"
 
 export default function HomeNewsletter() {
+  const t = useT()
   const [email, setEmail] = useState("")
   const [name, setName] = useState("")
   const [status, setStatus] = useState<SubmitStatus>("idle")
@@ -57,10 +59,10 @@ export default function HomeNewsletter() {
           id="newsletter-heading"
           className="font-heading text-xl font-bold tracking-tight text-ink md:text-[clamp(1.75rem,4vw,2.5rem)]"
         >
-          Discover somewhere new
+          {t("home.newsletterTitle")}
         </h2>
         <p className="mt-2 text-sm leading-snug text-ink-muted md:mt-4 md:text-base">
-          Travel tips, new listings, and Chitwan inspiration — delivered to your inbox.
+          {t("home.newsletterSubtitle")}
         </p>
         {status === "success" ? (
           <p className="mt-4 text-sm font-semibold text-green-brand md:mt-8 md:text-base">
@@ -74,21 +76,21 @@ export default function HomeNewsletter() {
             className="mx-auto mt-4 flex max-w-md flex-col items-stretch gap-2 md:mt-8 md:gap-3"
           >
             <label htmlFor="newsletter-name" className="sr-only">
-              Your name (optional)
+              {t("home.newsletterName")}
             </label>
             <input
               id="newsletter-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Your name (optional)"
+              placeholder={t("home.newsletterName")}
               className="min-w-0 rounded-xl border border-black/15 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-green-brand md:px-5 md:py-3.5 md:text-base"
               autoComplete="name"
               disabled={status === "loading"}
             />
             <div className="flex flex-row items-stretch gap-2 md:gap-3">
               <label htmlFor="newsletter-email" className="sr-only">
-                Email address
+                {t("home.newsletterEmail")}
               </label>
               <input
                 id="newsletter-email"
@@ -96,7 +98,7 @@ export default function HomeNewsletter() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address"
+                placeholder={t("home.newsletterEmail")}
                 className="min-w-0 flex-1 rounded-xl border border-black/15 bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-green-brand md:px-5 md:py-3.5 md:text-base"
                 autoComplete="email"
                 disabled={status === "loading"}
@@ -106,7 +108,7 @@ export default function HomeNewsletter() {
                 className="shrink-0 rounded-xl bg-green-brand px-4 py-2.5 text-xs font-bold tracking-wide text-white uppercase hover:bg-green-mid md:px-8 md:py-3.5 md:text-sm disabled:opacity-60"
                 disabled={status === "loading"}
               >
-                {status === "loading" ? "Subscribing…" : "Subscribe"}
+                {status === "loading" ? t("home.newsletterSubscribing") : t("home.newsletterSubscribe")}
               </button>
             </div>
           </form>

@@ -11,7 +11,7 @@ import { validateChatHistory, validateChatMessage } from "@/lib/chat-validate"
 import { getSupabaseAdmin } from "@/lib/supabase"
 
 const MODEL = "claude-haiku-4-5-20251001"
-const MAX_TOKENS = 500
+const MAX_TOKENS = 280
 
 function logChatToSupabase(
   message: string,
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
   recordRateLimitHit(ip)
 
   try {
-    const listingsContext = await buildListingsContext()
+    const listingsContext = await buildListingsContext(message)
     const system = buildChatSystemPrompt(listingsContext)
 
     const anthropic = new Anthropic({ apiKey })

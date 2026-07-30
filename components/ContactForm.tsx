@@ -3,27 +3,32 @@
 import { useSearchParams } from "next/navigation"
 import { Suspense, useEffect, useState, type FormEvent } from "react"
 import SiteIcon from "@/components/icons/SiteIcon"
+import NprPrice from "@/components/currency/NprPrice"
+import { useT } from "@/components/i18n/LocaleProvider"
 import { formatWhatsAppDisplay, whatsappUrl } from "@/lib/whatsapp"
 
 const listingPlans = [
   {
     name: "Basic Listing",
     desc: "Name, contact, category, location",
-    price: "Free",
+    amountNpr: null as number | null,
+    priceLabel: "Free",
     period: "Forever",
     featured: false,
   },
   {
     name: "Featured Listing",
     desc: "Top placement, photos, WhatsApp button",
-    price: "NPR 5,000",
+    amountNpr: 5000,
+    priceLabel: null as string | null,
     period: "per year",
     featured: true,
   },
   {
     name: "Premium Listing",
     desc: "Homepage feature, banner ad, priority support",
-    price: "NPR 12,000",
+    amountNpr: 12000,
+    priceLabel: null as string | null,
     period: "per year",
     featured: false,
   },
@@ -62,6 +67,7 @@ function ContactFormSkeleton() {
 }
 
 function ContactFormContent() {
+  const t = useT()
   const [tab, setTab] = useState<"general" | "listing">("general")
 
   return (
@@ -76,7 +82,7 @@ function ContactFormContent() {
               : "text-text-light"
           }`}
         >
-          General Enquiry
+          {t("contact.tabGeneral")}
         </button>
         <button
           type="button"
@@ -87,7 +93,7 @@ function ContactFormContent() {
               : "text-text-light"
           }`}
         >
-          List My Business
+          {t("contact.tabListing")}
         </button>
       </div>
 
@@ -473,50 +479,82 @@ export type ContactSidebarContentProps = {
 }
 
 export function ContactSidebarContent({
-  heading = "Let's connect",
-  subheading = "Have a question about Sauraha? Want to list your business or partner with us? Fill in the form and we'll get back to you within 24 hours.",
+  heading,
+  subheading,
   address = "Sauraha, Chitwan, Nepal",
   phone = "",
   whatsapp = "+977 98XXXXXXXX",
   email = "hello@mail.saurahanepal.com",
   responseTime = "Within 24 hours (NPT timezone)",
 }: ContactSidebarContentProps = {}) {
+  const t = useT()
+  const resolvedHeading = heading ?? t("contact.sidebarHeading")
+  const resolvedSubheading = subheading ?? t("contact.sidebarSub")
+  const plans = [
+    {
+      name: t("contact.planBasic"),
+      desc: t("contact.planBasicDesc"),
+      amountNpr: null as number | null,
+      priceLabel: t("contact.free"),
+      period: t("contact.forever"),
+      featured: false,
+    },
+    {
+      name: t("contact.planFeatured"),
+      desc: t("contact.planFeaturedDesc"),
+      amountNpr: 5000,
+      priceLabel: null as string | null,
+      period: t("contact.perYear"),
+      featured: true,
+    },
+    {
+      name: t("contact.planPremium"),
+      desc: t("contact.planPremiumDesc"),
+      amountNpr: 12000,
+      priceLabel: null as string | null,
+      period: t("contact.perYear"),
+      featured: false,
+    },
+  ]
+
   return (
     <div>
       <h2 className="font-[family-name:var(--font-playfair)] text-3xl font-bold text-green-brand">
-        {heading}
+        {resolvedHeading}
       </h2>
       <p className="mt-4 mb-8 leading-relaxed text-text-mid">
-        {subheading}
+        {resolvedSubheading}
       </p>
 
       <div className="space-y-6">
-        <InfoItem icon="map-pin" title="Location" text={address} />
+        <InfoItem icon="map-pin" title={t("contact.location")} text={address} />
         {email && (
           <InfoItem
             icon="mail"
-            title="Email"
+            title={t("contact.email")}
             text={email}
             href={`mailto:${email}`}
           />
         )}
-        {phone && <InfoItem icon="phone" title="Phone" text={phone} href={`tel:${phone}`} />}
+        {phone && (
+          <InfoItem icon="phone" title={t("contact.phone")} text={phone} href={`tel:${phone}`} />
+        )}
         {whatsapp && (
           <InfoItem
             icon="message-circle"
-            title="WhatsApp"
+            title={t("contact.whatsapp")}
             text={formatWhatsAppDisplay(whatsapp)}
             href={whatsappUrl(whatsapp)}
           />
         )}
-        <InfoItem icon="clock" title="Response Time" text={responseTime} />
+        <InfoItem icon="clock" title={t("contact.responseTime")} text={responseTime} />
       </div>
 
       <div className="mt-10">
         <h3 className="font-[family-name:var(--font-playfair)] mb-4 text-xl font-semibold text-green-brand">
-          Listing Plans
+          {t("contact.listingPlans")}
         </h3>
-        {listingPlans.map((plan) => (
+        {plans.map((plan) => (
           <div
             key={plan.name}
             className={`mb-3 flex items-center justify-between rounded-xl border-[1.5px] p-5 ${
@@ -530,7 +568,7 @@ export function ContactSidebarContent({
                 {plan.name}
                 {plan.featured && (
                   <span className="ml-2 rounded-full bg-orange-brand px-2 py-0.5 text-[0.7rem] font-bold text-white">
-                    Popular
+                    {t("contact.popular")}
                   </span>
                 )}
               </p>
@@ -538,7 +576,11 @@ export function ContactSidebarContent({
             </div>
             <div className="text-right">
               <p className="font-[family-name:var(--font-playfair)] text-lg font-bold text-green-brand">
-                {plan.price}
+                {plan.amountNpr != null ? (
+                  <NprPrice amount={plan.amountNpr} />
+                ) : (
+                  plan.priceLabel
+                )}
               </p>
               <span className="text-xs text-text-light">{plan.period}</span>
             </div>

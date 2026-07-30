@@ -23,6 +23,8 @@ import {
 } from "@/lib/category-catalog"
 import { pricingPlans } from "@/lib/data"
 import { useRecaptchaToken } from "@/lib/use-recaptcha-token"
+import NprPrice from "@/components/currency/NprPrice"
+import { useT } from "@/components/i18n/LocaleProvider"
 import { useToast } from "@/components/ui/ToastProvider"
 
 const inputClass =
@@ -131,6 +133,7 @@ type PhotoFileEntry = {
 }
 
 export default function ListBusinessForm({ categories }: { categories: string[] }) {
+  const t = useT()
   const categoryOptions =
     categories.length > 0
       ? categories
@@ -397,7 +400,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
       onSubmit={handleSubmit}
       noValidate
     >
-      <FormSection title="1. Business Details">
+      <FormSection title={t("listBusiness.sectionBusiness")}>
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Business Name">
             <input
@@ -462,7 +465,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
         </div>
       </FormSection>
 
-      <FormSection title="2. Contact Details">
+      <FormSection title={t("listBusiness.sectionContact")}>
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Owner Name">
             <input
@@ -527,7 +530,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
         </div>
       </FormSection>
 
-      <FormSection title="3. Location">
+      <FormSection title={t("listBusiness.sectionLocation")}>
         <Field label="Full Address">
           <input
             type="text"
@@ -551,7 +554,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
         </Field>
       </FormSection>
 
-      <FormSection title="4. Photos">
+      <FormSection title={t("listBusiness.sectionPhotos")}>
         <p className="text-sm text-text-light">
           Upload JPEG, PNG, WEBP, or HEIC files and/or paste image links (one per line). Photos are
           optimized in your browser before upload.{" "}
@@ -622,7 +625,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
         </Field>
       </FormSection>
 
-      <FormSection title="5. Choose Your Plan">
+      <FormSection title={t("listBusiness.sectionPlan")}>
         <div className="grid gap-3 md:grid-cols-3">
           {pricingPlans.map((p) => (
             <button
@@ -645,7 +648,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
                 {p.name}
               </p>
               <p className="text-lg font-bold text-orange-brand">
-                {p.price}
+                {p.amountNpr != null ? <NprPrice amount={p.amountNpr} /> : p.price}
                 <span className="text-[0.65rem] font-normal text-text-light"> / {p.period}</span>
               </p>
             </button>
@@ -683,7 +686,7 @@ export default function ListBusinessForm({ categories }: { categories: string[] 
         disabled={isLoading}
       >
         {isLoading && <Spinner />}
-        {isLoading ? "Submitting…" : "Submit Listing Application"}
+        {isLoading ? t("listBusiness.submitting") : t("listBusiness.submit")}
       </button>
     </form>
   )

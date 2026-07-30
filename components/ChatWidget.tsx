@@ -50,7 +50,7 @@ function BotAvatar({ size = 28 }: { size?: number }) {
 }
 
 const WELCOME =
-  "Hi! I'm Dhurbe, your AI travel guide for Sauraha and Chitwan National Park. What would you like to know?"
+  "Hi — I'm Dhurbe. Ask about hotels, safaris, or food in Sauraha."
 
 const QUICK_REPLIES = [
   { label: "Best hotels", icon: "hotel" },

@@ -1,31 +1,22 @@
+"use client"
+
 import Link from "next/link"
+import { useT } from "@/components/i18n/LocaleProvider"
 
 export default function HomeIntro() {
+  const t = useT()
+
   return (
     <section id="why-visit" className="home-section home-intro scroll-mt-24">
       <div className="site-container">
-        <h2 className="nsw-section-title home-intro-title">Sauraha, Nepal</h2>
+        <h2 className="nsw-section-title home-intro-title">{t("home.introTitle")}</h2>
         <div className="home-intro-body mt-6 max-w-3xl space-y-5 text-[1.125rem] leading-[1.8] text-ink-muted">
-          <p>
-            Welcome to Sauraha — the gateway to Chitwan National Park. Let us
-            inspire your next journey through Nepal&apos;s wildlife capital, from
-            rhino encounters at dawn to riverside sunsets on the Rapti.
-          </p>
-          <p>
-            Follow birdsong through sal forest to thundering elephant grasslands.
-            Glide down the river at sunrise or slip into a jungle safari before
-            dusk. Taste Tharu specialities, fresh river fish, and homely dal bhat
-            after a day in the park. Connect with local guides and communities
-            making new friends along the way.
-          </p>
-          <p className="hidden md:block">
-            So, where to first? Browse places to explore below, find stays and
-            restaurants, book activities, and read our travel guides for permits,
-            transport, and seasonal tips.
-          </p>
+          <p>{t("home.introP1")}</p>
+          <p>{t("home.introP2")}</p>
+          <p className="hidden md:block">{t("home.introP3")}</p>
         </div>
         <Link href="/about" className="nsw-view-all home-intro-link mt-8 inline-flex">
-          Read more about Sauraha
+          {t("home.introCta")}
         </Link>
       </div>
     </section>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import ContactForm, { ContactSidebarContent } from "@/components/ContactForm"
-import PageHeader from "@/components/PageHeader"
+import ContactPageHeader from "@/components/contact/ContactPageHeader"
 import { fetchContactPageContent } from "@/lib/site-content"
 import { fetchSiteSettings } from "@/lib/site-settings"
 import { pageMetadata } from "@/lib/seo"
@@ -33,11 +33,7 @@ async function ContactPageContent() {
 
   return (
     <main>
-      <PageHeader
-        label="Get In Touch"
-        title="Contact & List Your Business"
-        subtitle="Questions, listings, partnerships — we're here to help"
-      />
+      <ContactPageHeader />
 
       <div className="mx-auto grid max-w-5xl gap-12 px-8 py-16 md:grid-cols-[1fr_1.4fr]">
         <ContactSidebarContent

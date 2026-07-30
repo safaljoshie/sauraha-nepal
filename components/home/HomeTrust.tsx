@@ -2,6 +2,7 @@
 
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import { useT } from "@/components/i18n/LocaleProvider"
 import { TESTIMONIALS, TRAVELLER_PHOTOS } from "@/lib/homepage-constants"
 import { DEFAULT_IMAGE_QUALITY } from "@/lib/image"
 
@@ -11,6 +12,7 @@ type HomeTrustProps = {
 }
 
 export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps) {
+  const t = useT()
   const [active, setActive] = useState(0)
 
   useEffect(() => {
@@ -29,19 +31,19 @@ export default function HomeTrust({ businessCount, guidesCount }: HomeTrustProps
           <div className="rounded-xl bg-surface-muted px-2 py-3 text-center md:px-6 md:py-10">
             <p className="font-heading text-base font-bold text-ink md:text-4xl">{businessCount}+</p>
             <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-muted md:mt-2 md:text-sm">
-              Businesses listed
+              {t("home.trustBusinesses")}
             </p>
           </div>
           <div className="rounded-xl bg-surface-muted px-2 py-3 text-center md:px-6 md:py-10">
             <p className="font-heading text-base font-bold text-ink md:text-4xl">{guidesCount}+</p>
             <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-muted md:mt-2 md:text-sm">
-              Guides published
+              {t("home.trustGuides")}
             </p>
           </div>
           <div className="rounded-xl bg-surface-muted px-2 py-3 text-center md:px-6 md:py-10">
             <p className="font-heading text-base font-bold text-ink md:text-4xl">10k+</p>
             <p className="mt-0.5 text-[0.65rem] leading-tight text-ink-muted md:mt-2 md:text-sm">
-              Travellers visit Sauraha yearly
+              {t("home.trustTravellers")}
             </p>
           </div>
         </div>

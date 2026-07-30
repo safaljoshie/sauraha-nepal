@@ -3,6 +3,7 @@ import { MessageCircle, Phone } from "lucide-react"
 import FavouriteButton from "@/components/favourites/FavouriteButton"
 import GuideAvatar from "@/components/guides/GuideAvatar"
 import GuideStarRating from "@/components/guides/GuideStarRating"
+import NprPrice from "@/components/currency/NprPrice"
 import SiteIcon from "@/components/icons/SiteIcon"
 import {
   formatGuidePhoneUrl,
@@ -116,7 +117,11 @@ export default function GuideCard({
 
       {startingPrice != null ? (
         <p className="mt-4 text-sm text-text-mid">
-          From <span className="font-bold text-green-brand">NPR {startingPrice.toLocaleString()}</span>
+          From{" "}
+          <NprPrice
+            amount={startingPrice}
+            className="font-bold text-green-brand"
+          />
         </p>
       ) : null}
 

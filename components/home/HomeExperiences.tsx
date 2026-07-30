@@ -1,5 +1,8 @@
+"use client"
+
 import Link from "next/link"
 import HomeImageCard from "@/components/home/HomeImageCard"
+import { useT } from "@/components/i18n/LocaleProvider"
 import type { HomepageData } from "@/lib/homepage-data"
 
 export default function HomeExperiences({
@@ -7,13 +10,15 @@ export default function HomeExperiences({
 }: {
   experiences: HomepageData["experiences"]
 }) {
+  const t = useT()
+
   return (
     <section id="experiences" className="home-section scroll-mt-24">
       <div className="site-container">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-12">
-          <h2 className="nsw-section-title">Things to do</h2>
+          <h2 className="nsw-section-title">{t("home.experiencesTitle")}</h2>
           <Link href="/listings?category=activities" className="nsw-view-all shrink-0">
-            View all activities
+            {t("home.experiencesViewAll")}
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

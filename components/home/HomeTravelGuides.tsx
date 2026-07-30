@@ -1,5 +1,8 @@
+"use client"
+
 import Image from "next/image"
 import Link from "next/link"
+import { useT } from "@/components/i18n/LocaleProvider"
 import { HOMEPAGE_BLOG_FALLBACK } from "@/lib/homepage-blog-fallback"
 import type { BlogPostPreview } from "@/lib/blog-db"
 import { DEFAULT_IMAGE_QUALITY, isNextOptimizedImageSrc } from "@/lib/image"
@@ -30,6 +33,7 @@ export default function HomeTravelGuides({
   posts: BlogPostPreview[]
   useFallback: boolean
 }) {
+  const t = useT()
   const guides: GuideCard[] = useFallback
     ? HOMEPAGE_BLOG_FALLBACK.map((p) => ({
         href: p.href,
@@ -46,9 +50,9 @@ export default function HomeTravelGuides({
     <section id="travel-guides" className="home-section home-section-muted scroll-mt-24">
       <div className="site-container">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4 md:mb-12">
-          <h2 className="nsw-section-title">Latest articles</h2>
+          <h2 className="nsw-section-title">{t("home.articlesTitle")}</h2>
           <Link href="/blog" className="nsw-view-all shrink-0">
-            View all
+            {t("home.articlesViewAll")}
           </Link>
         </div>
         <ul className="divide-y divide-black/8 border-t border-black/8">

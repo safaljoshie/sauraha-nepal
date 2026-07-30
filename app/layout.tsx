@@ -3,6 +3,8 @@ import { GoogleAnalytics } from "@next/third-parties/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ChatUIProvider } from "@/components/ChatUIProvider"
 import ChatWidgetLoader from "@/components/ChatWidgetLoader"
+import { CurrencyProvider } from "@/components/currency/CurrencyProvider"
+import { LocaleProvider } from "@/components/i18n/LocaleProvider"
 import RecaptchaProvider from "@/components/RecaptchaProvider"
 import { ToastProvider } from "@/components/ui/ToastProvider"
 import SiteJsonLd from "@/components/seo/SiteJsonLd"
@@ -94,10 +96,14 @@ export default function RootLayout({
       <body className="font-[family-name:var(--font-inter)] antialiased">
         <RecaptchaProvider>
           <ToastProvider>
-            <ChatUIProvider>
-              {children}
-              <ChatWidgetLoader />
-            </ChatUIProvider>
+            <LocaleProvider>
+              <CurrencyProvider>
+                <ChatUIProvider>
+                  {children}
+                  <ChatWidgetLoader />
+                </ChatUIProvider>
+              </CurrencyProvider>
+            </LocaleProvider>
           </ToastProvider>
         </RecaptchaProvider>
         <Analytics />

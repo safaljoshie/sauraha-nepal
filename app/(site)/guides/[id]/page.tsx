@@ -8,11 +8,11 @@ import { GuideReviewsSection } from "@/components/guides/GuideReviewsSection"
 import GuideStarRating from "@/components/guides/GuideStarRating"
 import GuideStickyCta from "@/components/guides/GuideStickyCta"
 import FavouriteButton from "@/components/favourites/FavouriteButton"
+import NprPrice from "@/components/currency/NprPrice"
 import SiteIcon from "@/components/icons/SiteIcon"
 import { isTargetFavourited } from "@/lib/favourites"
 import { getCurrentUser } from "@/lib/supabase/auth-server"
 import { isListingUuid } from "@/lib/listing-slug"
-import { formatInrFromNpr, formatUsdFromNpr } from "@/lib/currency"
 import {
   buildGuideProfileJsonLd,
   buildGuideProfileTitle,
@@ -352,10 +352,7 @@ export default async function GuideProfilePage({ params }: PageProps) {
                       <div>
                         <p className="font-semibold text-text-brand">{service.name}</p>
                         <p className="mt-1 text-lg font-bold text-green-brand">
-                          NPR {service.price_npr.toLocaleString()}
-                        </p>
-                        <p className="mt-0.5 text-sm text-text-light">
-                          ≈ {formatUsdFromNpr(service.price_npr)} · {formatInrFromNpr(service.price_npr)}
+                          <NprPrice amount={service.price_npr} />
                         </p>
                         {service.description ? (
                           <p className="mt-2 text-sm text-text-light">{service.description}</p>

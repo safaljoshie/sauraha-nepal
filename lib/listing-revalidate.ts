@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import type { BusinessListing } from "@/lib/business-listing"
 import { getListingDetailPath } from "@/lib/listing-url"
 
@@ -21,6 +21,9 @@ export function revalidateListingPaths(
   if (detailPath !== `/listings/${listing.id}`) {
     revalidatePath(detailPath)
   }
+
+  // Keep Dhurbe's directory snapshot in sync with admin listing writes.
+  revalidateTag("listings", "max")
 }
 
 /**

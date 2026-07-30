@@ -212,6 +212,7 @@ export const pricingPlans = [
   {
     name: "Basic",
     price: "Free",
+    amountNpr: null as number | null,
     period: "forever",
     popular: false,
     features: [
@@ -225,6 +226,7 @@ export const pricingPlans = [
   {
     name: "Featured",
     price: "NPR 5,000",
+    amountNpr: 5000,
     period: "per year",
     popular: true,
     features: [
@@ -240,6 +242,7 @@ export const pricingPlans = [
   {
     name: "Premium",
     price: "NPR 12,000",
+    amountNpr: 12000,
     period: "per year",
     popular: false,
     features: [

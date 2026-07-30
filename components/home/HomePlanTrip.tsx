@@ -4,13 +4,10 @@ import Link from "next/link"
 import { useState } from "react"
 import ChatAssistantAvatar from "@/components/chat/ChatAssistantAvatar"
 import { useChatUI } from "@/components/ChatUIProvider"
+import { useT } from "@/components/i18n/LocaleProvider"
 import { PLAN_TRIP_DHURBE, PLAN_TRIP_STEPS } from "@/lib/homepage-constants"
 
-const TABS = [
-  { id: "plan", label: "Plan your visit" },
-  { id: "stay", label: "Where to stay" },
-  { id: "do", label: "Things to do" },
-] as const
+const TAB_IDS = ["plan", "stay", "do"] as const
 
 const ROW_CLASS =
   "group flex w-full gap-6 py-6 text-left transition-colors hover:bg-white/60 md:items-center md:px-4"
@@ -58,7 +55,13 @@ function PlanTripStepRow({
 }
 
 export default function HomePlanTrip() {
-  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("plan")
+  const t = useT()
+  const [tab, setTab] = useState<(typeof TAB_IDS)[number]>("plan")
+  const tabs = [
+    { id: "plan" as const, label: t("home.planTabPlan") },
+    { id: "stay" as const, label: t("home.planTabStay") },
+    { id: "do" as const, label: t("home.planTabDo") },
+  ]
 
   const steps =
     tab === "stay"
@@ -70,31 +73,28 @@ export default function HomePlanTrip() {
   return (
     <section id="plan-trip" className="home-section home-section-muted scroll-mt-24">
       <div className="site-container">
-        <h2 className="nsw-section-title">Choose your path</h2>
-        <p className="mt-4 max-w-xl text-ink-muted">
-          Plan dates, book stays, reserve activities, and find travel information —
-          your Chitwan itinerary starts here.
-        </p>
+        <h2 className="nsw-section-title">{t("home.planTitle")}</h2>
+        <p className="mt-4 max-w-xl text-ink-muted">{t("home.planSubtitle")}</p>
 
         <div
           className="mt-8 flex flex-wrap gap-2 border-b border-black/10"
           role="tablist"
-          aria-label="Trip planning"
+          aria-label={t("home.planTitle")}
         >
-          {TABS.map((t) => (
+          {tabs.map((item) => (
             <button
-              key={t.id}
+              key={item.id}
               type="button"
               role="tab"
-              aria-selected={tab === t.id}
-              onClick={() => setTab(t.id)}
+              aria-selected={tab === item.id}
+              onClick={() => setTab(item.id)}
               className={`-mb-px border-b-2 px-4 py-3 text-sm font-bold tracking-wide uppercase transition-colors ${
-                tab === t.id
+                tab === item.id
                   ? "border-green-brand text-green-brand"
                   : "border-transparent text-ink-muted hover:text-ink"
               }`}
             >
-              {t.label}
+              {item.label}
             </button>
           ))}
         </div>
@@ -108,7 +108,7 @@ export default function HomePlanTrip() {
               <li className="flex items-center gap-4 px-4 py-5">
                 <span className="h-px flex-1 bg-black/10" aria-hidden />
                 <span className="text-sm font-bold tracking-wide text-ink-muted uppercase">
-                  Or plan yourself
+                  {t("home.planYourself")}
                 </span>
                 <span className="h-px flex-1 bg-black/10" aria-hidden />
               </li>
