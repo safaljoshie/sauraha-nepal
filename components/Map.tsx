@@ -18,10 +18,12 @@ import "leaflet/dist/leaflet.css"
 const SAURAHA_CENTER: [number, number] = [27.5833, 84.5]
 const DEFAULT_ZOOM = 14
 
-const CARTO_TILES =
-  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+// Use OpenStreetMap tiles by default to avoid provider API-key requirements.
+// For production, consider switching to a paid tile provider or configuring
+// CARTO with an API key if you prefer CARTO styling.
+const CARTO_TILES = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
 const CARTO_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 
 function FitBounds({ listings }: { listings: MapListingMarker[] }) {
   const map = useMap()
