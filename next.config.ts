@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
       ...blogRedirects,
     ]
   },
+  outputFileTracingIncludes: {
+    "/api/list-business/upload-photos": [
+      "node_modules/sharp/**/*",
+      "node_modules/@img/sharp-linux-x64/**/*",
+      "node_modules/@img/sharp-libvips-linux-x64/**/*",
+    ],
+    "/api/admin/upload-listing-photos": [
+      "node_modules/sharp/**/*",
+      "node_modules/@img/sharp-linux-x64/**/*",
+      "node_modules/@img/sharp-libvips-linux-x64/**/*",
+    ],
+  },
   images: {
     // WebP only. Adding AVIF doubles the transformation count for ~20% file
     // size, and Vercel's Hobby plan meters transformations — not worth it for a
